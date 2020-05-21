@@ -71,8 +71,8 @@ public class TokenController {
     private String urlCorreoAdjunto;
     @Value("${api.firmaDigital}")	
     private String firmaDigital; 
-	@PostMapping(value="token",produces=MediaType.APPLICATION_JSON_VALUE)
-
+    
+    @RequestMapping(value="token",produces=MediaType.APPLICATION_JSON_VALUE)
 	public DocumentSign firmaDocumento(@RequestBody(required = true) Solicitud solicitud)  {
 		System.out.println("payload run :" + solicitud.getIdCaso());
 		FileInputStream fis = null;
