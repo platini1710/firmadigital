@@ -72,8 +72,10 @@ public class TokenController {
     @Value("${api.firmaDigital}")	
     private String firmaDigital; 
     
-    
-    // hola probando
+    @Value("${entity}")	
+    private String entity;     
+    @Value("${purpose}")	
+    private String purpose;    
     @RequestMapping(value="token",produces=MediaType.APPLICATION_JSON_VALUE)
 	public DocumentSign firmaDocumento(@RequestBody(required = true) Solicitud solicitud)  {
 		System.out.println("payload run :" + solicitud.getIdCaso());
@@ -87,7 +89,7 @@ public class TokenController {
 		long t= date.getTimeInMillis();
 		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		String dateTime=sdf2.format(new Date(t + (15 * ONE_MINUTE_IN_MILLIS))).toString();
-		Payload payloads=new Payload(solicitud.getRunUsuarioEjecuta(), "Subsecretaría General de La Presidencia", "Desatendido", dateTime);
+		Payload payloads=new Payload(solicitud.getRunUsuarioEjecuta(), entity, purpose, dateTime);
 		try {
 			 String content=signFilePdf(solicitud,payloads,clave);
 
