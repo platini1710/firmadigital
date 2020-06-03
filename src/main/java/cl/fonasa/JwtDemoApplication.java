@@ -24,27 +24,7 @@ public class JwtDemoApplication extends SpringBootServletInitializer{
 	    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 	        return application.sources(JwtDemoApplication.class);
 	    }
-	@EnableWebSecurity
-	@Configuration
-	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	@Override
-		protected void configure(HttpSecurity http) throws Exception {
-			http.csrf().disable()
-				.addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
-				.authorizeRequests()
-				.antMatchers(HttpMethod.POST, "/token").permitAll()
-				.antMatchers(HttpMethod.GET, "/").permitAll()
-				.antMatchers(HttpMethod.POST, "/subirArchivos").permitAll()
-				.anyRequest().authenticated();
-		}
-		
-		/*  @Override
-		    protected void configure(HttpSecurity security) throws Exception
-		    {
-		     security.httpBasic().disable();
-		     
-		    }*/
-	}
+
 
 }

@@ -8,17 +8,25 @@ public class Solicitud implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private String idCaso;
+	private long idCaso;
 	private String runUsuarioEjecuta;
+	private String entity;
+	private String purpose;
 	private String  nombreSolicitante;
 	private String  nombreAfectado;
 	private String  nombreTipificacion;
 	private String   problemaDeSalud;
 	private String   email;
-	public String getIdCaso() {
+	private String   respuesta;
+	private int   otp;
+	private int   ord;
+	private String   tipo;
+	private String   de;
+	private String   apiToken;
+	public long getIdCaso() {
 		return idCaso;
 	}
-	public void setIdCaso(String idCaso) {
+	public void setIdCaso(long idCaso) {
 		this.idCaso = idCaso;
 	}
 	public String getRunUsuarioEjecuta() {
@@ -57,5 +65,55 @@ public class Solicitud implements Serializable {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	public String getRespuesta() {
+		return respuesta;
+	}
+	public void setRespuesta(String respuesta) {
+		this.respuesta = respuesta;
+	}
+	public int getOtp() {
+		return otp;
+	}
+	public void setOtp(int otp) {
+		this.otp = otp;
+	}
+	public int getOrd() {
+		return ord;
+	}
+	public void setOrd(int ord) {
+		this.ord = ord;
+	}
+	public String getTipo() {
+		return tipo;
+	}
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
+	}
+	public String getDe() {
+		return de;
+	}
+	public void setDe(String de) {
+		this.de = de;
+	}
 
+	public String getEntity() {
+		return entity;
+	}
+	public void setEntity(String entity) {
+		this.entity = entity;
+	}
+	public String getPurpose() {
+		return purpose;
+	}
+	public void setPurpose(String purpose) {
+		this.purpose = purpose;
+	}
+	public String getApiToken() {
+		return apiToken;
+	}
+	public void setApiToken(String apiToken) {
+		this.apiToken = apiToken;
+	}
+	
+	
 }

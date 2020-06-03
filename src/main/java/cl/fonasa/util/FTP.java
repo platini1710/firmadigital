@@ -19,7 +19,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 
-@Component
+
 public class FTP {
 
     @Value("${cl.fonasa.sftp.host}")

@@ -10,11 +10,16 @@ import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import cl.fonasa.controller.SignDesAtendidaController;
 import cl.fonasa.dto.Payload;
 import cl.fonasa.utils.Constantes;
+import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -23,7 +28,7 @@ import org.apache.commons.codec.binary.Base64;
 
 public class SignFileService {
     private  SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-    
+	private static final Logger log = LoggerFactory.getLogger(SignatureAlgorithm.class);
     
     public String encodeFileToBase64Binary(File file )
 			throws IOException {
@@ -77,18 +82,49 @@ public class SignFileService {
         }
          
         String fileHash = sb.toString();
-
+        fis.close();
         return fileHash;
     }
-    
+     
 	public  String getJWTToken(Payload payloads) throws ParseException {
+
+		String run ="";
+		  Header header2 = Jwts.header();
+		  header2.put("alg", "HS256");
+		  header2.put("typ", "JWT");
+		HashMap<String, Object> header = new HashMap<String,Object>();			
+		header.put("alg", signatureAlgorithm.toString()); //HS256			
+		header.put("typ","JWT");
+		if  (payloads.getRun().length()>2) {
+			run =payloads.getRun().substring(0, payloads.getRun().length()-2);
+		} else {
+			run =payloads.getRun();
+		}
+		JwtBuilder builder = Jwts.builder()
+				.setHeader((Map<String, Object>)header2)
+				.claim("entity", payloads.getEntity())
+				                  
+				.claim("run", run)
+				.claim("expiration", payloads.getExpiration())
+				.claim("purpose",payloads.getPurpose())
+
+				.signWith(SignatureAlgorithm.HS256,  TextCodec.BASE64.encode(Constantes.SECRET_KEY));
+	
+		log.warn("Entity ::" + payloads.getEntity()); 
+		log.warn("Run ::" + run);
+		log.warn("Expiration ::" + payloads.getExpiration());
+		log.warn("Purpose ::" + payloads.getPurpose());
+		return builder.compact();
+
+	}
+
+	public  String getJWTTokenAtendido(Payload payloads) throws ParseException {
 
 
 
 		HashMap<String, Object> header = new HashMap<String,Object>();			
 		header.put("alg", signatureAlgorithm.toString()); //HS256			
 		header.put("typ","JWT");
-
 
 
 		JwtBuilder builder = Jwts.builder()
@@ -103,6 +139,4 @@ public class SignFileService {
 
 		return builder.compact();
 	}
-
-
 }
