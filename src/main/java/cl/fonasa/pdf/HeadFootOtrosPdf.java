@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -57,9 +58,12 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
     private void addHeader(PdfWriter writer) {
         PdfPTable table = new PdfPTable(3);
         try {
-     
+            Font f0 = new Font();
+            f0.setFamily("Calibri");
+            f0.setStyle(Font.BOLD);
+            f0.setSize(8);
             table.setWidths(new float[]{1, 4, 1});
-            table.setTotalWidth(407);
+            table.setTotalWidth(495);
 
             table.setLockedWidth(true);
             // add image
@@ -111,11 +115,32 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
             table.addCell(logoLeftCell);
             // write content
 
-            
-    
+            headParaTit = new Paragraph(12);
+            headParaTit.setAlignment(Element.ALIGN_LEFT);
+            Chunk chunk0= new Chunk("FONASA NIVEL CENTRAL\r\nDIVISIÓN SERVICIO AL USUARIO\r\nDPTO. GESTIÓN CIUDADANA\r\nSUBDPTO GESTIÓN DE SOLICITUDES CIUDADANAS " ,f0 ) ;  
+            headParaTit.add(chunk0);
+            text.setColspan(3);
+            text.setVerticalAlignment(Element.ALIGN_TOP);
+            text.addElement(headParaTit);
+            text.setPaddingTop(0);
             text.setBorder(Rectangle.NO_BORDER);
-            table.addCell(text);                      
-            table.writeSelectedRows(0, 2, 94, 810, writer.getDirectContent());
+            logoLeftCell.setBorder(Rectangle.NO_BORDER);
+            text.setBorder(Rectangle.NO_BORDER);
+            table.addCell(text);    
+            table.setWidthPercentage(100);
+            PdfPCell text2 = new PdfPCell();
+            
+            text2.setBorder(Rectangle.NO_BORDER);
+      
+
+            text2.setColspan(3);
+            table.addCell(text2); 
+            
+
+            
+            
+            
+            table.writeSelectedRows(0, 2, 54, 810, writer.getDirectContent());
         } catch (DocumentException de) {
             log.error(de.getMessage(), de);
             throw new ExceptionConverter(de);

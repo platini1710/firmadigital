@@ -1,35 +1,18 @@
 package cl.fonasa;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.RestTemplate;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -37,15 +20,16 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import cl.fonasa.controller.SignDesAtendidaController;
 import cl.fonasa.dto.Payload;
 import cl.fonasa.pdf.GeneradorFilePdf;
 import io.jsonwebtoken.JwtBuilder;
@@ -57,6 +41,8 @@ import io.jsonwebtoken.impl.TextCodec;
 public class Test {
     private  SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 	private static final Logger log = LoggerFactory.getLogger(Test.class);
+    public static final String FONTBold = "/Font/CalibriBold.ttf";
+    public static final String FONTNormal= "/Font/CalibriRegular.ttf";
     public static void main(String[] args) throws DocumentException, MalformedURLException, IOException, org.json.simple.parser.ParseException {
         String clave  ="xxx";
         long ord= 9339 ;
@@ -69,19 +55,19 @@ public class Test {
         String nombreTipificacion="garantías GES";
         String respuesta="El problema de salud Cáncer de próstata contempla garantías explícitas en salud (GES), según lo estipula el Decreto Supremo Nº 22 vigente desde el 1/10/2019. Cabe señalar que en concordancia con lo señalado en el Artículo 11 de la ley No se entenderá que hay incumplimiento de la Garantía de oportunidad en los casos de fuerza mayor, caso fortuito, causal médica o causa imputable al beneficiario, lo que deberá ser debidamente acreditado por el FONASA. En su caso, la garantía tratamiento quirúrgico se encuentra exceptuado por indicación médica (seguimiento).";
         Date fecha = new Date();
-		Font f2 = new Font();
+        Font f2 = FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 12); 
 		f2.setFamily("Calibri");
-		f2.setStyle(Font.BOLD);
+
 		f2.setSize(10);
-		Font f5 = new Font();
+		Font f5 = FontFactory.getFont(FONTNormal, BaseFont.WINANSI, BaseFont.EMBEDDED, 12); 
 		f5.setFamily("Calibri");
 		f5.setStyle(Font.UNDERLINE);
 		f5.setSize(7);
-		Font paragraNegrita = new Font();
+		Font paragraNegrita =FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 12); 
 		paragraNegrita.setFamily("Calibri");
-		paragraNegrita.setStyle(Font.BOLD);
+
 		paragraNegrita.setSize(9);
-		Font paragraFontNormal = new Font();
+		Font paragraFontNormal = FontFactory.getFont(FONTNormal, BaseFont.WINANSI, BaseFont.EMBEDDED, 12); 
 		paragraFontNormal.setFamily("Calibri");
 		paragraFontNormal.setStyle(Font.NORMAL);
 		paragraFontNormal.setSize(10);

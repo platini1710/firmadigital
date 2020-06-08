@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
@@ -59,7 +60,7 @@ import sun.misc.BASE64Decoder;
 public class SignDesAtendidaController {
 	static final long ONE_MINUTE_IN_MILLIS=60000;//millisecs
 	private static final Logger log = LoggerFactory.getLogger(SignDesAtendidaController.class);
-	
+
     String appName;
 	@Autowired
 	private FTP ftp;
@@ -75,6 +76,9 @@ public class SignDesAtendidaController {
     @Value("${api.firmaDigital}")	
     private String firmaDigital; 
     
+    @Value("${url.generaOrdinario}")	
+    private String urlGeneraOrdinario; 
+    
     @Value("${entity}")	
     private String entity;     
     @Value("${purposeDesatendido}")	
@@ -83,94 +87,117 @@ public class SignDesAtendidaController {
     private String purposeAtendido;    
     @Value("${url.cerrarCaso}")	
     private String urlCerrarCaso;   
-    @RequestMapping(value="fea",produces=MediaType.APPLICATION_JSON_VALUE)
-	public DocumentSign firmaDocumentoDesatendida(@RequestBody(required = true) Solicitud solicitud)   {
-		String message ="archivo firmado exitosamente ";
-		String codigo="1";
-		long saveDB=0;
+
+	@RequestMapping(value = "fea", produces = MediaType.APPLICATION_JSON_VALUE)
+	public DocumentSign firmaDocumentoDesatendida(@RequestBody(required = true) Solicitud solicitud) {
+
+		String message = "archivo firmado exitosamente ";
+		String codigo = "1";
+		long saveDB = 1;
+		FileInputStream fis = null;
 		Utilidades util = new Utilidades();
 		String clave = util.retornaAleatorios();
-		if (solicitud.getOtp()>99999) {
+		if (solicitud.getOtp() > 99999) {
 			solicitud.setPurpose(purposeAtendido);
 		} else
 			solicitud.setPurpose(purposeDesatendido);
 		try {
-    	getTokenKey(solicitud.getRunUsuarioEjecuta(),solicitud);
+			getTokenKey(solicitud.getRunUsuarioEjecuta(), solicitud);
 
+			String respuesta = solicitud.getRespuesta();
 
+			Calendar date = Calendar.getInstance();
+			long t = date.getTimeInMillis();
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			String dateTime = sdf2.format(new Date(t + (15 * ONE_MINUTE_IN_MILLIS))).toString();
 
-		String respuesta = solicitud.getRespuesta();
+			/*
+			 * if (!"".equals(solicitud.getEntity()) || solicitud.getEntity()!=null) {
+			 * entity=solicitud.getEntity(); } if (!"".equals(solicitud.getPurpose()) ||
+			 * solicitud.getPurpose()!=null) { purpose=solicitud.getPurpose(); }
+			 */
+			Payload payloads = new Payload(solicitud.getRunUsuarioEjecuta(), solicitud.getEntity(),
+					solicitud.getPurpose(), dateTime);
+			String ordinario = "000";
+			try {
+				ordinario = getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			if ("".equals(ordinario.trim()) ) {
+				ordinario=String.valueOf(solicitud.getOrd());
+			}
+			log.info("ordinario ::" + ordinario);
+			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta);
+			codigo = "0";
+			try {
+				sendEmailWidthFile("adjunto archivo firmado digitalmente", "archivo firmado digitalmente",
+						solicitud.getEmail(), content);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			fis = new FileInputStream(clave + fileFirmadoDigital);
+			ftp.upload(solicitud.getIdCaso(), fis, ruta, solicitud.getPath(), clave + fileFirmadoDigital);
 
+			if (fis != null) {
+				fis.close();
+			}
 
-		Calendar date = Calendar.getInstance();
-		long t= date.getTimeInMillis();
-		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-		String dateTime=sdf2.format(new Date(t + (15 * ONE_MINUTE_IN_MILLIS))).toString();
+			log.info("ordinario ::" + ordinario);
+			log.info("ruta ::" + solicitud.getPath());
+			saveDB = grabaOk(solicitud.getIdCaso(), "archivo firmado exitosamente", clave + fileFirmadoDigital,
+					 solicitud.getPath(), "pdf", "solicitudesCiudadanas");
 
-		/*if (!"".equals(solicitud.getEntity()) || solicitud.getEntity()!=null) {
-			entity=solicitud.getEntity();
-		}
-		if (!"".equals(solicitud.getPurpose()) || solicitud.getPurpose()!=null) {
-			purpose=solicitud.getPurpose();
-		}*/
-		Payload payloads=new Payload(solicitud.getRunUsuarioEjecuta(), solicitud.getEntity(), solicitud.getPurpose(), dateTime);
-
-
-		String content=signFilePdf(solicitud,payloads,clave,respuesta);
-		codigo="0";
-			sendEmailWidthFile( "adjunto archivo firmado digitalmente","archivo firmado digitalmente", solicitud.getEmail(), content);
-
-		saveDB=grabaOk(solicitud.getIdCaso(),"archivo firmado exitosamente" ,clave + fileFirmadoDigital, ruta,"pdf","solicitudesCiudadanas") ;
-
-  
-		} catch(IOException |  ParseException  | UnsupportedOperationException e) {
+		} catch (IOException | ParseException | UnsupportedOperationException e) {
 
 			log.error(e.getMessage(), e);
 			if ("1".equals(codigo) && (!"".equals(solicitud.getApiToken().trim()))) {
-				message= " fallo la firma digital " + e.getMessage();
+				message = " fallo la firma digital " + e.getMessage();
 			}
 			if ("".equals(solicitud.getApiToken().trim())) {
-				message= " fallo el obtener ApiTokenKey " + e.getMessage();
+				message = " fallo el obtener ApiTokenKey " + e.getMessage();
 			}
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 
 			log.error(e.getMessage(), e);
 			if ("1".equals(codigo)) {
-				message=" fallo la firma digital " + e.getMessage();
+				message = " fallo la firma digital " + e.getMessage();
 			}
 
 		} finally {
-		
-				Path directory = Paths.get(clave + fileFirmadoDigital);
-				Path directory2 = Paths.get(clave + ".pdf");
-				try {
-					Files.delete(directory);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					log.error(e.getMessage(), e);
-				}
-	
-				try {
-					Files.delete(directory2);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					log.error(e.getMessage(), e);
-				}
-	
+
+			Path directory = Paths.get(clave + fileFirmadoDigital);
+			Path directory2 = Paths.get(clave + ".pdf");
+			try {
+				Files.delete(directory);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				log.error(e.getMessage(), e);
+			}
+
+			try {
+				Files.delete(directory2);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				log.error(e.getMessage(), e);
+			}
+
 		}
-		if (saveDB==0) {
-			codigo ="3";
-			message=message + ", no se cerro el caso  en base de datos";
-			if ("1".equals(codigo)) {
-				codigo ="2";	
-			} 
-			
+		log.info("saveDB :: " + saveDB);
+		if (saveDB == 1) {
+
+			message = message + ", no se cerro el caso  en base de datos";
+			if ("0".equals(codigo)) {
+				codigo = "1";
+			} else if ("1".equals(codigo)) {
+				codigo = "2";
+			}
+
 		} else {
-			message=message + ", se cerro exitosamente el caso en base de datos";
-			codigo ="0";
+			message = message + ", se cerro exitosamente el caso en base de datos";
+			codigo = "0";
 		}
-		DocumentSign  documentSign=new DocumentSign();
+		DocumentSign documentSign = new DocumentSign();
 		documentSign.setCodigo(codigo);
 		documentSign.setMensaje(message);
 
@@ -180,9 +207,12 @@ public class SignDesAtendidaController {
 
 
 	    
-	public String signFilePdf(Solicitud solicitud, Payload payloads, String clave,String respuesta) throws ParseException, IOException, DocumentException, java.text.ParseException, NoSuchAlgorithmException {
+	public String signFilePdf(String ordinario,Solicitud solicitud, Payload payloads, String clave,String respuesta) throws ParseException, IOException, DocumentException, java.text.ParseException, NoSuchAlgorithmException {
     	Object[] o = null;
-    	payloads.setEntity(entity);
+    	if ("".equals(payloads.getEntity().trim()) || payloads.getEntity()==null) {
+    		payloads.setEntity(entity);
+    	}
+		log.info("entity::" +solicitud.getEntity());
     	payloads.setPurpose(solicitud.getPurpose());
 		log.info("entros a signFilePdf ::" );
 		GeneradorFilePdf generadorFilePdf = new GeneradorFilePdf();
@@ -192,12 +222,12 @@ public class SignDesAtendidaController {
 		log.info("clave::" +clave);
 		if ("RECLAMO".equals(solicitud.getTipo().trim().toUpperCase())) {
 			log.info("paso 2::" );
-			fileName = generadorFilePdf.generaFileReclamposPdf(solicitud.getNombreSolicitante(),
+			fileName = generadorFilePdf.generaFileReclamposPdf(ordinario,solicitud.getNombreSolicitante(),
 				solicitud.getNombreTipificacion(), solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), 
 				respuesta,clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe());
 		}
 		else  {
-			fileName = generadorFilePdf.generaFileFelicitacioPdf(solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),
+			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),
 					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe());
 		}
 		log.info("paso 4::" );
@@ -256,6 +286,7 @@ public class SignDesAtendidaController {
 		fop.write(decodedBytes);
 		fop.flush();
 		fop.close();
+	
 		return content;
 	}
 	
@@ -375,7 +406,7 @@ public class SignDesAtendidaController {
 				fop.write(decodedBytes);
 				fop.flush();
 				fop.close();
-				System.out.println("content ::" + content);      
+
 				
 			}	
 			   ModelAndView modelAndView = new ModelAndView();
@@ -391,18 +422,16 @@ public class SignDesAtendidaController {
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			String endPoint = urlDatosFirma;
 			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
-
-
 			httppost.setHeader("Accept", "application/json");
 			httppost.setHeader("Content-type", "application/json");
 			String json = "{\r\n" + "\"run\": \"" + run  + "\"\r\n"  +"}";
-			System.out.println("inputJson :: "+ json);
+	
 			StringEntity stringEntity = new StringEntity(json);
 			httppost.setEntity(stringEntity);
 			HttpResponse response = httpclient.execute(httppost );
 			if (response.getStatusLine().getStatusCode() != 200) {
 				throw new RuntimeException(
-						" Failed : HTTP firma digital error code : " + response.getStatusLine().getStatusCode());
+						" Failed :  FrontInt_OSB_SolicitudesCiudadanas/RS_ObtenerDatosFirma: " + response.getStatusLine().getStatusCode());
 			}
 			String output, result = "";
 			BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "utf-8"));
@@ -410,7 +439,8 @@ public class SignDesAtendidaController {
 				result = result + output;
 
 			}
-			System.out.println("inputJson :: "+ result);
+
+
 			Object obj = new JSONParser().parse(result);
 			JSONObject jo = (JSONObject) obj; 
 			String apiToken=(String)jo.get("apiToken");
@@ -418,7 +448,7 @@ public class SignDesAtendidaController {
 			solicitud.setApiToken(apiToken);
 			solicitud.setEntity(institucion);
 			solicitud.setDe( (String)jo.get("nombreFirmante"));
-			System.out.println("inputJson :: "+  jo.get("nombreFirmante"));
+
 	    }
 	  
 	  
@@ -432,22 +462,19 @@ public class SignDesAtendidaController {
 
 			httppost.setHeader("Accept", "application/json");
 			httppost.setHeader("Content-type", "application/json");
-			String json = "{\r\n" + "\"idCaso\": " + idCaso  + ",\r\n "  ;
-			json =json + 		"\"mensajes\": [";
-			json =json + " \r\n { " ;
-			json =json + "\"mensaje\":\"" + msg +  "\",\r\n"  ;
-			json =json + "\"documentos\": [\r\n" ;
-			json =json +  " {\r\n";
-			json =json +  "\"nombreArchivo\":\"" + nombreArchivo +  "\" , \r\n" ;
-			json =json +   "\"ruta\": \"" + ruta +   "\" , \r\n" ;
-			json =json +   "\"extension\": \"" + extension +   "\" ,\r\n" ;
-			json =json +    "\"alias\": \"" + alias +   "\" \r\n" ;
-			json =json +        "              } \r\n";
-			json =json +        "              ]\r\n";
+			String json = "{\r\n" + "\"numeroSolicitud\": " + idCaso  + ",\r\n "  ;
+			
+			json =json +  "\"mensaje\" :\"" + msg +  "\",\r\n"  ;
+			json =json +   "\"documentoAdjunto\" : [{ \r\n";
+			json =json +   "\"nombreArchivo\" : \"" + nombreArchivo + "\", \r\n";
+			json =json +   "\"descripcion\" : \"string\", \r\n";
+			json =json +   "\"path\": \"" + ruta +   "\" , \r\n" ;
+			json =json +   "\"extension\": \"" + extension +   "\" \r\n" ;
+
 			json =json +        "   }\r\n";
 			json =json +        "  ]\r\n";
 			json =json +   "     }";
-
+			log.info("ruta::: " + ruta);
 			StringEntity stringEntity = new StringEntity(json);
 			httppost.setEntity(stringEntity);
 			HttpResponse response = httpclient.execute(httppost );
@@ -461,7 +488,7 @@ public class SignDesAtendidaController {
 				result = result + output;
 
 			}
-			System.out.println("inputJson :: "+ result);
+
 			Object obj = new JSONParser().parse(result);
 			JSONObject jo = (JSONObject) obj; 
 			codigo=(Long)jo.get("codigo");
@@ -469,4 +496,44 @@ public class SignDesAtendidaController {
 			return codigo;
 		  
 	  }
+	  
+	  public String getOrdinario(String run, long numeroSolicitud) throws ClientProtocolException, IOException, ParseException, UnsupportedOperationException {  
+	  	  
+		  String ordinario=" ";
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			String endPoint = urlGeneraOrdinario;
+			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
+log.info("endPoint::: " + endPoint);
+
+
+			httppost.setHeader("Accept", "application/json");
+			httppost.setHeader("Content-type", "application/json");
+			String json = "{\r\n" + "\"runUsuario\": \"" + run  + "\",\r\n "  ;
+			
+			json =json +  "\"numeroSolicitud\" :" + numeroSolicitud +  "\r\n"  ;
+
+			json =json +   "     }";
+			log.info("json::: " + json);
+			StringEntity stringEntity = new StringEntity(json);
+			httppost.setEntity(stringEntity);
+			HttpResponse response = httpclient.execute(httppost );
+			if (response.getStatusLine().getStatusCode() != 200) {
+				throw new RuntimeException(
+						" Failed : HTTP getOrdinario: " + response.getStatusLine().getStatusCode());
+			}
+			String output, result = "";
+			BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "utf-8"));
+			while ((output = br.readLine()) != null) {
+				result = result + output;
+
+			}
+
+			Object obj = new JSONParser().parse(result);
+			JSONObject jo = (JSONObject) obj; 
+
+			if (jo.get("ordinario")!=null) {
+				ordinario=(String)jo.get("ordinario");
+				}
+			return ordinario;
+		}
 }

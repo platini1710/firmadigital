@@ -23,6 +23,7 @@ public class Solicitud implements Serializable {
 	private String   tipo;
 	private String   de;
 	private String   apiToken;
+	private String   path;
 	public long getIdCaso() {
 		return idCaso;
 	}
@@ -114,6 +115,13 @@ public class Solicitud implements Serializable {
 	public void setApiToken(String apiToken) {
 		this.apiToken = apiToken;
 	}
+	public String getPath() {
+		return path;
+	}
+	public void setPath(String path) {
+		this.path = path;
+	}
+
 	
 	
 }

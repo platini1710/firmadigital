@@ -1,0 +1,33 @@
+
+
+# SFTP
+cl.fonasa.sftp.user=fonresuelve
+cl.fonasa.sftp.password=Fonasa123.,
+cl.fonasa.sftp.host=fosqaotdgen.fonasa.local
+cl.fonasa.sftp.port=7522
+cl.fonasa.sftp.protocol=sFTP
+# session connection timeout
+sftp.client.sessionConnectTimeout=120000
+ # channel connection timeout
+sftp.client.channelConnectedTimeout=45000
+
+#SQA
+ruta.server.pdf =/pdf-fonasa
+ruta.server.url =http://fosqaotdgen.fonasa.local:11015
+
+ruta.host.reportes=http://fodevotdgen.fonasa.local:20010/GestorReportes/
+
+url.correoAdjunto=http://fosqaotdgen.fonasa.local:10010/ComponenteNotificacion/RS_CorreoConAdjuntosCC/correoConAdjuntosCC
+
+
+
+api.firmaDigital=https://api.firma.test.digital.gob.cl/firma/v2/files/tickets
+
+
+
+entity=Fondo Nacional de Salud
+purposeAtendido=Prop\u00f3sito General
+purposeDesatendido=Desatendido
+url.datosFirma=http://fosqaotdgen.fonasa.local:10010/FrontInt_OSB_SolicitudesCiudadanas/RS_ObtenerDatosFirma
+
+url.cerrarCaso=http://fosqaotdgen.fonasa.local:10010/FrontInt_OSB_SolicitudesCiudadanas/RS_CerrarCaso

@@ -19,7 +19,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 
-
+@Component
 public class FTP {
 
     @Value("${cl.fonasa.sftp.host}")
@@ -173,14 +173,40 @@ public class FTP {
         }
     }
 	
-	public void upload(InputStream isFile, String ruta, String fileName) throws Exception {
-		Instant start = Instant.now();
+	public void upload(long idCaso,InputStream isFile, String ruta, String path,String fileName) {
+
+
+
+
+		log.info("ruta::"  + ruta);
+		log.info("fileName::"  + fileName);
+		log.info("path::"  + path);
+		log.info("idCaso::"  + idCaso);
 
 		connect();
-		channelSftp.cd(ruta);
+		 path = ruta  +path ;
+			log.info("path::"  + path);
+		// println path;
+		try {
+		    channelSftp.stat(path);
+		} catch (SftpException se) {
+		    log.warn(se.getMessage());
 
-		channelSftp.put(isFile, fileName);
-
-	}
+		    try {
+		        channelSftp.mkdir(path);
+		    } catch (SftpException e) {
+		        log.warn("SftpException->" + e.getMessage());
+		    }
+		} catch (Exception e) {
+		    log.warn("Error stat ->" + e.getMessage());
+		}
+		try {
+			log.info("filcopy file ::"  + path + "/" + fileName);
+		    channelSftp.put(isFile, path + "/" + fileName);
+		} catch (SftpException e) {
+		    e.printStackTrace();
+		}
+		
+			}
 
 }

@@ -17,10 +17,7 @@
 		<relativePath />
 	</parent>
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/com.itextpdf/itextpdf -->
 
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
@@ -36,11 +33,11 @@
 			<version>20190722</version>
 		</dependency>
 
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-tomcat</artifactId>
-    <scope>provided</scope>
-</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-thymeleaf -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
