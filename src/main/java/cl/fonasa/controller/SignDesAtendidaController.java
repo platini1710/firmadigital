@@ -237,13 +237,13 @@ public class SignDesAtendidaController {
 		String fileName = "";
 		log.info("getTipo::" +solicitud.getTipo());
 		log.info("clave::" +clave);
-		if ("RECLAMO".equals(solicitud.getTipo().trim().toUpperCase())) {
+		if ("RECLAMO".equals(solicitud.getTipo().trim().toUpperCase())) {                                         // si es reclamo
 			log.info("paso 2::" );
 			fileName = generadorFilePdf.generaFileReclamposPdf(ordinario,solicitud.getNombreSolicitante(),
 				solicitud.getNombreTipificacion(), solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), 
 				respuesta,clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe());
 		}
-		else  {
+		else  {         // si otro tipo de archivo
 			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),
 					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe());
 		}
