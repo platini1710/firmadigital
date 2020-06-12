@@ -12,10 +12,12 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -23,7 +25,9 @@ import com.itextpdf.text.pdf.PdfWriter;
 import cl.fonasa.pdf.GeneradorFilePdf;
 
 public class Test2 {
-
+    public static final String FONTBold = "/Font/CalibriBold.ttf";
+    public static final String FONTNormal= "/Font/CalibriRegular.ttf";
+    
     public static void main(String[] args) throws DocumentException, MalformedURLException, IOException, org.json.simple.parser.ParseException {
         String clave  ="sas1312";
         String ord="13779/2020";
@@ -58,14 +62,18 @@ public class Test2 {
             Paragraph paragraphead= new Paragraph(13f);
             Paragraph paragraphead2= new Paragraph(13f);
             paragraphead.setAlignment(Paragraph.ALIGN_RIGHT);
-            Font f0 = new Font();
+            Font f0 =FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 8); 
             f0.setFamily("Calibri");
             f0.setStyle(Font.BOLD);
             f0.setSize(8);
-            Font f = new Font();
+            Font f =FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 8); 
             f.setFamily("Calibri");
             f.setStyle(Font.NORMAL);
             f.setSize(8);
+            Font f2 =FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 10); 
+            f2.setFamily("Calibri");
+            f2.setStyle(Font.BOLD);
+            f2.setSize(10);
            /* --------------------------------------------Head-----------------------------------------------*/
             Chunk chunk0= new Chunk("ORD. 1.1G/N°   " ,f0 );           		
             paragraphead.setAlignment(Element.ALIGN_RIGHT);
@@ -117,10 +125,7 @@ public class Test2 {
 
 
 
-            Font f2 = new Font();
-            f2.setFamily("Calibri");
-            f2.setStyle(Font.BOLD);
-            f2.setSize(10);
+
             Chunk chunk2= new Chunk(respuesta + "\r\n\n",f);
             
             

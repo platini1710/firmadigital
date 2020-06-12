@@ -18,7 +18,7 @@ public class Solicitud implements Serializable {
 	private String   problemaDeSalud;
 	private String   email;
 	private String   respuesta;
-	private int   otp;
+	private String   otp;
 	private int   ord;
 	private String   tipo;
 	private String   de;
@@ -72,10 +72,10 @@ public class Solicitud implements Serializable {
 	public void setRespuesta(String respuesta) {
 		this.respuesta = respuesta;
 	}
-	public int getOtp() {
+	public String getOtp() {
 		return otp;
 	}
-	public void setOtp(int otp) {
+	public void setOtp(String otp) {
 		this.otp = otp;
 	}
 	public int getOrd() {

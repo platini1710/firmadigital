@@ -4,13 +4,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.datatype.DatatypeFactory;
 
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -18,6 +23,11 @@ import org.slf4j.LoggerFactory;
 
 import cl.fonasa.controller.SignDesAtendidaController;
 import cl.fonasa.dto.Payload;
+import cl.fonasa.soa.gestioncertificado.GestionCertificadoRequest;
+import cl.fonasa.soa.gestioncertificado.GestionCertificadoResponse;
+import cl.fonasa.soa.protocolo.HeaderRequest;
+import cl.fonasa.soa.proxy.gestioncertificado_ps.GestionCertificadoBindingQSService;
+import cl.fonasa.soa.proxy.gestioncertificado_ps.GestionCertificadoPortType;
 import cl.fonasa.utils.Constantes;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwtBuilder;
@@ -139,4 +149,8 @@ public class SignFileService {
 
 		return builder.compact();
 	}
+	
+	
+
+	
 }

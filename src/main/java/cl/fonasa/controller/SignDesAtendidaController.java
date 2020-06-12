@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,7 +17,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Map;
+
+import javax.xml.datatype.DatatypeFactory;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -51,6 +55,11 @@ import cl.fonasa.dto.Payload;
 import cl.fonasa.dto.Solicitud;
 import cl.fonasa.pdf.GeneradorFilePdf;
 import cl.fonasa.service.SignFileService;
+import cl.fonasa.soa.gestioncertificado.GestionCertificadoRequest;
+import cl.fonasa.soa.gestioncertificado.GestionCertificadoResponse;
+import cl.fonasa.soa.protocolo.HeaderRequest;
+import cl.fonasa.soa.proxy.gestioncertificado_ps.GestionCertificadoBindingQSService;
+import cl.fonasa.soa.proxy.gestioncertificado_ps.GestionCertificadoPortType;
 import cl.fonasa.util.FTP;
 import cl.fonasa.util.Utilidades;
 import sun.misc.BASE64Decoder;
@@ -87,7 +96,8 @@ public class SignDesAtendidaController {
     private String purposeAtendido;    
     @Value("${url.cerrarCaso}")	
     private String urlCerrarCaso;   
-
+    @Value("${ws.genera.codigo.certificadoWSDL}\")	;
+    	    private String certificadoWSDL;   
 	@RequestMapping(value = "fea", produces = MediaType.APPLICATION_JSON_VALUE)
 	public DocumentSign firmaDocumentoDesatendida(@RequestBody(required = true) Solicitud solicitud) {
 
@@ -96,14 +106,17 @@ public class SignDesAtendidaController {
 		long saveDB = 1;
 		FileInputStream fis = null;
 		Utilidades util = new Utilidades();
+		log.info("paso 1 ::" );
 		String clave = util.retornaAleatorios();
-		if (solicitud.getOtp() > 99999) {
+		if (solicitud.getOtp().length() > 5) {
 			solicitud.setPurpose(purposeAtendido);
 		} else
 			solicitud.setPurpose(purposeDesatendido);
+		log.info("paso 2 ::" );
 		try {
+			log.info("paso 3 ::" );
 			getTokenKey(solicitud.getRunUsuarioEjecuta(), solicitud);
-
+			log.info("paso 4 ::" );
 			String respuesta = solicitud.getRespuesta();
 
 			Calendar date = Calendar.getInstance();
@@ -116,14 +129,17 @@ public class SignDesAtendidaController {
 			 * entity=solicitud.getEntity(); } if (!"".equals(solicitud.getPurpose()) ||
 			 * solicitud.getPurpose()!=null) { purpose=solicitud.getPurpose(); }
 			 */
+			log.info("paso 5 ::" );
 			Payload payloads = new Payload(solicitud.getRunUsuarioEjecuta(), solicitud.getEntity(),
 					solicitud.getPurpose(), dateTime);
 			String ordinario = "000";
+			log.info("paso 6 ::" );
 			try {
 				ordinario = getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
+			log.info("paso 7 ::" );
 			if ("".equals(ordinario.trim()) ) {
 				ordinario=String.valueOf(solicitud.getOrd());
 			}
@@ -251,8 +267,8 @@ public class SignDesAtendidaController {
 		httpRequest.setHeader("Accept", "application/json");
 		httpRequest.setHeader("Content-type", "application/json");
 		log.info("solicitud.getOtp() ::" + solicitud.getOtp());
-		if (solicitud.getOtp()>9999) {
-			httpRequest.setHeader("otp", String.valueOf(solicitud.getOtp()));
+		if (solicitud.getOtp().length()>5) {
+			httpRequest.setHeader("otp", solicitud.getOtp());
 		}
 		StringEntity stringEntity = new StringEntity(json);
 		httpRequest.setEntity(stringEntity);
@@ -444,6 +460,7 @@ public class SignDesAtendidaController {
 			Object obj = new JSONParser().parse(result);
 			JSONObject jo = (JSONObject) obj; 
 			String apiToken=(String)jo.get("apiToken");
+			log.info("apiToken::" + apiToken);
 			String institucion=(String)jo.get("institucion");
 			solicitud.setApiToken(apiToken);
 			solicitud.setEntity(institucion);
@@ -535,5 +552,45 @@ log.info("endPoint::: " + endPoint);
 				ordinario=(String)jo.get("ordinario");
 				}
 			return ordinario;
+		}
+	  
+	  public String generaCodigoCertificado(String rut, String tramo, String codigo) throws Exception {
+			String valor = "";
+
+			certificadoWSDL = cl.fonasa.util.BaseResources.getPropertiesWSDL("application-" + env,
+					"ws.genera.codigo.certificadoWSDL");
+
+			URL wsdlLocation = new URL(certificadoWSDL);
+			GestionCertificadoBindingQSService service = new GestionCertificadoBindingQSService(wsdlLocation);
+			GestionCertificadoPortType port = service.getGestionCertificadoBindingQSPort();
+			HeaderRequest header = new HeaderRequest();
+			header.setUserID("");
+			header.setRolID("");
+			header.setSucursalID("");
+			GregorianCalendar gfechaActual = new GregorianCalendar();
+			Calendar fechaActual = GregorianCalendar.getInstance();
+			gfechaActual.setTime(fechaActual.getTime());
+			header.setFechaHora(DatatypeFactory.newInstance().newXMLGregorianCalendar(gfechaActual));
+
+			GestionCertificadoRequest request = new GestionCertificadoRequest();
+			log.info("fechaActual  ::" + fechaActual.getTime());
+			GestionCertificadoRequest.BodyResquest bd = new GestionCertificadoRequest.BodyResquest();
+			bd.setRunCertificado(rut);
+			bd.setTipoCertificado(codigo);
+			bd.setTramoCertificado(tramo);
+
+			request.setHeaderRequest(header);
+			request.setBodyResquest(bd);
+
+			GestionCertificadoResponse response = port.gestionCertificado(request);
+			// valor = response.getBodyResponse().getIdCertificado().toString();
+
+			if ("0".equals(response.getBodyResponse().getCodigoEstado())) {
+				throw new Exception("error al generar codigo certificado");
+			}
+			valor = response.getBodyResponse().getCodCertificado();
+
+			return valor;
+
 		}
 }

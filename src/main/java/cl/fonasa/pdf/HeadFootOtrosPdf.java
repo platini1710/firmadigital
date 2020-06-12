@@ -14,10 +14,12 @@ import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.ExceptionConverter;
 import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfName;
@@ -28,7 +30,9 @@ import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 
 public class HeadFootOtrosPdf extends PdfPageEventHelper {
-
+    public static final String FONTBold = "/Font/CalibriBold.ttf";
+    public static final String FONTNormal= "/Font/CalibriRegular.ttf";
+    
 	private static final Logger log = LoggerFactory.getLogger(GeneradorFilePdf.class);
     private PdfTemplate t;
     private Image total;
@@ -58,7 +62,7 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
     private void addHeader(PdfWriter writer) {
         PdfPTable table = new PdfPTable(3);
         try {
-            Font f0 = new Font();
+            Font f0 =FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 8); 
             f0.setFamily("Calibri");
             f0.setStyle(Font.BOLD);
             f0.setSize(8);
