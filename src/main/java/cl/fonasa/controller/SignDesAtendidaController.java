@@ -96,7 +96,7 @@ public class SignDesAtendidaController {
     private String purposeAtendido;    
     @Value("${url.cerrarCaso}")	
     private String urlCerrarCaso;   
-    @Value("${ws.genera.codigo.certificadoWSDL}\")	;
+    @Value("${ws.genera.codigo.certificadoWSDL}")	
     	    private String certificadoWSDL;   
 	@RequestMapping(value = "fea", produces = MediaType.APPLICATION_JSON_VALUE)
 	public DocumentSign firmaDocumentoDesatendida(@RequestBody(required = true) Solicitud solicitud) {
@@ -135,7 +135,7 @@ public class SignDesAtendidaController {
 			String ordinario = "000";
 			log.info("paso 6 ::" );
 			try {
-				ordinario = getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());
+				ordinario = getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());//genera ordinario
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
@@ -146,14 +146,9 @@ public class SignDesAtendidaController {
 			log.info("ordinario ::" + ordinario);
 			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta);
 			codigo = "0";
-			try {
-				sendEmailWidthFile("adjunto archivo firmado digitalmente", "archivo firmado digitalmente",
-						solicitud.getEmail(), content);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
+
 			fis = new FileInputStream(clave + fileFirmadoDigital);
-			ftp.upload(solicitud.getIdCaso(), fis, ruta, solicitud.getPath(), clave + fileFirmadoDigital);
+			ftp.upload(solicitud.getIdCaso(), fis, ruta, solicitud.getPath(), clave + fileFirmadoDigital);//sube archivo 
 
 			if (fis != null) {
 				fis.close();
@@ -161,8 +156,14 @@ public class SignDesAtendidaController {
 
 			log.info("ordinario ::" + ordinario);
 			log.info("ruta ::" + solicitud.getPath());
-			saveDB = grabaOk(solicitud.getIdCaso(), "archivo firmado exitosamente", clave + fileFirmadoDigital,
+			saveDB = grabaOk(solicitud.getIdCaso(), "archivo firmado exitosamente", clave + fileFirmadoDigital,//cierre de caso
 					 solicitud.getPath(), "pdf", "solicitudesCiudadanas");
+			try {
+				sendEmailWidthFile("adjunto archivo firmado digitalmente", "archivo firmado digitalmente",//envio de correo
+						solicitud.getEmail(), content);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
 
 		} catch (IOException | ParseException | UnsupportedOperationException e) {
 
@@ -554,43 +555,5 @@ log.info("endPoint::: " + endPoint);
 			return ordinario;
 		}
 	  
-	  public String generaCodigoCertificado(String rut, String tramo, String codigo) throws Exception {
-			String valor = "";
 
-			certificadoWSDL = cl.fonasa.util.BaseResources.getPropertiesWSDL("application-" + env,
-					"ws.genera.codigo.certificadoWSDL");
-
-			URL wsdlLocation = new URL(certificadoWSDL);
-			GestionCertificadoBindingQSService service = new GestionCertificadoBindingQSService(wsdlLocation);
-			GestionCertificadoPortType port = service.getGestionCertificadoBindingQSPort();
-			HeaderRequest header = new HeaderRequest();
-			header.setUserID("");
-			header.setRolID("");
-			header.setSucursalID("");
-			GregorianCalendar gfechaActual = new GregorianCalendar();
-			Calendar fechaActual = GregorianCalendar.getInstance();
-			gfechaActual.setTime(fechaActual.getTime());
-			header.setFechaHora(DatatypeFactory.newInstance().newXMLGregorianCalendar(gfechaActual));
-
-			GestionCertificadoRequest request = new GestionCertificadoRequest();
-			log.info("fechaActual  ::" + fechaActual.getTime());
-			GestionCertificadoRequest.BodyResquest bd = new GestionCertificadoRequest.BodyResquest();
-			bd.setRunCertificado(rut);
-			bd.setTipoCertificado(codigo);
-			bd.setTramoCertificado(tramo);
-
-			request.setHeaderRequest(header);
-			request.setBodyResquest(bd);
-
-			GestionCertificadoResponse response = port.gestionCertificado(request);
-			// valor = response.getBodyResponse().getIdCertificado().toString();
-
-			if ("0".equals(response.getBodyResponse().getCodigoEstado())) {
-				throw new Exception("error al generar codigo certificado");
-			}
-			valor = response.getBodyResponse().getCodCertificado();
-
-			return valor;
-
-		}
 }

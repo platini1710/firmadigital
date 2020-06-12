@@ -152,5 +152,42 @@ public class SignFileService {
 	
 	
 
-	
+	  public String generaCodigoCertificado(String rut, String tramo, String codigo,String certificadoWSDL) throws Exception {
+			String valor = "";
+
+
+
+			URL wsdlLocation = new URL(certificadoWSDL);
+			GestionCertificadoBindingQSService service = new GestionCertificadoBindingQSService(wsdlLocation);
+			GestionCertificadoPortType port = service.getGestionCertificadoBindingQSPort();
+			HeaderRequest header = new HeaderRequest();
+			header.setUserID("");
+			header.setRolID("");
+			header.setSucursalID("");
+			GregorianCalendar gfechaActual = new GregorianCalendar();
+			Calendar fechaActual = GregorianCalendar.getInstance();
+			gfechaActual.setTime(fechaActual.getTime());
+			header.setFechaHora(DatatypeFactory.newInstance().newXMLGregorianCalendar(gfechaActual));
+
+			GestionCertificadoRequest request = new GestionCertificadoRequest();
+			log.info("fechaActual  ::" + fechaActual.getTime());
+			GestionCertificadoRequest.BodyResquest bd = new GestionCertificadoRequest.BodyResquest();
+			bd.setRunCertificado(rut);
+			bd.setTipoCertificado(codigo);
+			bd.setTramoCertificado(tramo);
+
+			request.setHeaderRequest(header);
+			request.setBodyResquest(bd);
+
+			GestionCertificadoResponse response = port.gestionCertificado(request);
+			// valor = response.getBodyResponse().getIdCertificado().toString();
+
+			if ("0".equals(response.getBodyResponse().getCodigoEstado())) {
+				throw new Exception("error al generar codigo certificado");
+			}
+			valor = response.getBodyResponse().getCodCertificado();
+
+			return valor;
+
+		}
 }
