@@ -144,7 +144,7 @@ public class SignDesAtendidaController {
 				ordinario=String.valueOf(solicitud.getOrd());
 			}
 			log.info("ordinario ::" + ordinario);
-			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta);
+			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta);   //firma archivo
 			codigo = "0";
 
 			fis = new FileInputStream(clave + fileFirmadoDigital);
