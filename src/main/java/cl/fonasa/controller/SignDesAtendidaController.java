@@ -96,11 +96,19 @@ public class SignDesAtendidaController {
 	@RequestMapping(value = "fea", consumes  = "application/json; charset=utf-8",produces = "application/json; charset=utf-8")
 	public DocumentSign firmaDocumentoDesatendida(@RequestBody(required = true) Solicitud solicitud)  {
 
-		String rawString =solicitud.getRespuesta();
-		byte[] bytes = rawString.getBytes(StandardCharsets.UTF_8);
-		 
-		String utf8EncodedString = new String(bytes, StandardCharsets.UTF_8);
-		log.info("setRespuesta utf8EncodedString ::"+utf8EncodedString );
+		String text=new String(solicitud.getRespuesta().replaceAll("\u00e1","a"));
+
+		log.info("setRespuesta   \u00e1 á ::"+text );
+		
+		   String output = solicitud.getRespuesta();
+		    for (int i=0; i<solicitud.getRespuesta().length(); i++) {
+		    // Reemplazamos los caracteres especiales.
+		    
+		        output = output.replace(solicitud.getRespuesta().charAt(i), 'á');
+
+		    }
+			log.info("output ::" );
+		solicitud.setRespuesta(text);
 		String message = "archivo firmado exitosamente ";
 
 		String codigo = "1";
@@ -116,7 +124,7 @@ public class SignDesAtendidaController {
 		log.info("paso 2 ::" );
 		try {
 			log.info("paso 3 ::" );
-			getTokenKey(solicitud.getRunUsuarioEjecuta(), solicitud);
+			getTokenKey(solicitud.getRunUsuarioEjecuta(), solicitud);// fallo obtencion token
 			log.info("paso 4 ::" );
 			String respuesta = solicitud.getRespuesta();
 
@@ -135,21 +143,18 @@ public class SignDesAtendidaController {
 					solicitud.getPurpose(), dateTime);
 			String ordinario = "000";
 			log.info("paso 6 ::" );
-			try {
-				ordinario = getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());//genera ordinario
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-			log.info("paso 7 ::" );
-			if ("".equals(ordinario.trim()) ) {
-				ordinario=String.valueOf(solicitud.getOrd());
-			}
+			codigo = "2";
+			ordinario = getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());// fallo obtencion ordinario
+		
+
 			log.info("ordinario ::" + ordinario);
-			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta);   //firma archivo
+			codigo = "3";
+			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta);   //fallo Firma
 			codigo = "0";
 
 			fis = new FileInputStream(clave + fileFirmadoDigital);
-			ftp.upload(solicitud.getIdCaso(), fis, ruta, solicitud.getPath(), clave + fileFirmadoDigital);//sube archivo 
+			codigo = "4";
+			ftp.upload(solicitud.getIdCaso(), fis, ruta, solicitud.getPath(), clave + fileFirmadoDigital);//fallo subida FTP archivo 
 
 			if (fis != null) {
 				fis.close();
@@ -157,30 +162,22 @@ public class SignDesAtendidaController {
 
 			log.info("ordinario ::" + ordinario);
 			log.info("ruta ::" + solicitud.getPath());
-			saveDB = grabaOk(solicitud.getIdCaso(), "archivo firmado exitosamente", clave + fileFirmadoDigital,//cierre de caso
+			codigo = "5";
+			saveDB = grabaOk(solicitud.getIdCaso(), "archivo firmado exitosamente", clave + fileFirmadoDigital,//fallo cierre de caso
 					 solicitud.getPath(), "pdf", "solicitudesCiudadanas");
-			try {
-				sendEmailWidthFile("adjunto archivo firmado digitalmente", "archivo firmado digitalmente",//envio de correo
+			codigo = "6";
+				sendEmailWidthFile("adjunto archivo firmado digitalmente", "archivo firmado digitalmente",//fallo envio de correo
 						solicitud.getEmail(), content);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
 
+				codigo = "0";
 		} catch (IOException | ParseException | UnsupportedOperationException e) {
 
 			log.error(e.getMessage(), e);
-			if ("1".equals(codigo) && (!"".equals(solicitud.getApiToken().trim()))) {
-				message = " fallo la firma digital " + e.getMessage();
-			}
-			if ("".equals(solicitud.getApiToken().trim())) {
-				message = " fallo el obtener ApiTokenKey " + e.getMessage();
-			}
+
 		} catch (Exception e) {
 
 			log.error(e.getMessage(), e);
-			if ("1".equals(codigo)) {
-				message = " fallo la firma digital " + e.getMessage();
-			}
+
 
 		} finally {
 
@@ -202,19 +199,22 @@ public class SignDesAtendidaController {
 
 		}
 		log.info("saveDB :: " + saveDB);
-		if (saveDB == 1) {
-
-			message = message + ", no se cerro el caso  en base de datos";
-			if ("0".equals(codigo)) {
-				codigo = "1";
-			} else if ("1".equals(codigo)) {
-				codigo = "2";
-			}
-
-		} else {
-			message = message + ", se cerro exitosamente el caso en base de datos";
-			codigo = "0";
+		if ("0".equals(codigo)) {
+			message = "Se firmo archivo correctamente , se cerro en base de datos y se envio archivo por correo";
+		} else if ("1".equals(codigo)) {
+			message = "fallo la obtención del token, no se pudo generar archivo firmado ";
+		}else if ("2".equals(codigo)) {
+			message = "fallo la obtención del ordinario, no se pudo generar archivo firmado ";
+		}else if ("3".equals(codigo)) {
+			message = "fallo la firma  , causa posible el OTP";
+		}else if ("4".equals(codigo)) {
+			message = "fallo la subida de archivo al ftp, no se pudo cerrar en base de Datos ni enviar correo";
+		}else if ("5".equals(codigo)) {
+			message = "fallo el cierre en base de datos,el archivo fue firmado  pero no se pudo enviar el correo";
+		}else if ("6".equals(codigo)) {
+			message = "fallo el envio de correo , se pudo firmar el archivo y cerrar en base de datos";
 		}
+		
 		DocumentSign documentSign = new DocumentSign();
 		documentSign.setCodigo(codigo);
 		documentSign.setMensaje(message);
@@ -521,19 +521,24 @@ public class SignDesAtendidaController {
 
 			httppost.setHeader("Accept", "application/json");
 			httppost.setHeader("Content-type", "application/json");
-			String json = "{\r\n" + "\"numeroSolicitud\": " + idCaso  + ",\r\n "  ;
-			
-			json =json +  "\"mensaje\" :\"" + msg +  "\",\r\n"  ;
-			json =json +   "\"documentoAdjunto\" : [{ \r\n";
-			json =json +   "\"nombreArchivo\" : \"" + nombreArchivo + "\", \r\n";
-			json =json +   "\"descripcion\" : \"string\", \r\n";
-			json =json +   "\"path\": \"" + ruta +   "\" , \r\n" ;
-			json =json +   "\"extension\": \"" + extension +   "\" \r\n" ;
-
-			json =json +        "   }\r\n";
-			json =json +        "  ]\r\n";
-			json =json +   "     }";
-			log.info("ruta::: " + ruta);
+			String json = "{\r\n" + 
+					"    \"idCaso\":" + idCaso + "\r\n" + 
+					",\r\n" + 
+					"    \"mensajes\": [\r\n" + 
+					"        {\r\n" + 
+					"            \"mensaje\": \"string\",\r\n" + 
+					"            \"documentos\": [\r\n" + 
+					"                {\r\n" + 
+					"                    \"nombreArchivo\": \"" +nombreArchivo  + "\",\r\n" + 
+					"                    \"ruta\": \""  +  ruta + "\",\r\n" + 
+					"                    \"extension\": \"" + extension + "\",\r\n" + 
+					"                    \"alias\": \"" +  alias + "\"\r\n" + 
+					"                }\r\n" + 
+					"            ]\r\n" + 
+					"        }\r\n" + 
+					"    ]\r\n" + 
+					"}";
+			log.info("json::: " + json);
 			StringEntity stringEntity = new StringEntity(json);
 			httppost.setEntity(stringEntity);
 			HttpResponse response = httpclient.execute(httppost );
