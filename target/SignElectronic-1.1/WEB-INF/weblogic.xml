@@ -10,8 +10,12 @@
 		</wls:prefer-application-packages>
 
 	</wls:container-descriptor>
-
-
+	<charset-params>
+		<input-charset>
+			        <resource-path>/*</resource-path>
+			        <java-charset-name>UTF-8</java-charset-name>
+		</input-charset>
+	</charset-params>
 	<wls:context-root>SignElectronic</wls:context-root>
 
 
