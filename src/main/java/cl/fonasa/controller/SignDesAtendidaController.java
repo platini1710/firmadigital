@@ -5,10 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,10 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Map;
-
-import javax.xml.datatype.DatatypeFactory;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -55,17 +55,12 @@ import cl.fonasa.dto.Payload;
 import cl.fonasa.dto.Solicitud;
 import cl.fonasa.pdf.GeneradorFilePdf;
 import cl.fonasa.service.SignFileService;
-import cl.fonasa.soa.gestioncertificado.GestionCertificadoRequest;
-import cl.fonasa.soa.gestioncertificado.GestionCertificadoResponse;
-import cl.fonasa.soa.protocolo.HeaderRequest;
-import cl.fonasa.soa.proxy.gestioncertificado_ps.GestionCertificadoBindingQSService;
-import cl.fonasa.soa.proxy.gestioncertificado_ps.GestionCertificadoPortType;
 import cl.fonasa.util.FTP;
 import cl.fonasa.util.Utilidades;
 import sun.misc.BASE64Decoder;
 
 @RestController
-@RequestMapping(path = "/", consumes = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/", consumes =  "application/json; charset=utf-8")
 public class SignDesAtendidaController {
 	static final long ONE_MINUTE_IN_MILLIS=60000;//millisecs
 	private static final Logger log = LoggerFactory.getLogger(SignDesAtendidaController.class);
@@ -94,14 +89,19 @@ public class SignDesAtendidaController {
     private String purposeDesatendido;  
     @Value("${purposeAtendido}")	
     private String purposeAtendido;    
-    @Value("${url.cerrarCaso}")	
+    @Value("${url.cerrarCaso}")	 
     private String urlCerrarCaso;   
     @Value("${ws.genera.codigo.certificadoWSDL}")	
     	    private String certificadoWSDL;   
-	@RequestMapping(value = "fea", produces = MediaType.APPLICATION_JSON_VALUE)
-	public DocumentSign firmaDocumentoDesatendida(@RequestBody(required = true) Solicitud solicitud) {
+	@RequestMapping(value = "fea", consumes  = "application/json; charset=utf-8",produces = "application/json; charset=utf-8")
+	public DocumentSign firmaDocumentoDesatendida(@RequestBody(required = true) Solicitud solicitud)  {
 
+		String text=new String(solicitud.getRespuesta().replaceAll("\u00e1","á"));
+
+		log.info("setRespuesta   \u00e1 á ::"+text );
+		solicitud.setRespuesta(text);
 		String message = "archivo firmado exitosamente ";
+
 		String codigo = "1";
 		long saveDB = 1;
 		FileInputStream fis = null;
@@ -226,31 +226,33 @@ public class SignDesAtendidaController {
 	    
 	public String signFilePdf(String ordinario,Solicitud solicitud, Payload payloads, String clave,String respuesta) throws ParseException, IOException, DocumentException, java.text.ParseException, NoSuchAlgorithmException {
     	Object[] o = null;
+		log.info("entity::" +solicitud.getEntity());
     	if ("".equals(payloads.getEntity().trim()) || payloads.getEntity()==null) {
     		payloads.setEntity(entity);
     	}
-		log.info("entity::" +solicitud.getEntity());
+
     	payloads.setPurpose(solicitud.getPurpose());
 		log.info("entros a signFilePdf ::" );
 		GeneradorFilePdf generadorFilePdf = new GeneradorFilePdf();
 		SignFileService signFileService = new SignFileService();
 		String fileName = "";
 		log.info("getTipo::" +solicitud.getTipo());
-		log.info("clave::" +clave);
-		if ("RECLAMO".equals(solicitud.getTipo().trim().toUpperCase())) {                                         // si es reclamo
+		log.info("RECLAMO::" +solicitud.getTipo().trim().toUpperCase().indexOf("RECLAMO"));
+		if (solicitud.getTipo().trim().toUpperCase().indexOf("RECLAMO")>=0) {                                         // si es reclamo
 			log.info("paso 2::" );
 			fileName = generadorFilePdf.generaFileReclamposPdf(ordinario,solicitud.getNombreSolicitante(),
 				solicitud.getNombreTipificacion(), solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), 
-				respuesta,clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe());
+				respuesta,clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta());
 		}
 		else  {         // si otro tipo de archivo
-			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),
-					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe());
+			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),  // si no es reclamo
+					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta());
 		}
 		log.info("paso 4::" );
+
 		String postEndpoint = firmaDigital;
 		String resultToken = signFileService.getJWTToken(payloads);
-		log.info("resultToken ::" + resultToken);
+		log.info("resultToken 5::"  + resultToken );
 		File file = new File(fileName);
 
 		String fileBase64 = signFileService.encodeFileToBase64Binary(file);
@@ -260,19 +262,56 @@ public class SignDesAtendidaController {
 		json = json + "{\r\n" + "\"content-type\": \"application/pdf\"," + " \r\n" + "\"content\": \"" + fileBase64
 				+ "\" \r\n";
 		json = json + ",	\r\n \"description\": \"str\"," + " \r\n" + "\"checksum\":\""
-				+ signFileService.verifyChecksum(file) + "\" \r\n" + "}\r\n";
+				+ signFileService.verifyChecksum(file) + "\", \r\n";
+
+
+		
+		json = json +"\"layout\":";
+		
+		json = json + "\"<AgileSignerConfig>";
+		json = json + "<Application id=\\\"THIS-CONFIG\\\">";
+		json = json + "<pdfPassword/> " ;
+		json = json + "<Signature>";
+		json = json + "<Visible active=\\\"true\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">";
+
+		if (solicitud.getTipo().trim().toUpperCase().indexOf("RECLAMO")>=0) {  
+			json = json + "<llx>240</llx> ";
+			json = json + "<lly>215</lly> ";
+			json = json + "<urx>350</urx> ";		
+			json = json + "<ury>355</ury> ";
+		} else {
+			json = json + "<llx>280</llx> ";
+			json = json + "<lly>220</lly> ";
+			json = json + "<urx>350</urx> ";
+			json = json + "<ury>400</ury> ";
+		}
+		
+		json = json + "<page>1</page>";
+		json = json + "<image>BASE64</image>";
+		json = json + "<BASE64VALUE>" + solicitud.getImagenFirma() + "</BASE64VALUE>";
+		json = json + "</Visible>";
+		json = json + "</Signature>";
+		json = json + "</Application>";
+		json = json + "</AgileSignerConfig>\"";
+		
+				
+		json = json +  "\r\n}\r\n";	
 		json = json + "\r\n" + "] \r\n" + "}";
 
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(postEndpoint);
 		httpRequest.setHeader("Accept", "application/json");
 		httpRequest.setHeader("Content-type", "application/json");
-		log.info("solicitud.getOtp() ::" + solicitud.getOtp());
+
 		if (solicitud.getOtp().length()>5) {
 			httpRequest.setHeader("otp", solicitud.getOtp());
 		}
+
 		StringEntity stringEntity = new StringEntity(json);
+		stringEntity.setContentType("application/json");
+
 		httpRequest.setEntity(stringEntity);
+		httpRequest.setHeader("Content-type", "application/json");
 		HttpResponse response = httpclient.execute(httpRequest); 
 		if (response.getStatusLine().getStatusCode() != 200) { 
 			throw new RuntimeException(
@@ -289,7 +328,7 @@ public class SignDesAtendidaController {
 		o = ja.toArray();
 		int i = 0;
 		Map o1 = (Map) o[i];
-		log.warn("url ::" + url);
+
 		
 		
 
@@ -466,6 +505,7 @@ public class SignDesAtendidaController {
 			solicitud.setApiToken(apiToken);
 			solicitud.setEntity(institucion);
 			solicitud.setDe( (String)jo.get("nombreFirmante"));
+			solicitud.setImagenFirma((String)jo.get("imagenFirma"));
 
 	    }
 	  

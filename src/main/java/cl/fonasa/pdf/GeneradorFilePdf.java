@@ -27,6 +27,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
 import cl.fonasa.controller.SignDesAtendidaController;
+import cl.fonasa.service.SignFileService;
 import cl.fonasa.util.Utilidades;
 
 
@@ -37,8 +38,10 @@ public class GeneradorFilePdf {
     public static final String FONTBold = "/Font/CalibriBold.ttf";
     public static final String FONTNormal= "/Font/CalibriRegular.ttf";
 	public String generaFileReclamposPdf(String ordinario,String nombreSolicitante, String nombreTipificacion, String problemaSalud,
-			long idCaso, String respuesta, String clave, int ord, String tipo, String de)
+			long idCaso, String respuesta, String clave, int ord, String tipo, String de,String wsdl,String run)
 			throws IOException, DocumentException {
+		
+		log.info("respuesta :: " + respuesta + ".pdf");
 			Date fecha = new Date();
 		 	Font f2 = FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 10); 
 			f2.setFamily("Calibri");
@@ -119,9 +122,19 @@ public class GeneradorFilePdf {
 					paragraFontNormal);
 			paragraphBody.setAlignment(Paragraph.ALIGN_JUSTIFIED);
 			paragraphBody.add(chunkReclamo);
-			
-			
+			PdfPTable tableBody= new PdfPTable(1);
+			tableBody.setWidthPercentage(100);
+			PdfPCell cellBody = new PdfPCell();
+			cellBody.setVerticalAlignment(Element.ALIGN_TOP);
+			cellBody.setHorizontalAlignment(Element.ALIGN_CENTER);
+			cellBody.setBorder(Rectangle.NO_BORDER);
+			cellBody.setFixedHeight(84f);
+			cellBody.addElement(paragraphBody);
+			tableBody.addCell(cellBody);
+
 			//******************************Body Respuesta                ******************************************************
+			cellBody = new PdfPCell();
+			paragraphBody = new Paragraph(13f);
 			Chunk chunkRespuesta = new Chunk(respuesta + "\r\n\n", f2);
 			paragraphBody.add(chunkRespuesta);	
 			Chunk chunkRespuesta2 = new Chunk(
@@ -132,7 +145,13 @@ public class GeneradorFilePdf {
 
 			paragraphBody.add(chunkRespuesta2);
 			paragraphBody.setAlignment(Paragraph.ALIGN_JUSTIFIED);
-			document.add(paragraphBody);
+			cellBody.setVerticalAlignment(Element.ALIGN_TOP);
+			cellBody.setHorizontalAlignment(Element.ALIGN_CENTER);
+			cellBody.addElement(paragraphBody);
+			cellBody.setBorder(Rectangle.NO_BORDER);
+			cellBody.setFixedHeight(84f);
+			tableBody.addCell(cellBody);
+			document.add(tableBody);
 			
 			//******************************Firma                    ******************************************************		
 			
@@ -153,11 +172,7 @@ public class GeneradorFilePdf {
 			PdfPTable tableImgFirma = new PdfPTable(1);
 			tableImgFirma.setTotalWidth(50f);
 			
-			PdfPCell firma = new PdfPCell();
-			firma.setHorizontalAlignment(Element.ALIGN_CENTER);
-			firma.setBorder(Rectangle.NO_BORDER);
-			firma.addElement(paragraphFirma);
-			tableImgFirma.addCell(firma);
+
 			
 			tableImgFirma.setWidthPercentage(100f);
 			PdfPCell image2LeftCell = new PdfPCell();
@@ -166,16 +181,22 @@ public class GeneradorFilePdf {
 
 			image2LeftCell.setBorderColor(BaseColor.BLUE);
 
-			String imagePathFirma = "/imagen/firma.jpg";
-			Image imgFirma = Image.getInstance(GeneradorFilePdf.class.getResource(imagePathFirma));
-			imgFirma.scalePercent(30f);
-			imgFirma.setAlignment(Element.ALIGN_CENTER);
-			image2LeftCell.setImage(imgFirma);
+			//String imagePathFirma = "/imagen/firma.jpg";
+			//Image imgFirma = Image.getInstance(GeneradorFilePdf.class.getResource(imagePathFirma));
+		//	imgFirma.scalePercent(30f);
+		//	imgFirma.setAlignment(Element.ALIGN_CENTER);
+		//	image2LeftCell.setImage(imgFirma);
+			// image2LeftCell = new PdfPCell();
 			image2LeftCell.setVerticalAlignment(Element.ALIGN_BOTTOM);
 			image2LeftCell.setHorizontalAlignment(Element.ALIGN_CENTER);
 			image2LeftCell.setBorder(Rectangle.NO_BORDER);
 			tableImgFirma.addCell(image2LeftCell);
-
+			
+			PdfPCell firma = new PdfPCell();
+			firma.setHorizontalAlignment(Element.ALIGN_CENTER);
+			firma.setBorder(Rectangle.NO_BORDER);
+			firma.addElement(paragraphFirma);
+			tableImgFirma.addCell(firma);
 			document.add(tableImgFirma);
 
 			
@@ -242,11 +263,21 @@ public class GeneradorFilePdf {
 			cellText.addElement(p);
 
 			table3.addCell(cellText);
-			p = new Paragraph("Código Verificación:  6B327D4E-127ED250-E5BF9647-75E196E8\r\n" + "", f7);
+			SignFileService codigoCertificadoUtil = new SignFileService();
+			String codVerificacion="";
+			try {
+				String runSinDv=run.substring(0, run.length()-2) +run.substring(run.length()-1, run.length());
+				codVerificacion = codigoCertificadoUtil.generaCodigoCertificado(runSinDv, "X",
+						"7",wsdl);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				log.error(e.getMessage(),e);;
+			}
+			p = new Paragraph("Código Verificación:" + codVerificacion  + "r\n" + "", f7);
 			cellText = new PdfPCell();
 			cellText.setVerticalAlignment(Element.ALIGN_CENTER);
 			cellText.setBorder(Rectangle.TOP);
-			// cellText.addElement(p);
+			cellText.addElement(p);
 			cellText.setBorder(Rectangle.NO_BORDER);
 			table3.addCell(cellText);
 			document.add(table3);
@@ -266,7 +297,7 @@ public class GeneradorFilePdf {
 	}
 	
 	public String generaFileFelicitacioPdf(String ordinario,String nombreSolicitante, String nombreTipificacion, String problemaSalud,
-			long idCaso, String respuesta, String clave, int ord, String tipo, String de)
+			long idCaso, String respuesta, String clave, int ord, String tipo, String de,String wsdl,String run)
 			throws IOException, DocumentException {
 
 		Date fecha = new Date();
@@ -340,47 +371,64 @@ public class GeneradorFilePdf {
 		f2.setFamily("Calibri");
 		f2.setStyle(Font.BOLD);
 		f2.setSize(10);
-		Chunk chunk2 = new Chunk(respuesta + "\r\n\n", f);
 
-		Chunk chunk3 = new Chunk(
-				"Agradecemos su felicitación, la cual constituye un gran incentivo para continuar trabajando en la mejora constante  de"
-						+ " la calida de atención entregada diariamente a los usuarios a través  de	 nuestro canales  de contacto.",
-				f);
 		Paragraph paragraphLorem4 = new Paragraph(13f);
 		Chunk chunk4 = new Chunk(de + "\r\nJEFA (S) DEPARTAMENTO GESTIÓN CIUDADANA\r\nFONDO NACIONAL DE SALUD", f2);
-		paragraphBody.setAlignment(Paragraph.ALIGN_JUSTIFIED);
 
-		paragraphBody.add(chunk2);
-		paragraphBody.add(chunk3);
+
+		////paragraphBody.add(chunk2);
+	
 		paragraphLorem4.setAlignment(Element.ALIGN_CENTER);
 		paragraphLorem4.add(chunk4);
 
 		paragraphead2.add(chunk01);
-		paragraphBody.setAlignment(Paragraph.ALIGN_JUSTIFIED);
-
 		document.add(paragraphead2);
-		document.add(paragraphBody);
+		
+		
+		PdfPTable tableBody= new PdfPTable(1);
+		tableBody.setWidthPercentage(100);
+		paragraphBody.setAlignment(Paragraph.ALIGN_JUSTIFIED);
+		Chunk chunk3 = new Chunk(
+				respuesta,
+				f);
+		paragraphBody.add(chunk3);
+		paragraphBody.setAlignment(Paragraph.ALIGN_JUSTIFIED);
+		PdfPCell cellBody = new PdfPCell();
+		cellBody.setVerticalAlignment(Element.ALIGN_TOP);
+		cellBody.setHorizontalAlignment(Element.ALIGN_CENTER);
+		cellBody.setBorder(Rectangle.NO_BORDER);
+		cellBody.setFixedHeight(148f);
+		cellBody.addElement(paragraphBody);
+		tableBody.addCell(cellBody);
+
+		document.add(tableBody);
 
 		PdfPTable table = new PdfPTable(1);
 		table.setTotalWidth(50f);
 		PdfPCell image2LeftCell = new PdfPCell();
-		image2LeftCell.setBorder(Rectangle.BOX);
+	
 		image2LeftCell.setFixedHeight(128f);
 
 		image2LeftCell.setBorderColor(BaseColor.BLUE);
 
-		String imagePath = "/imagen/firma.jpg";
+		/*String imagePath = "/imagen/firma.jpg";
 		Image image3 = Image.getInstance(GeneradorFilePdf.class.getResource(imagePath));
 		image3.scalePercent(30f);
 		image3.setAlignment(Element.ALIGN_CENTER);
-		image2LeftCell.setImage(image3);
+		image2LeftCell.setImage(image3);*/
 		image2LeftCell.setVerticalAlignment(Element.ALIGN_BOTTOM);
 		image2LeftCell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		image2LeftCell.setBorder(Rectangle.NO_BORDER);
 		table.addCell(image2LeftCell);
-
+		
+		image2LeftCell = new PdfPCell();
+		image2LeftCell.addElement(paragraphLorem4);
+		image2LeftCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+		image2LeftCell.setBorder(Rectangle.NO_BORDER);
+		table.addCell(image2LeftCell);
 		document.add(table);
-		document.add(paragraphLorem4);
+
+		//document.add(paragraphLorem4);
 
 		Chunk chunkFoot = new Chunk("AYM / pvm   ", f0);
 		Paragraph paragraphFoot = new Paragraph(13f);
@@ -397,6 +445,24 @@ public class GeneradorFilePdf {
 		paragraphFoot.setAlignment(Element.ALIGN_LEFT);
 		cellFoot.setHorizontalAlignment(Element.ALIGN_CENTER);
 		cellFoot.setVerticalAlignment(Element.ALIGN_LEFT);
+		cellFoot.addElement(paragraphFoot);
+		cellFoot.setBorder(Rectangle.NO_BORDER);
+		tableFooter.addCell(cellFoot);
+		SignFileService codigoCertificadoUtil = new SignFileService();
+		String codVerificacion="";
+		try {
+			String runSinDv=run.substring(0, run.length()-2) +run.substring(run.length()-1, run.length());
+			codVerificacion = codigoCertificadoUtil.generaCodigoCertificado(runSinDv, "X",
+					"7",wsdl);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			log.error(e.getMessage(),e);;
+		}
+		cellFoot = new PdfPCell();
+		paragraphFoot=new Paragraph(13f);
+		chunkFoot= new Chunk("\r\n" + codVerificacion +"\r\nCodigo de Verificación " ,f0 );
+		paragraphFoot.add(chunkFoot);
+	  paragraphFoot.setAlignment(Element.ALIGN_CENTER);
 		cellFoot.addElement(paragraphFoot);
 		cellFoot.setBorder(Rectangle.NO_BORDER);
 		tableFooter.addCell(cellFoot);

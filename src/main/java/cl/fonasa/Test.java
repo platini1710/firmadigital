@@ -3,7 +3,6 @@ package cl.fonasa;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
@@ -32,6 +30,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import cl.fonasa.dto.Payload;
 import cl.fonasa.pdf.GeneradorFilePdf;
+import cl.fonasa.service.SignFileService;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -43,7 +42,7 @@ public class Test {
 	private static final Logger log = LoggerFactory.getLogger(Test.class);
     public static final String FONTBold = "/Font/CalibriBold.ttf";
     public static final String FONTNormal= "/Font/CalibriRegular.ttf";
-    public static void main(String[] args) throws DocumentException, MalformedURLException, IOException, org.json.simple.parser.ParseException {
+    public static void main(String[] args) throws Exception {
         String clave  ="xxx";
         long ord= 9339 ;
 
@@ -168,11 +167,7 @@ public class Test {
 		PdfPTable tableImgFirma = new PdfPTable(1);
 		tableImgFirma.setTotalWidth(50f);
 		
-		PdfPCell firma = new PdfPCell();
-		firma.setHorizontalAlignment(Element.ALIGN_CENTER);
-		firma.setBorder(Rectangle.NO_BORDER);
-		firma.addElement(paragraphFirma);
-		tableImgFirma.addCell(firma);
+
 		
 		tableImgFirma.setWidthPercentage(100f);
 		PdfPCell image2LeftCell = new PdfPCell();
@@ -185,12 +180,18 @@ public class Test {
 		Image imgFirma = Image.getInstance(GeneradorFilePdf.class.getResource(imagePathFirma));
 		imgFirma.scalePercent(30f);
 		imgFirma.setAlignment(Element.ALIGN_CENTER);
-		image2LeftCell.setImage(imgFirma);
+	//	image2LeftCell.setImage(imgFirma);
 		image2LeftCell.setVerticalAlignment(Element.ALIGN_BOTTOM);
 		image2LeftCell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		image2LeftCell.setBorder(Rectangle.NO_BORDER);
 		tableImgFirma.addCell(image2LeftCell);
-
+		PdfPCell firma = new PdfPCell();
+		firma.setHorizontalAlignment(Element.ALIGN_CENTER);
+		firma.setBorder(Rectangle.NO_BORDER);
+		firma.addElement(paragraphFirma);
+		
+		
+		tableImgFirma.addCell(firma);
 		document.add(tableImgFirma);
 
 		
@@ -225,15 +226,12 @@ public class Test {
 		paragraphLorem6.add(chunk6);
 		document.add(paragraphLorem6);
 
-		String imagePath2 = "/imagen/imagen.jpg";
-		Image imagenFirma = Image.getInstance(GeneradorFilePdf.class.getResource(imagePath2));
+
+		//Image imagenFirma = Image.getInstance(GeneradorFilePdf.class.getResource(imagePath2));
 		PdfPCell imagenCell = new PdfPCell();
 		imagenCell.setBorder(Rectangle.NO_BORDER);
 		imagenCell.setFixedHeight(10f);
-		imagenFirma.scalePercent(100f);
-		imagenFirma.setWidthPercentage(50f);
-		imagenFirma.setAlignment(Element.ALIGN_LEFT);
-		imagenCell.setImage(imagenFirma);
+
 		imagenCell.setVerticalAlignment(Element.ALIGN_BOTTOM);
 		imagenCell.setHorizontalAlignment(Element.ALIGN_LEFT);
 		imagenCell.setPaddingBottom(5f);
@@ -243,7 +241,7 @@ public class Test {
 		table2.setHorizontalAlignment(Element.ALIGN_LEFT);
 		table2.addCell(imagenCell);
 
-		document.add(table2);
+		//document.add(table2);
 		PdfPTable table3 = new PdfPTable(1);
 		table3.setWidthPercentage(100f);
 		PdfPCell cellText = new PdfPCell();
@@ -257,11 +255,14 @@ public class Test {
 		cellText.addElement(p);
 
 		table3.addCell(cellText);
-		p = new Paragraph("Código Verificación:  6B327D4E-127ED250-E5BF9647-75E196E8\r\n" + "", f7);
+		SignFileService codigoCertificadoUtil = new SignFileService();
+		String codVerificacion = codigoCertificadoUtil.generaCodigoCertificado("115661876", "X",
+				"7","http://fodevotdgen.fonasa.local:10010/GestionCertificadoProject/ProxyServices/gestionCertificado_PS?wsdl");
+		p = new Paragraph("Código Verificación:  \r\n" + "", f7);
 		cellText = new PdfPCell();
 		cellText.setVerticalAlignment(Element.ALIGN_CENTER);
 		cellText.setBorder(Rectangle.TOP);
-		// cellText.addElement(p);
+		 cellText.addElement(p);
 		cellText.setBorder(Rectangle.NO_BORDER);
 		table3.addCell(cellText);
 		document.add(table3);
