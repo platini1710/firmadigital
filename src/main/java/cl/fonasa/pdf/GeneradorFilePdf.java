@@ -40,7 +40,10 @@ public class GeneradorFilePdf {
 	public String generaFileReclamposPdf(String ordinario,String nombreSolicitante, String nombreTipificacion, String problemaSalud,
 			long idCaso, String respuesta, String clave, int ord, String tipo, String de,String wsdl,String run)
 			throws IOException, DocumentException {
-		
+
+		    
+			  byte[] arrayAux = respuesta.getBytes("ISO-8859-1");
+			  respuesta= new String(arrayAux, "UTF-8");
 		log.info("respuesta :: " + respuesta + ".pdf");
 			Date fecha = new Date();
 		 	Font f2 = FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 10); 

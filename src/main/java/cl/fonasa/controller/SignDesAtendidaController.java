@@ -96,10 +96,11 @@ public class SignDesAtendidaController {
 	@RequestMapping(value = "fea", consumes  = "application/json; charset=utf-8",produces = "application/json; charset=utf-8")
 	public DocumentSign firmaDocumentoDesatendida(@RequestBody(required = true) Solicitud solicitud)  {
 
-		String text=new String(solicitud.getRespuesta().replaceAll("\u00e1","á"));
-
-		log.info("setRespuesta   \u00e1 á ::"+text );
-		solicitud.setRespuesta(text);
+		String rawString =solicitud.getRespuesta();
+		byte[] bytes = rawString.getBytes(StandardCharsets.UTF_8);
+		 
+		String utf8EncodedString = new String(bytes, StandardCharsets.UTF_8);
+		log.info("setRespuesta utf8EncodedString ::"+utf8EncodedString );
 		String message = "archivo firmado exitosamente ";
 
 		String codigo = "1";
