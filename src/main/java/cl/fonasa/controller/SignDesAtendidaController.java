@@ -210,7 +210,7 @@ public class SignDesAtendidaController {
 		}else if ("4".equals(codigo)) {
 			message = "fallo la subida de archivo al ftp, no se pudo cerrar en base de Datos ni enviar correo";
 		}else if ("5".equals(codigo)) {
-			message = "fallo el cierre en base de datos,el archivo fue firmado  pero no se pudo enviar el correo";
+			message = "fallo el cierre en base de datos,el archivo fue firmado  y  no se pudo enviar el correo";
 		}else if ("6".equals(codigo)) {
 			message = "fallo el envio de correo , se pudo firmar el archivo y cerrar en base de datos";
 		}
@@ -519,7 +519,7 @@ public class SignDesAtendidaController {
 
 
 
-			httppost.setHeader("Accept", "application/json");
+
 			httppost.setHeader("Content-type", "application/json");
 			String json = "{\r\n" + 
 					"    \"idCaso\":" + idCaso + "\r\n" + 
