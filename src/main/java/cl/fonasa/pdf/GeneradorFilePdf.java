@@ -116,9 +116,9 @@ public class GeneradorFilePdf {
 					"Con motivo de la presentación de su reclamo a través de uno de nuestros canales de contacto, "
 							+ "en el cual  nos señala su molestia por el incumplimiento de " + nombreTipificacion + " del",paragraFontNormal);
 			if (problemaSalud!=null &&	problemaSalud.trim().length()>0)
-				chunkReclamo.append(" problema de salud \"" + problemaSalud + "\", le informo lo siguiente:\r\n\n");
+				chunkReclamo.append(" problema de salud, \"" + problemaSalud + "\", le informo lo siguiente:\r\n\n");
 				else  
-					chunkReclamo.append(" problema de salud , le informo lo siguiente:\r\n\n");
+					chunkReclamo.append(" le informo lo siguiente:\r\n\n");
 			paragraphBody.setAlignment(Paragraph.ALIGN_JUSTIFIED);
 			paragraphBody.add(chunkReclamo);
 			PdfPTable tableBody= new PdfPTable(1);
