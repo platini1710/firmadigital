@@ -26,9 +26,9 @@ import cl.fonasa.pdf.GeneradorFilePdf;
 import cl.fonasa.service.SignFileService;
 
 public class Test2 {
-    public static final String FONTBold = "/Font/CalibriBold.ttf";
-    public static final String FONTNormal= "/Font/CalibriRegular.ttf";
-    
+
+
+    public static final String FONT= "/Font/Calibri-7.ttf";
     public static void main(String[] args) throws DocumentException, MalformedURLException, IOException, org.json.simple.parser.ParseException {
         String clave  ="file2";
         String ord="13779/2020";
@@ -60,12 +60,12 @@ public class Test2 {
 		Paragraph paragraphead = new Paragraph(13f);
 		Paragraph paragraphead2 = new Paragraph(13f);
 		paragraphead.setAlignment(Paragraph.ALIGN_RIGHT);
-		Font f0 = new Font();
-		f0.setFamily("Calibri");
+		Font f0 = FontFactory.getFont(FONT, BaseFont.WINANSI, BaseFont.EMBEDDED, 10); 
+
 		f0.setStyle(Font.BOLD);
 		f0.setSize(8);
-		Font f = new Font();
-		f.setFamily("Calibri");
+		Font f = FontFactory.getFont(FONT, BaseFont.WINANSI, BaseFont.EMBEDDED, 10); 
+
 		f.setStyle(Font.NORMAL);
 		f.setSize(8);
 		/*

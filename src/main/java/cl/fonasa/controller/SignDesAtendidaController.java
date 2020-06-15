@@ -6,12 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,6 +15,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -55,8 +52,8 @@ import cl.fonasa.dto.Payload;
 import cl.fonasa.dto.Solicitud;
 import cl.fonasa.pdf.GeneradorFilePdf;
 import cl.fonasa.service.SignFileService;
-import cl.fonasa.util.FTP;
-import cl.fonasa.util.Utilidades;
+import cl.fonasa.utils.FTP;
+import cl.fonasa.utils.Utilidades;
 import sun.misc.BASE64Decoder;
 
 @RestController
@@ -67,7 +64,7 @@ public class SignDesAtendidaController {
 
     String appName;
 	@Autowired
-	private FTP ftp;
+	private FTP  ftp;
     @Value("${ruta.server.pdf}")
 	private String ruta;
     @Value("${ruta.server.url}")
@@ -93,35 +90,24 @@ public class SignDesAtendidaController {
     private String urlCerrarCaso;   
     @Value("${ws.genera.codigo.certificadoWSDL}")	
     	    private String certificadoWSDL;   
-	@RequestMapping(value = "fea", consumes  = "application/json; charset=utf-8",produces = "application/json; charset=utf-8")
-	public DocumentSign firmaDocumentoDesatendida(@RequestBody(required = true) Solicitud solicitud)  {
+	@RequestMapping(value = "fea", method=RequestMethod.POST,consumes  = "application/json; charset=utf-8",produces = "application/json; charset=utf-8")
+	public DocumentSign firmaDocumentoDesatendida(@Context HttpServletRequest  request ,@RequestBody(required = true) Solicitud solicitud) throws IOException  {
 
-		String text=new String(solicitud.getRespuesta().replaceAll("\u00e1","a"));
 
-		log.info("setRespuesta   \u00e1 á ::"+text );
-		
-		   String output = solicitud.getRespuesta();
-		    for (int i=0; i<solicitud.getRespuesta().length(); i++) {
-		    // Reemplazamos los caracteres especiales.
-		    
-		        output = output.replace(solicitud.getRespuesta().charAt(i), 'á');
 
-		    }
-			log.info("output ::" );
-		solicitud.setRespuesta(text);
 		String message = "archivo firmado exitosamente ";
 
 		String codigo = "1";
 		long saveDB = 1;
 		FileInputStream fis = null;
 		Utilidades util = new Utilidades();
-		log.info("paso 1 ::" );
+
 		String clave = util.retornaAleatorios();
 		if (solicitud.getOtp().length() > 5) {
 			solicitud.setPurpose(purposeAtendido);
 		} else
 			solicitud.setPurpose(purposeDesatendido);
-		log.info("paso 2 ::" );
+
 		try {
 			log.info("paso 3 ::" );
 			getTokenKey(solicitud.getRunUsuarioEjecuta(), solicitud);// fallo obtencion token
@@ -150,7 +136,7 @@ public class SignDesAtendidaController {
 			log.info("ordinario ::" + ordinario);
 			codigo = "3";
 			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta);   //fallo Firma
-			codigo = "0";
+
 
 			fis = new FileInputStream(clave + fileFirmadoDigital);
 			codigo = "4";
@@ -522,21 +508,14 @@ public class SignDesAtendidaController {
 
 			httppost.setHeader("Content-type", "application/json");
 			String json = "{\r\n" + 
-					"    \"idCaso\":" + idCaso + "\r\n" + 
-					",\r\n" + 
-					"    \"mensajes\": [\r\n" + 
-					"        {\r\n" + 
-					"            \"mensaje\": \"string\",\r\n" + 
-					"            \"documentos\": [\r\n" + 
-					"                {\r\n" + 
-					"                    \"nombreArchivo\": \"" +nombreArchivo  + "\",\r\n" + 
-					"                    \"ruta\": \""  +  ruta + "\",\r\n" + 
-					"                    \"extension\": \"" + extension + "\",\r\n" + 
-					"                    \"alias\": \"" +  alias + "\"\r\n" + 
-					"                }\r\n" + 
-					"            ]\r\n" + 
-					"        }\r\n" + 
-					"    ]\r\n" + 
+					"  \"numeroSolicitud\" :" +  idCaso +  ",\r\n" + 
+					"  \"mensaje\" : \"" + alias + "\",\r\n" + 
+					"  \"documentoAdjunto\" : [ {\r\n" + 
+					"    \"nombreArchivo\" : \"" + nombreArchivo  + "\",\r\n" + 
+					"    \"descripcion\" : \"string\",\r\n" + 
+					"    \"path\" : \"" + ruta + "\",\r\n" + 
+					"    \"extension\" : \"" + extension + "\"\r\n" + 
+					"  } ]\r\n" + 
 					"}";
 			log.info("json::: " + json);
 			StringEntity stringEntity = new StringEntity(json);

@@ -10,15 +10,18 @@
 	<groupId>fonasa.cl</groupId>
 	<packaging>war</packaging>
 	<version>1.1</version>
+
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.2.0.RELEASE</version>
-		<relativePath />
+		<groupId>cl.fonasa</groupId>
+		<artifactId>fonasaUploadFiles</artifactId>
+		<version>0.1.1</version>
+
 	</parent>
 	<dependencies>
 
 		<!-- https://mvnrepository.com/artifact/com.itextpdf/itextpdf -->
+<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+
 
 		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
@@ -38,11 +41,7 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-thymeleaf -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
+
 		<!-- spring-boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

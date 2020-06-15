@@ -40,8 +40,7 @@ import io.jsonwebtoken.impl.TextCodec;
 public class Test {
     private  SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 	private static final Logger log = LoggerFactory.getLogger(Test.class);
-    public static final String FONTBold = "/Font/CalibriBold.ttf";
-    public static final String FONTNormal= "/Font/CalibriRegular.ttf";
+    public static final String FONT= "/Font/Calibri-7.ttf";
     public static void main(String[] args) throws Exception {
         String clave  ="xxx";
         long ord= 9339 ;
@@ -54,19 +53,19 @@ public class Test {
         String nombreTipificacion="garantías GES";
         String respuesta="El problema de salud Cáncer de próstata contempla garantías explícitas en salud (GES), según lo estipula el Decreto Supremo Nº 22 vigente desde el 1/10/2019. Cabe señalar que en concordancia con lo señalado en el Artículo 11 de la ley No se entenderá que hay incumplimiento de la Garantía de oportunidad en los casos de fuerza mayor, caso fortuito, causal médica o causa imputable al beneficiario, lo que deberá ser debidamente acreditado por el FONASA. En su caso, la garantía tratamiento quirúrgico se encuentra exceptuado por indicación médica (seguimiento).";
         Date fecha = new Date();
-        Font f2 = FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 12); 
+        Font f2 =  FontFactory.getFont(FONT, BaseFont.WINANSI, BaseFont.EMBEDDED, 10); 
 		f2.setFamily("Calibri");
 
 		f2.setSize(10);
-		Font f5 = FontFactory.getFont(FONTNormal, BaseFont.WINANSI, BaseFont.EMBEDDED, 12); 
+		Font f5 =  new Font();
 		f5.setFamily("Calibri");
 		f5.setStyle(Font.UNDERLINE);
 		f5.setSize(7);
-		Font paragraNegrita =FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 12); 
+		Font paragraNegrita = new Font();
 		paragraNegrita.setFamily("Calibri");
 
 		paragraNegrita.setSize(9);
-		Font paragraFontNormal = FontFactory.getFont(FONTNormal, BaseFont.WINANSI, BaseFont.EMBEDDED, 12); 
+		Font paragraFontNormal =  new Font();
 		paragraFontNormal.setFamily("Calibri");
 		paragraFontNormal.setStyle(Font.NORMAL);
 		paragraFontNormal.setSize(10);

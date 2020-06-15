@@ -11,3 +11,7 @@ cache
 out
 target/
 *.iml
+.project
+.gitignore
+.classpath
+

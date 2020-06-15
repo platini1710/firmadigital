@@ -1,6 +1,5 @@
 package cl.fonasa.pdf;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -8,7 +7,6 @@ import java.util.Date;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
@@ -28,37 +26,33 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import cl.fonasa.controller.SignDesAtendidaController;
 import cl.fonasa.service.SignFileService;
-import cl.fonasa.util.Utilidades;
 
 
 public class GeneradorFilePdf {
 	
 	private static final Logger log = LoggerFactory.getLogger(SignDesAtendidaController.class);
+    public static final String FONT= "/Font/Calibri-7.ttf";
 
-    public static final String FONTBold = "/Font/CalibriBold.ttf";
-    public static final String FONTNormal= "/Font/CalibriRegular.ttf";
 	public String generaFileReclamposPdf(String ordinario,String nombreSolicitante, String nombreTipificacion, String problemaSalud,
 			long idCaso, String respuesta, String clave, int ord, String tipo, String de,String wsdl,String run)
 			throws IOException, DocumentException {
 
-		    
-			  byte[] arrayAux = respuesta.getBytes("ISO-8859-1");
-			  respuesta= new String(arrayAux, "UTF-8");
+
 		log.info("respuesta :: " + respuesta + ".pdf");
 			Date fecha = new Date();
-		 	Font f2 = FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 10); 
+		 	Font f2 =FontFactory.getFont(FONT, BaseFont.CP1252 , BaseFont.EMBEDDED, 107); 
 			f2.setFamily("Calibri");
 			f2.setStyle(Font.BOLD);
 			f2.setSize(10);
-			Font f5 = FontFactory.getFont(FONTNormal, BaseFont.WINANSI, BaseFont.EMBEDDED, 7); 
+			Font f5 = FontFactory.getFont(FONT, BaseFont.CP1252  , BaseFont.EMBEDDED, 7); 
 			f5.setFamily("Calibri");
 			f5.setStyle(Font.UNDERLINE);
 			f5.setSize(7);
-			Font paragraNegrita = FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 9); 
+			Font paragraNegrita =FontFactory.getFont(FONT, BaseFont.CP1252  , BaseFont.EMBEDDED,9);  
 			paragraNegrita.setFamily("Calibri");
 			paragraNegrita.setStyle(Font.BOLD);
 			paragraNegrita.setSize(9);
-			Font paragraFontNormal = FontFactory.getFont(FONTNormal, BaseFont.WINANSI, BaseFont.EMBEDDED, 10); 
+			Font paragraFontNormal = FontFactory.getFont(FONT, BaseFont.CP1252 , BaseFont.EMBEDDED, 10); 
 			paragraFontNormal.setFamily("Calibri");
 			paragraFontNormal.setStyle(Font.NORMAL);
 			paragraFontNormal.setSize(10);
@@ -111,7 +105,7 @@ public class GeneradorFilePdf {
 					"DE : " + de
 							+ "\r\n        JEFA (S) DEPARTAMENTO GESTIÓN CIUDADANA\r\n        FONDO NACIONAL DE SALUD\r\n",
 					paragraNegrita);
-			chunkDE.append("\r\nA : SR. " + nombreSolicitante + "\r\n\r\n");
+			chunkDE.append("\r\nA : SR.(a) " + nombreSolicitante + "\r\n\r\n");
 			paragraphead2.add(chunkDE);
 
 			document.add(paragraphead2);
@@ -120,9 +114,11 @@ public class GeneradorFilePdf {
 			//******************************Body Reclamo                ******************************************************
 			Chunk chunkReclamo = new Chunk(
 					"Con motivo de la presentación de su reclamo a través de uno de nuestros canales de contacto, "
-							+ "en el cual  nos señala su molestia por el incumplimiento de " + nombreTipificacion + " del"
-							+ " problema de salud \"" + problemaSalud + "\", le informo lo siguiente:\r\n\n",
-					paragraFontNormal);
+							+ "en el cual  nos señala su molestia por el incumplimiento de " + nombreTipificacion + " del",paragraFontNormal);
+			if (problemaSalud!=null &&	problemaSalud.trim().length()>0)
+				chunkReclamo.append(" problema de salud \"" + problemaSalud + "\", le informo lo siguiente:\r\n\n");
+				else  
+					chunkReclamo.append(" problema de salud , le informo lo siguiente:\r\n\n");
 			paragraphBody.setAlignment(Paragraph.ALIGN_JUSTIFIED);
 			paragraphBody.add(chunkReclamo);
 			PdfPTable tableBody= new PdfPTable(1);
@@ -292,6 +288,7 @@ public class GeneradorFilePdf {
 			paragraphFirma.add(chunkFirma);
 			document.add(paragraphFirma);
 			document.close();
+			
 			FILE.flush();
 
 		FILE.close();
