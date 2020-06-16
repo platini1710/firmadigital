@@ -102,10 +102,10 @@ public class GeneradorFilePdf {
 			document.add(tableHeadRight);
 			
 			Chunk chunkDE = new Chunk(
-					"DE : " + de
+					"DE : " + de.trim()
 							+ "\r\n        JEFA (S) DEPARTAMENTO GESTIÓN CIUDADANA\r\n        FONDO NACIONAL DE SALUD\r\n",
 					paragraNegrita);
-			chunkDE.append("\r\nA : SR.(a) " + nombreSolicitante + "\r\n\r\n");
+			chunkDE.append("\r\nA : " + nombreSolicitante.trim() + "\r\n\r\n");
 			paragraphead2.add(chunkDE);
 
 			document.add(paragraphead2);
@@ -114,7 +114,7 @@ public class GeneradorFilePdf {
 			//******************************Body Reclamo                ******************************************************
 			Chunk chunkReclamo = new Chunk(
 					"Con motivo de la presentación de su reclamo a través de uno de nuestros canales de contacto, "
-							+ "en el cual  nos señala su molestia por el incumplimiento de " + nombreTipificacion + " del",paragraFontNormal);
+							+ "en el cual  nos señala su molestia por el incumplimiento de " + nombreTipificacion + " ",paragraFontNormal);
 			if (problemaSalud!=null &&	problemaSalud.trim().length()>0)
 				chunkReclamo.append(" problema de salud, \"" + problemaSalud + "\", le informo lo siguiente:\r\n\n");
 				else  

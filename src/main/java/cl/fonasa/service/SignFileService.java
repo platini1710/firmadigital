@@ -5,11 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -17,11 +15,10 @@ import java.util.Map;
 
 import javax.xml.datatype.DatatypeFactory;
 
-import org.json.simple.JSONObject;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cl.fonasa.controller.SignDesAtendidaController;
 import cl.fonasa.dto.Payload;
 import cl.fonasa.soa.gestioncertificado.GestionCertificadoRequest;
 import cl.fonasa.soa.gestioncertificado.GestionCertificadoResponse;
@@ -34,7 +31,6 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
-import org.apache.commons.codec.binary.Base64;
 
 public class SignFileService {
     private  SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;

@@ -8,7 +8,6 @@ import cl.fonasa.utils.FTP;
 
 
 
-
 @Configuration
 public class Config {
 
