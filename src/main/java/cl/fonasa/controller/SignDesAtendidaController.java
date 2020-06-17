@@ -52,8 +52,8 @@ import cl.fonasa.dto.Payload;
 import cl.fonasa.dto.Solicitud;
 import cl.fonasa.pdf.GeneradorFilePdf;
 import cl.fonasa.service.SignFileService;
+import cl.fonasa.util.Utilidades;
 import cl.fonasa.utils.FTP;
-import cl.fonasa.utils.Utilidades;
 import sun.misc.BASE64Decoder;
 
 @RestController
@@ -109,9 +109,9 @@ public class SignDesAtendidaController {
 			solicitud.setPurpose(purposeDesatendido);
 
 		try {
-			log.info("paso 3 ::" );
+
 			getTokenKey(solicitud.getRunUsuarioEjecuta(), solicitud);// fallo obtencion token
-			log.info("paso 4 ::" );
+
 			String respuesta = solicitud.getRespuesta();
 
 			Calendar date = Calendar.getInstance();
@@ -149,10 +149,10 @@ public class SignDesAtendidaController {
 			log.info("ordinario ::" + ordinario);
 			log.info("ruta ::" + solicitud.getPath());
 			codigo = "5";
-			saveDB = grabaOk(solicitud.getIdCaso(), "archivo firmado exitosamente", clave + fileFirmadoDigital,//fallo cierre de caso
+			saveDB = grabaOk(solicitud.getIdCaso(), "Archivo firmado exitosamente", clave + fileFirmadoDigital,//fallo cierre de caso
 					 solicitud.getPath(), "pdf", "solicitudesCiudadanas");
 			codigo = "6";
-				sendEmailWidthFile("adjunto archivo firmado digitalmente", "archivo firmado digitalmente",//fallo envio de correo
+				sendEmailWidthFile("<br><h3> Estimado(a) :"  + solicitud.getNombreSolicitante()  +  " </h3> <br/> </p><br><p>Le informamos que el caso #"  + solicitud.getIdCaso() +   "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>" , "Archivo firmado digitalmente",//fallo envio de correo
 						solicitud.getEmail(), content);
 
 				codigo = "0";
@@ -198,7 +198,7 @@ public class SignDesAtendidaController {
 		}else if ("5".equals(codigo)) {
 			message = "fallo el cierre en base de datos,el archivo fue firmado  y  no se pudo enviar el correo";
 		}else if ("6".equals(codigo)) {
-			message = "fallo el envio de correo , se pudo firmar el archivo y cerrar en base de datos";
+			message = "fallo el envio de correo , se firmó el archivo y se  cerró en base de datos";
 		}
 		
 		DocumentSign documentSign = new DocumentSign();
@@ -332,23 +332,25 @@ public class SignDesAtendidaController {
 	
 		return content;
 	}
-	
+	//http://fosqaotdgen.fonasa.local:10010/ComponenteNotificacion/RS_CorreoConAdjuntosCC/correoConAdjuntosCC
 	public void sendEmailWidthFile(String msg,String asunto,String correo,String content) throws ClientProtocolException, IOException {
-	String json = "{\r\n" + "\"mensaje\": \"" + msg  +  "\",\r\n" + "\"asunto\":\"" + asunto + "\",\r\n"  +
-		  "\"remitente\": \"notificacion@fonasa.cl\" ,\r\n" +
-		  "\"listDestinatarios\" : {" +
-		  "\"destinatario\" : [ \"" + correo + "\"] " +
-		 " }," +
-		 "\"listDestinatariosCC\" : { " +
-		 "\"destinatario\" :  [ \"\" ] " +
-		  "}," +
-		  "\"listAdjuntos\" : {" + 
-		  "\"data\" : [\"" + "solicitudesCiudadanas.pdf" +  content  + "\"] " +
-		 " }"+
-		"}";
+
+	
+	String json = "{\r\n" + 
+			"    \"asunto\": \"" + asunto + "\",\r\n" + 
+			"    \"remitente\": \"NotificacionFonasa@fonasa.cl\",\r\n" + 
+			"    \"destinatarios\": [\r\n" + 
+			"        \""  +  correo +  "\"\r\n" + 
+			"    ],\r\n" + 
+			"    \"destinatariosConCopia\": [],\r\n" + 
+			"    \"destinatariosConCopiaOculta\": [],\r\n" + 
+			"    \"mensaje\": \"" + msg + "\",\r\n" + 
+			"    \"adjuntos\": [\r\n\"solicitudCiudadana.pdf?" + content			 + "\"     ]\r\n" + 
+			"}";
+
 	CloseableHttpClient httpclient = HttpClients.createDefault();
 	HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(urlCorreoAdjunto);
-	
+
 	httpRequest.setHeader("Accept", "application/json");
 	httpRequest.setHeader("Content-type", "application/json");
 	httpRequest.setHeader("Content-Disposition",
