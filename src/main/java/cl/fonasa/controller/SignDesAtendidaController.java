@@ -52,8 +52,8 @@ import cl.fonasa.dto.Payload;
 import cl.fonasa.dto.Solicitud;
 import cl.fonasa.pdf.GeneradorFilePdf;
 import cl.fonasa.service.SignFileService;
-import cl.fonasa.util.Utilidades;
 import cl.fonasa.utils.FTP;
+import cl.fonasa.utils.Utilidades;
 import sun.misc.BASE64Decoder;
 
 @RestController

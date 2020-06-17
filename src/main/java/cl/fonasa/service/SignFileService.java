@@ -25,7 +25,7 @@ import cl.fonasa.soa.gestioncertificado.GestionCertificadoResponse;
 import cl.fonasa.soa.protocolo.HeaderRequest;
 import cl.fonasa.soa.proxy.gestioncertificado_ps.GestionCertificadoBindingQSService;
 import cl.fonasa.soa.proxy.gestioncertificado_ps.GestionCertificadoPortType;
-import cl.fonasa.util.Constantes;
+import cl.fonasa.utils.Constantes;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;

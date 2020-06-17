@@ -1,4 +1,4 @@
-package cl.fonasa.util;
+package cl.fonasa.utils;
 
 public class Constantes {
 
