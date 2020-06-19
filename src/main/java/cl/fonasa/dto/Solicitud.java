@@ -25,6 +25,7 @@ public class Solicitud implements Serializable {
 	private String   apiToken;
 	private String   path;
 	private String   imagenFirma;
+	private int   genero=2;
 	public long getIdCaso() {
 		return idCaso;
 	}
@@ -127,6 +128,12 @@ public class Solicitud implements Serializable {
 	}
 	public void setImagenFirma(String imagenFirma) {
 		this.imagenFirma = imagenFirma;
+	}
+	public int getGenero() {
+		return genero;
+	}
+	public void setGenero(int genero) {
+		this.genero = genero;
 	}
 
 	

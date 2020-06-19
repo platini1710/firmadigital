@@ -34,7 +34,7 @@ public class GeneradorFilePdf {
     public static final String FONT= "/Font/Calibri-7.ttf";
 
 	public String generaFileReclamposPdf(String ordinario,String nombreSolicitante, String nombreTipificacion, String problemaSalud,
-			long idCaso, String respuesta, String clave, int ord, String tipo, String de,String wsdl,String run)
+			long idCaso, String respuesta, String clave, int ord, String tipo, String de,String wsdl,String run,int genero)
 			throws IOException, DocumentException {
 
 
@@ -105,7 +105,13 @@ public class GeneradorFilePdf {
 					"DE : " + de.trim()
 							+ "\r\n        JEFA (S) DEPARTAMENTO GESTIÓN CIUDADANA\r\n        FONDO NACIONAL DE SALUD\r\n",
 					paragraNegrita);
-			chunkDE.append("\r\nA : " + nombreSolicitante.trim() + "\r\n\r\n");
+			if ( genero==1) {
+			chunkDE.append("\r\nA: Sr. " + nombreSolicitante.trim() + "\r\n\r\n");
+			} else if ( genero==2)  {
+				chunkDE.append("\r\nA: Sra. " + nombreSolicitante.trim() + "\r\n\r\n");				
+			} else {
+				chunkDE.append("\r\nA: " + nombreSolicitante.trim() + "\r\n\r\n");				
+			}
 			paragraphead2.add(chunkDE);
 
 			document.add(paragraphead2);
@@ -297,7 +303,7 @@ public class GeneradorFilePdf {
 	}
 	
 	public String generaFileFelicitacioPdf(String ordinario,String nombreSolicitante, String nombreTipificacion, String problemaSalud,
-			long idCaso, String respuesta, String clave, int ord, String tipo, String de,String wsdl,String run)
+			long idCaso, String respuesta, String clave, int ord, String tipo, String de,String wsdl,String run,int genero)
 			throws IOException, DocumentException {
 
 		Date fecha = new Date();
@@ -366,7 +372,14 @@ public class GeneradorFilePdf {
 				"DE : " + de
 						+ "\r\n        JEFA (S) DEPARTAMENTO GESTIÓN CIUDADANA\r\n         FONDO NACIONAL DE SALUD\r\n",
 				f0);
-		chunk01.append("\r\nA : SR. " + nombreSolicitante + "\r\n\r\n");
+		if ( genero==1) {
+			chunk01.append("\r\nA: Sr. " + nombreSolicitante.trim() + "\r\n\r\n");
+		} else if ( genero==2)  {
+			chunk01.append("\r\nA: Sra. " + nombreSolicitante.trim() + "\r\n\r\n");				
+		} else {
+			chunk01.append("\r\nA: " + nombreSolicitante.trim() + "\r\n\r\n");				
+		}
+
 		Font f2 = new Font();
 		f2.setFamily("Calibri");
 		f2.setStyle(Font.BOLD);

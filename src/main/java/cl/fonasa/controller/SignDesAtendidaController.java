@@ -148,13 +148,22 @@ public class SignDesAtendidaController {
 
 			log.info("ordinario ::" + ordinario);
 			log.info("ruta ::" + solicitud.getPath());
+			log.info("getGenero ::" + solicitud.getGenero());
 			codigo = "5";
 			saveDB = grabaOk(solicitud.getIdCaso(), "Archivo firmado exitosamente", clave + fileFirmadoDigital,//fallo cierre de caso
 					 solicitud.getPath(), "pdf", "solicitudesCiudadanas");
 			codigo = "6";
-				sendEmailWidthFile("<br><h3> Estimado(a) :"  + solicitud.getNombreSolicitante()  +  " </h3> <br/> </p><br><p>Le informamos que el caso #"  + solicitud.getIdCaso() +   "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>" , "Archivo firmado digitalmente",//fallo envio de correo
-						solicitud.getEmail(), content);
-
+			if (solicitud.getGenero()==1) {
+				sendEmailWidthFile("<br><h3> Estimado : "  + solicitud.getNombreSolicitante()  +  " </h3> <br/> </p><br><p>Le informamos que el caso #"  + solicitud.getIdCaso() +   "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>" , "Archivo firmado digitalmente",//fallo envio de correo
+						solicitud.getEmail(), content);			
+			} else	if (solicitud.getGenero()==2) {
+				sendEmailWidthFile("<br><h3> Estimada : "  + solicitud.getNombreSolicitante()  +  " </h3> <br/> </p><br><p>Le informamos que el caso #"  + solicitud.getIdCaso() +   "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>" , "Archivo firmado digitalmente",//fallo envio de correo				
+			solicitud.getEmail(), content);
+			} else  {
+				sendEmailWidthFile("<br><h3> "  + solicitud.getNombreSolicitante()  +  "</h3> <br/> </p><br><p>Le informamos que el caso #"  + solicitud.getIdCaso() +   "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>" , "Archivo firmado digitalmente",//fallo envio de correo				
+			solicitud.getEmail(), content);
+			}
+				
 				codigo = "0";
 		} catch (IOException | ParseException | UnsupportedOperationException e) {
 
@@ -224,16 +233,16 @@ public class SignDesAtendidaController {
 		SignFileService signFileService = new SignFileService();
 		String fileName = "";
 		log.info("getTipo::" +solicitud.getTipo());
-		log.info("RECLAMO::" +solicitud.getTipo().trim().toUpperCase().indexOf("RECLAMO"));
+
 		if (solicitud.getTipo().trim().toUpperCase().indexOf("RECLAMO")>=0) {                                         // si es reclamo
 			log.info("paso 2::" );
 			fileName = generadorFilePdf.generaFileReclamposPdf(ordinario,solicitud.getNombreSolicitante(),
 				solicitud.getNombreTipificacion(), solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), 
-				respuesta,clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta());
+				respuesta,clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero());
 		}
 		else  {         // si otro tipo de archivo
 			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),  // si no es reclamo
-					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta());
+					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero());
 		}
 		log.info("paso 4::" );
 
@@ -352,11 +361,12 @@ public class SignDesAtendidaController {
 	HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(urlCorreoAdjunto);
 
 	httpRequest.setHeader("Accept", "application/json");
-	httpRequest.setHeader("Content-type", "application/json");
+	httpRequest.setHeader("Accept-Charset", "charset=UTF-8");
+	httpRequest.setHeader("Content-type", "application/json;charset=UTF-8");
 	httpRequest.setHeader("Content-Disposition",
 			"attachment; filename=" + "document.pdf");
 
-	StringEntity stringEntity = new StringEntity(json);
+	StringEntity stringEntity = new StringEntity(json,"UTF-8");
 	httpRequest.setEntity(stringEntity);
 	HttpResponse response = httpclient.execute(httpRequest);
 	if (response.getStatusLine().getStatusCode() != 200) {
