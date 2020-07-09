@@ -49,6 +49,7 @@ import com.itextpdf.text.DocumentException;
 
 import cl.fonasa.dto.DocumentSign;
 import cl.fonasa.dto.Payload;
+import cl.fonasa.dto.RespuestaOrdinario;
 import cl.fonasa.dto.Solicitud;
 import cl.fonasa.pdf.GeneradorFilePdf;
 import cl.fonasa.service.SignFileService;
@@ -94,9 +95,8 @@ public class SignDesAtendidaController {
 	public DocumentSign firmaDocumentoDesatendida(@Context HttpServletRequest  request ,@RequestBody(required = true) Solicitud solicitud) throws IOException  {
 
 
-
 		String message = "archivo firmado exitosamente ";
-
+		log.info("getDe 1 ::" +solicitud.getDe() );
 		String codigo = "1";
 		long saveDB = 1;
 		FileInputStream fis = null;
@@ -124,18 +124,22 @@ public class SignDesAtendidaController {
 			 * entity=solicitud.getEntity(); } if (!"".equals(solicitud.getPurpose()) ||
 			 * solicitud.getPurpose()!=null) { purpose=solicitud.getPurpose(); }
 			 */
-			log.info("paso 5 ::" );
+
 			Payload payloads = new Payload(solicitud.getRunUsuarioEjecuta(), solicitud.getEntity(),
 					solicitud.getPurpose(), dateTime);
 			String ordinario = "000";
-			log.info("paso 6 ::" );
+
 			codigo = "2";
-			ordinario = getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());// fallo obtencion ordinario
-		
+
+			RespuestaOrdinario respuestaOrdinario= getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());
+			ordinario =respuestaOrdinario.getOrdinario();// fallo obtencion ordinario
+			String parrafoUno =respuestaOrdinario.getParrafoUno();
+			String parrafoDos=respuestaOrdinario.getParrafoDos();
 
 			log.info("ordinario ::" + ordinario);
 			codigo = "3";
-			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta);   //fallo Firma
+			log.info("getIdCaso 5 ::" +solicitud.getIdCaso() );
+			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta,parrafoUno,parrafoDos);   //fallo Firma
 
 
 			fis = new FileInputStream(clave + fileFirmadoDigital);
@@ -220,31 +224,33 @@ public class SignDesAtendidaController {
 
 
 	    
-	public String signFilePdf(String ordinario,Solicitud solicitud, Payload payloads, String clave,String respuesta) throws ParseException, IOException, DocumentException, java.text.ParseException, NoSuchAlgorithmException {
+	public String signFilePdf(String ordinario,Solicitud solicitud, Payload payloads, String clave,String respuesta,String parrafoUno,String parrafoDos) throws ParseException, IOException, DocumentException, java.text.ParseException, NoSuchAlgorithmException {
     	Object[] o = null;
-		log.info("entity::" +solicitud.getEntity());
+
+
     	if ("".equals(payloads.getEntity().trim()) || payloads.getEntity()==null) {
     		payloads.setEntity(entity);
     	}
 
     	payloads.setPurpose(solicitud.getPurpose());
-		log.info("entros a signFilePdf ::" );
+
 		GeneradorFilePdf generadorFilePdf = new GeneradorFilePdf();
 		SignFileService signFileService = new SignFileService();
 		String fileName = "";
 		log.info("getTipo::" +solicitud.getTipo());
 
-		if (solicitud.getTipo().trim().toUpperCase().indexOf("RECLAMO")>=0) {                                         // si es reclamo
-			log.info("paso 2::" );
+			if (solicitud.getTipo().trim().toUpperCase().indexOf("FELICITACI")>=0) {  
+				log.info("FELICITACION ");
+			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),  // si no es reclamo
+					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),parrafoUno,parrafoDos);
+		} else 		 {                                         // si es reclamo
+			log.info("de 2::" + solicitud.getDe());
 			fileName = generadorFilePdf.generaFileReclamposPdf(ordinario,solicitud.getNombreSolicitante(),
 				solicitud.getNombreTipificacion(), solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), 
-				respuesta,clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero());
+				respuesta,clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),parrafoUno,parrafoDos);
 		}
-		else  {         // si otro tipo de archivo
-			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),  // si no es reclamo
-					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero());
-		}
-		log.info("paso 4::" );
+	
+
 
 		String postEndpoint = firmaDigital;
 		String resultToken = signFileService.getJWTToken(payloads);
@@ -269,20 +275,25 @@ public class SignDesAtendidaController {
 		json = json + "<pdfPassword/> " ;
 		json = json + "<Signature>";
 		json = json + "<Visible active=\\\"true\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">";
-
-		if (solicitud.getTipo().trim().toUpperCase().indexOf("RECLAMO")>=0) {  
-			json = json + "<llx>240</llx> ";
+		log.info("paso 4::" );
+		if ((solicitud.getTipo().trim().toUpperCase().indexOf("RECLAMO")>=0) || (solicitud.getTipo().trim().toUpperCase().indexOf("DENUNCIA")>=0) 
+		|| (solicitud.getTipo().trim().toUpperCase().indexOf("SOLICITUD")>=0)) {  
+			json = json + "<llx>210</llx> ";
 			json = json + "<lly>215</lly> ";
 			json = json + "<urx>350</urx> ";		
-			json = json + "<ury>355</ury> ";
+			json = json + "<ury>85</ury> ";
+			json = json + "<page>1</page>";
+			log.info("paso 4xxx::" );
 		} else {
-			json = json + "<llx>280</llx> ";
-			json = json + "<lly>220</lly> ";
+			json = json + "<llx>210</llx> ";
+			json = json + "<lly>215</lly> ";
 			json = json + "<urx>350</urx> ";
-			json = json + "<ury>400</ury> ";
+			json = json + "<ury>85</ury> ";
+			json = json + "<page>1</page>";
+			log.info("paso 5xxx::" );
 		}
 		
-		json = json + "<page>1</page>";
+		
 		json = json + "<image>BASE64</image>";
 		json = json + "<BASE64VALUE>" + solicitud.getImagenFirma() + "</BASE64VALUE>";
 		json = json + "</Visible>";
@@ -384,7 +395,7 @@ public class SignDesAtendidaController {
 	
 	
 	
-	
+	/*
 	
 	  @RequestMapping(value ="/firmarArchivos", method = RequestMethod.POST)
 	    public ModelAndView  subirArchivos(Model model,@RequestParam("uploadingFiles") MultipartFile[] uploadingFiles,
@@ -469,11 +480,11 @@ public class SignDesAtendidaController {
 		    modelAndView.setViewName("home");
 			    return modelAndView;
 	    
-	    }
+	    }*/
 	  
 	  public void getTokenKey(String run, Solicitud solicitud) throws ClientProtocolException, IOException, ParseException, UnsupportedOperationException {
 
-
+			log.info("apiToken::" );
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			String endPoint = urlDatosFirma;
 			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
@@ -484,6 +495,7 @@ public class SignDesAtendidaController {
 			StringEntity stringEntity = new StringEntity(json);
 			httppost.setEntity(stringEntity);
 			HttpResponse response = httpclient.execute(httppost );
+
 			if (response.getStatusLine().getStatusCode() != 200) {
 				throw new RuntimeException(
 						" Failed :  FrontInt_OSB_SolicitudesCiudadanas/RS_ObtenerDatosFirma: " + response.getStatusLine().getStatusCode());
@@ -495,7 +507,7 @@ public class SignDesAtendidaController {
 
 			}
 
-
+			log.info("result::"  + result);
 			Object obj = new JSONParser().parse(result);
 			JSONObject jo = (JSONObject) obj; 
 			String apiToken=(String)jo.get("apiToken");
@@ -552,9 +564,11 @@ public class SignDesAtendidaController {
 		  
 	  }
 	  
-	  public String getOrdinario(String run, long numeroSolicitud) throws ClientProtocolException, IOException, ParseException, UnsupportedOperationException {  
+	  public RespuestaOrdinario getOrdinario(String run, long numeroSolicitud) throws ClientProtocolException, IOException, ParseException, UnsupportedOperationException {  
 	  	  
 		  String ordinario=" ";
+		  String parrafoUno="S/D";
+		  String parrafoDos="S/D";		  
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			String endPoint = urlGeneraOrdinario;
 			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
@@ -589,7 +603,22 @@ log.info("endPoint::: " + endPoint);
 			if (jo.get("ordinario")!=null) {
 				ordinario=(String)jo.get("ordinario");
 				}
-			return ordinario;
+			if (jo.get("parrafoUno")!=null) {
+				parrafoUno=(String)jo.get("parrafoUno");
+				}
+			if (jo.get("parrafoDos")!=null) {
+				parrafoDos=(String)jo.get("parrafoDos");
+				}
+			RespuestaOrdinario respuestaOrdinario=new RespuestaOrdinario();
+			respuestaOrdinario.setOrdinario(ordinario);
+
+			respuestaOrdinario.setParrafoUno(parrafoUno);
+			respuestaOrdinario.setParrafoDos(parrafoDos);
+		//	respuestaOrdinario.setParrafoUno("Con motivo de la presentación de su Denuncia ingresada en uno de nuestros canales de contacto, donde señala que ha detectado malas prácticas de parte de un prestador, informo a usted lo siguiente:");
+		//	respuestaOrdinario.setParrafoDos("En caso de disconformidad con el contenido de esta respuesta, usted podrá solicitar a la Superintendencia de Salud su revisión, debiendo acompañar copia de esta carta y de los antecedentes remitidos por esta institución.");
+			//
+			log.info("parrafoUno::: " + parrafoUno);
+			return respuestaOrdinario;
 		}
 	  
 

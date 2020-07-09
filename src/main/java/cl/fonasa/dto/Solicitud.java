@@ -24,11 +24,14 @@ public class Solicitud implements Serializable {
 	private String   de;
 	private String   apiToken;
 	private String   path;
+	private String   concepto;
+	private String   detalle;
 	private String   imagenFirma;
 	private int   genero=2;
 	public long getIdCaso() {
 		return idCaso;
 	}
+
 	public void setIdCaso(long idCaso) {
 		this.idCaso = idCaso;
 	}
@@ -135,7 +138,18 @@ public class Solicitud implements Serializable {
 	public void setGenero(int genero) {
 		this.genero = genero;
 	}
-
+	public String getConcepto() {
+		return concepto;
+	}
+	public void setConcepto(String concepto) {
+		this.concepto = concepto;
+	}
+	public String getDetalle() {
+		return detalle;
+	}
+	public void setDetalle(String detalle) {
+		this.detalle = detalle;
+	}
 	
 	
 }
