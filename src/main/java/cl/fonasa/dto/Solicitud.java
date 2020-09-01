@@ -27,7 +27,13 @@ public class Solicitud implements Serializable {
 	private String   concepto;
 	private String   detalle;
 	private String   imagenFirma;
+	private int   numeroPaginas;
 	private int   genero=2;
+	private String   ordinario;
+	private Hijos[]   hijos;
+	
+	
+	
 	public long getIdCaso() {
 		return idCaso;
 	}
@@ -150,6 +156,33 @@ public class Solicitud implements Serializable {
 	public void setDetalle(String detalle) {
 		this.detalle = detalle;
 	}
+
+	public int getNumeroPaginas() {
+		return numeroPaginas;
+	}
+
+	public void setNumeroPaginas(int numeroPaginas) {
+		this.numeroPaginas = numeroPaginas;
+	}
+
+	public String getOrdinario() {
+		return ordinario;
+	}
+
+	public void setOrdinario(String ordinario) {
+		this.ordinario = ordinario;
+	}
+
+	public Hijos[] getHijos() {
+		return hijos;
+	}
+
+	public void setHijos(Hijos[] hijos) {
+		this.hijos = hijos;
+	}
+
+
+
 	
 	
 }

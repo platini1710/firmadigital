@@ -204,9 +204,11 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
 
     public void onCloseDocument(PdfWriter writer, Document document) {
 
-        ColumnText.showTextAligned(t, Element.ALIGN_LEFT,
-                new Phrase(""),
-                2, 2, 0);
+        int totalLength = String.valueOf(writer.getPageNumber()).length();
+        int totalWidth = totalLength * 5;
+        ColumnText.showTextAligned(t, Element.ALIGN_RIGHT,
+                new Phrase(String.valueOf(writer.getPageNumber()-1), new Font(Font.FontFamily.HELVETICA, 8)),
+                totalWidth, 6, 0);
 
     }
 }

@@ -12,10 +12,9 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
-
+import org.springframework.web.SpringServletContainerInitializer;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 
@@ -33,23 +32,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.itextpdf.text.DocumentException;
 
 import cl.fonasa.dto.DocumentSign;
+import cl.fonasa.dto.Hijos;
 import cl.fonasa.dto.Payload;
-import cl.fonasa.dto.RespuestaOrdinario;
 import cl.fonasa.dto.Solicitud;
 import cl.fonasa.pdf.GeneradorFilePdf;
 import cl.fonasa.service.SignFileService;
@@ -89,14 +81,17 @@ public class SignDesAtendidaController {
     private String purposeAtendido;    
     @Value("${url.cerrarCaso}")	 
     private String urlCerrarCaso;   
+    @Value("${url.correoZona}")	
+    private String correoZona;  
     @Value("${ws.genera.codigo.certificadoWSDL}")	
     	    private String certificadoWSDL;   
-	@RequestMapping(value = "fea", method=RequestMethod.POST,consumes  = "application/json; charset=utf-8",produces = "application/json; charset=utf-8")
-	public DocumentSign firmaDocumentoDesatendida(@Context HttpServletRequest  request ,@RequestBody(required = true) Solicitud solicitud) throws IOException  {
 
+	@RequestMapping(value = "fea", method = RequestMethod.POST, consumes = "application/json; charset=utf-8", produces = "application/json; charset=utf-8")
+	public DocumentSign firmaDocumentoDesatendida(@Context HttpServletRequest request,
+			@RequestBody(required = true) Solicitud solicitud) throws IOException {
 
 		String message = "archivo firmado exitosamente ";
-		log.info("getDe 1 ::" +solicitud.getDe() );
+
 		String codigo = "1";
 		long saveDB = 1;
 		FileInputStream fis = null;
@@ -109,7 +104,7 @@ public class SignDesAtendidaController {
 			solicitud.setPurpose(purposeDesatendido);
 
 		try {
-
+			codigo = "7";
 			getTokenKey(solicitud.getRunUsuarioEjecuta(), solicitud);// fallo obtencion token
 
 			String respuesta = solicitud.getRespuesta();
@@ -124,51 +119,66 @@ public class SignDesAtendidaController {
 			 * entity=solicitud.getEntity(); } if (!"".equals(solicitud.getPurpose()) ||
 			 * solicitud.getPurpose()!=null) { purpose=solicitud.getPurpose(); }
 			 */
-
+			codigo = "1";
 			Payload payloads = new Payload(solicitud.getRunUsuarioEjecuta(), solicitud.getEntity(),
 					solicitud.getPurpose(), dateTime);
 			String ordinario = "000";
 
 			codigo = "2";
 
-			RespuestaOrdinario respuestaOrdinario= getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());
-			ordinario =respuestaOrdinario.getOrdinario();// fallo obtencion ordinario
-			String parrafoUno =respuestaOrdinario.getParrafoUno();
-			String parrafoDos=respuestaOrdinario.getParrafoDos();
+			if (solicitud.getOrdinario() == null || "".equals(solicitud.getOrdinario().trim())) {
+				// RespuestaOrdinario respuestaOrdinario=
+				// getOrdinario(solicitud.getRunUsuarioEjecuta(), solicitud.getIdCaso());
+				// ordinario =respuestaOrdinario.getOrdinario();// fallo obtencion ordinario
 
-			log.info("ordinario ::" + ordinario);
+			} else {
+
+				ordinario = solicitud.getOrdinario();// fallo obtencion ordinario
+			}
+			// String parrafoUno =respuestaOrdinario.getParrafoUno();
+			// String parrafoDos=respuestaOrdinario.getParrafoDos();
+
 			codigo = "3";
-			log.info("getIdCaso 5 ::" +solicitud.getIdCaso() );
-			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta,parrafoUno,parrafoDos);   //fallo Firma
 
+			String content = signFilePdf(ordinario, solicitud, payloads, clave, respuesta, "", ""); // fallo Firma
 
 			fis = new FileInputStream(clave + fileFirmadoDigital);
 			codigo = "4";
-			ftp.upload(solicitud.getIdCaso(), fis, ruta, solicitud.getPath(), clave + fileFirmadoDigital);//fallo subida FTP archivo 
+			ftp.upload(solicitud.getIdCaso(), fis, ruta, solicitud.getPath(), clave + fileFirmadoDigital);// fallo
+																											// subida
+																											// FTP
+				
+			// archivo
 
 			if (fis != null) {
 				fis.close();
-			}
+			} 
 
-			log.info("ordinario ::" + ordinario);
-			log.info("ruta ::" + solicitud.getPath());
-			log.info("getGenero ::" + solicitud.getGenero());
 			codigo = "5";
-			saveDB = grabaOk(solicitud.getIdCaso(), "Archivo firmado exitosamente", clave + fileFirmadoDigital,//fallo cierre de caso
-					 solicitud.getPath(), "pdf", "solicitudesCiudadanas");
+			saveDB = grabaOk(solicitud.getIdCaso(), "Archivo firmado exitosamente", clave + fileFirmadoDigital, // fallo
+																												// cierre
+																												// de
+																												// caso
+					solicitud.getPath(), "pdf", "solicitudesCiudadanas");
 			codigo = "6";
-			if (solicitud.getGenero()==1) {
-				sendEmailWidthFile("<br><h3> Estimado : "  + solicitud.getNombreSolicitante()  +  " </h3> <br/> </p><br><p>Le informamos que el caso #"  + solicitud.getIdCaso() +   "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>" , "Archivo firmado digitalmente",//fallo envio de correo
-						solicitud.getEmail(), content);			
-			} else	if (solicitud.getGenero()==2) {
-				sendEmailWidthFile("<br><h3> Estimada : "  + solicitud.getNombreSolicitante()  +  " </h3> <br/> </p><br><p>Le informamos que el caso #"  + solicitud.getIdCaso() +   "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>" , "Archivo firmado digitalmente",//fallo envio de correo				
-			solicitud.getEmail(), content);
-			} else  {
-				sendEmailWidthFile("<br><h3> "  + solicitud.getNombreSolicitante()  +  "</h3> <br/> </p><br><p>Le informamos que el caso #"  + solicitud.getIdCaso() +   "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>" , "Archivo firmado digitalmente",//fallo envio de correo				
-			solicitud.getEmail(), content);
-			}
+			try {
+
+			if (solicitud.getHijos() == null || solicitud.getHijos().length == 0 ||  solicitud.getHijos()[0].getCasoHijo()==0 ) {
+				sendCorreo( solicitud, content);
 				
-				codigo = "0";
+			} else {
+				try {
+				sendCorreo2( solicitud, content);
+				}catch(Exception e) {
+					
+					sendCorreo( solicitud, content);
+				}
+			}
+			}catch(Exception e) {
+				
+				sendCorreo( solicitud, content);
+			}
+			codigo = "0";
 		} catch (IOException | ParseException | UnsupportedOperationException e) {
 
 			log.error(e.getMessage(), e);
@@ -176,7 +186,6 @@ public class SignDesAtendidaController {
 		} catch (Exception e) {
 
 			log.error(e.getMessage(), e);
-
 
 		} finally {
 
@@ -201,19 +210,22 @@ public class SignDesAtendidaController {
 		if ("0".equals(codigo)) {
 			message = "Se firmo archivo correctamente , se cerro en base de datos y se envio archivo por correo";
 		} else if ("1".equals(codigo)) {
-			message = "fallo la obtención del token, no se pudo generar archivo firmado ";
-		}else if ("2".equals(codigo)) {
-			message = "fallo la obtención del ordinario, no se pudo generar archivo firmado ";
-		}else if ("3".equals(codigo)) {
-			message = "fallo la firma  , causa posible el OTP";
-		}else if ("4".equals(codigo)) {
-			message = "fallo la subida de archivo al ftp, no se pudo cerrar en base de Datos ni enviar correo";
-		}else if ("5".equals(codigo)) {
-			message = "fallo el cierre en base de datos,el archivo fue firmado  y  no se pudo enviar el correo";
-		}else if ("6".equals(codigo)) {
-			message = "fallo el envio de correo , se firmó el archivo y se  cerró en base de datos";
-		}
-		
+			message = "Fallo la obtención del token, no se pudo generar archivo firmado ";
+		} else if ("2".equals(codigo)) {
+			message = "Fallo la obtención del ordinario, no se pudo generar archivo firmado ";
+		} else if ("3".equals(codigo)) {
+			message = "Fallo la firma, causa posible el OTP  o Html mal formado";
+		} else if ("4".equals(codigo)) {
+			message = "Fallo la subida de archivo al ftp, no se pudo cerrar en base de Datos ni enviar correo";
+		} else if ("5".equals(codigo)) {
+			message = "Fallo el cierre en base de datos,el archivo fue firmado  y  no se pudo enviar el correo";
+		} else if ("6".equals(codigo)) {
+			message = "Fallo el envio de correo , se firmó el archivo y se  cerró en base de datos";
+		} else if ("7".equals(codigo)) {
+			message = "Fallo la obtencion del token, usuario no cuenta con firma digital registrada";
+		} 
+
+
 		DocumentSign documentSign = new DocumentSign();
 		documentSign.setCodigo(codigo);
 		documentSign.setMensaje(message);
@@ -223,9 +235,13 @@ public class SignDesAtendidaController {
 	}
 
 
-	    
+	     
 	public String signFilePdf(String ordinario,Solicitud solicitud, Payload payloads, String clave,String respuesta,String parrafoUno,String parrafoDos) throws ParseException, IOException, DocumentException, java.text.ParseException, NoSuchAlgorithmException {
     	Object[] o = null;
+
+
+
+    	int[] numPage = {2};
 
 
     	if ("".equals(payloads.getEntity().trim()) || payloads.getEntity()==null) {
@@ -237,24 +253,23 @@ public class SignDesAtendidaController {
 		GeneradorFilePdf generadorFilePdf = new GeneradorFilePdf();
 		SignFileService signFileService = new SignFileService();
 		String fileName = "";
-		log.info("getTipo::" +solicitud.getTipo());
 
+		solicitud.setNumeroPaginas(2 );
 			if (solicitud.getTipo().trim().toUpperCase().indexOf("FELICITACI")>=0) {  
-				log.info("FELICITACION ");
-			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),  // si no es reclamo
-					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),parrafoUno,parrafoDos);
-		} else 		 {                                         // si es reclamo
-			log.info("de 2::" + solicitud.getDe());
-			fileName = generadorFilePdf.generaFileReclamposPdf(ordinario,solicitud.getNombreSolicitante(),
-				solicitud.getNombreTipificacion(), solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), 
-				respuesta,clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),parrafoUno,parrafoDos);
-		}
 	
+			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),  // si no es reclamo
+					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),parrafoUno,parrafoDos,numPage);
+		} else 		 {                                         // si es reclamo
+	
+			fileName = generadorFilePdf.generaFileReclamposPdf(solicitud,ordinario,
+				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage);
+		}
+	 
 
 
 		String postEndpoint = firmaDigital;
 		String resultToken = signFileService.getJWTToken(payloads);
-		log.info("resultToken 5::"  + resultToken );
+
 		File file = new File(fileName);
 
 		String fileBase64 = signFileService.encodeFileToBase64Binary(file);
@@ -267,7 +282,7 @@ public class SignDesAtendidaController {
 				+ signFileService.verifyChecksum(file) + "\", \r\n";
 
 
-		
+
 		json = json +"\"layout\":";
 		
 		json = json + "\"<AgileSignerConfig>";
@@ -275,22 +290,21 @@ public class SignDesAtendidaController {
 		json = json + "<pdfPassword/> " ;
 		json = json + "<Signature>";
 		json = json + "<Visible active=\\\"true\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">";
-		log.info("paso 4::" );
-		if ((solicitud.getTipo().trim().toUpperCase().indexOf("RECLAMO")>=0) || (solicitud.getTipo().trim().toUpperCase().indexOf("DENUNCIA")>=0) 
-		|| (solicitud.getTipo().trim().toUpperCase().indexOf("SOLICITUD")>=0)) {  
+		int page =numPage[0]-1;
+		if ((solicitud.getTipo().trim().toUpperCase().indexOf("FELICITACI")>=0) ) {  
 			json = json + "<llx>210</llx> ";
 			json = json + "<lly>215</lly> ";
 			json = json + "<urx>350</urx> ";		
 			json = json + "<ury>85</ury> ";
-			json = json + "<page>1</page>";
-			log.info("paso 4xxx::" );
+			json = json + "<page>" + page +"</page>";
+
 		} else {
 			json = json + "<llx>210</llx> ";
 			json = json + "<lly>215</lly> ";
 			json = json + "<urx>350</urx> ";
 			json = json + "<ury>85</ury> ";
-			json = json + "<page>1</page>";
-			log.info("paso 5xxx::" );
+			json = json + "<page>" + page +"</page>";
+
 		}
 		
 		
@@ -310,9 +324,9 @@ public class SignDesAtendidaController {
 		httpRequest.setHeader("Accept", "application/json");
 		httpRequest.setHeader("Content-type", "application/json");
 
-		if (solicitud.getOtp().length()>5) {
-			httpRequest.setHeader("otp", solicitud.getOtp());
-		}
+
+		httpRequest.setHeader("otp", solicitud.getOtp());
+
 
 		StringEntity stringEntity = new StringEntity(json);
 		stringEntity.setContentType("application/json");
@@ -329,6 +343,7 @@ public class SignDesAtendidaController {
 		while ((output = br.readLine()) != null) {
 			output2 = output2 + output;
 		}
+
 		Object obj = new JSONParser().parse(output2);
 		JSONObject jo = (JSONObject) obj;
 		JSONArray ja = (JSONArray) jo.get("files");
@@ -353,16 +368,25 @@ public class SignDesAtendidaController {
 		return content;
 	}
 	//http://fosqaotdgen.fonasa.local:10010/ComponenteNotificacion/RS_CorreoConAdjuntosCC/correoConAdjuntosCC
-	public void sendEmailWidthFile(String msg,String asunto,String correo,String content) throws ClientProtocolException, IOException {
-
-	
+	public void sendEmailWidthFile(long idCaso,String msg,String asunto,String correo,String content) throws ClientProtocolException, IOException, ParseException {
+		String correoCC="";
+		 log.info("correoCC" + correoCC);
+		try {
+			 correoCC=obtenerCopiaCorreo(idCaso);
+			 log.info("correoCC::::::" + correoCC);
+			 log.info("idCaso::::::" + idCaso);
+		}catch(Exception e) {
+			log.error(e.getMessage(),e );
+		}
+	log.info(" correoCC::" + correoCC);;
 	String json = "{\r\n" + 
 			"    \"asunto\": \"" + asunto + "\",\r\n" + 
 			"    \"remitente\": \"NotificacionFonasa@fonasa.cl\",\r\n" + 
 			"    \"destinatarios\": [\r\n" + 
 			"        \""  +  correo +  "\"\r\n" + 
 			"    ],\r\n" + 
-			"    \"destinatariosConCopia\": [],\r\n" + 
+		    "    \"destinatariosConCopia\":[ \r\n\"" +   correoCC + "\"\r\n" + 
+			"    ],\r\n" + 
 			"    \"destinatariosConCopiaOculta\": [],\r\n" + 
 			"    \"mensaje\": \"" + msg + "\",\r\n" + 
 			"    \"adjuntos\": [\r\n\"solicitudCiudadana.pdf?" + content			 + "\"     ]\r\n" + 
@@ -384,6 +408,50 @@ public class SignDesAtendidaController {
 		throw new RuntimeException(
 				"Failed : al Enviar Correo  error code : " + response.getStatusLine().getStatusCode());
 	}
+	}
+	public String obtenerCopiaCorreo(long numeroSolicitud) throws ClientProtocolException, IOException, ParseException {
+		String correo="";
+		String json = "\r\n" + 
+				"{\r\n" + 
+				"  \"numeroSolicitud\" : " + numeroSolicitud+ "\r\n" + 
+				"\r\n" + 
+				"\r\n" + 
+				"}\r\n" + 
+				"" ;
+
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(correoZona);
+
+		httpRequest.setHeader("Accept", "application/json");
+		httpRequest.setHeader("Accept-Charset", "charset=UTF-8");
+		httpRequest.setHeader("Content-type", "application/json;charset=UTF-8");
+
+
+		StringEntity stringEntity = new StringEntity(json,"UTF-8");
+		httpRequest.setEntity(stringEntity);
+		HttpResponse response = httpclient.execute(httpRequest);
+		if (response.getStatusLine().getStatusCode() != 200) {
+			throw new RuntimeException(
+					"Failed : servicio obtener copia de correo : " + response.getStatusLine().getStatusCode());	
+		
+	}
+		String output, result = "";
+		BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "utf-8"));
+		while ((output = br.readLine()) != null) {
+			result = result + output;
+
+		}
+
+
+		Object obj = new JSONParser().parse(result);
+		JSONObject jo = (JSONObject) obj; 
+		Long codigo=(Long)jo.get("codigo");
+		if (codigo==0) {
+			correo=(String)jo.get("correo");
+
+		}
+		return correo;
+	
 	}
 	
 	
@@ -482,23 +550,23 @@ public class SignDesAtendidaController {
 	    
 	    }*/
 	  
-	  public void getTokenKey(String run, Solicitud solicitud) throws ClientProtocolException, IOException, ParseException, UnsupportedOperationException {
+	  public void getTokenKey(String run, Solicitud solicitud) throws Exception {
 
-			log.info("apiToken::" );
+
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			String endPoint = urlDatosFirma;
 			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
 			httppost.setHeader("Accept", "application/json");
 			httppost.setHeader("Content-type", "application/json");
 			String json = "{\r\n" + "\"run\": \"" + run  + "\"\r\n"  +"}";
-	
+			log.info(" getTokenKey json ::" + json);
 			StringEntity stringEntity = new StringEntity(json);
 			httppost.setEntity(stringEntity);
 			HttpResponse response = httpclient.execute(httppost );
-
 			if (response.getStatusLine().getStatusCode() != 200) {
+
 				throw new RuntimeException(
-						" Failed :  FrontInt_OSB_SolicitudesCiudadanas/RS_ObtenerDatosFirma: " + response.getStatusLine().getStatusCode());
+						" Failed : No existe usuario con firma regisdtrada en database " + response.getStatusLine().getStatusCode());
 			}
 			String output, result = "";
 			BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "utf-8"));
@@ -507,10 +575,13 @@ public class SignDesAtendidaController {
 
 			}
 
-			log.info("result::"  + result);
+
 			Object obj = new JSONParser().parse(result);
 			JSONObject jo = (JSONObject) obj; 
 			String apiToken=(String)jo.get("apiToken");
+			if (apiToken==null) {
+				throw new Exception(" Failed : No existe usuario con firma regisdtrada en database ");
+			}
 			log.info("apiToken::" + apiToken);
 			String institucion=(String)jo.get("institucion");
 			solicitud.setApiToken(apiToken);
@@ -559,67 +630,73 @@ public class SignDesAtendidaController {
 			Object obj = new JSONParser().parse(result);
 			JSONObject jo = (JSONObject) obj; 
 			codigo=(Long)jo.get("codigo");
-
+			log.info("codigo::: " + codigo);
+			log.info("result::: " + result);
 			return codigo;
 		  
 	  }
 	  
-	  public RespuestaOrdinario getOrdinario(String run, long numeroSolicitud) throws ClientProtocolException, IOException, ParseException, UnsupportedOperationException {  
-	  	  
-		  String ordinario=" ";
-		  String parrafoUno="S/D";
-		  String parrafoDos="S/D";		  
-			CloseableHttpClient httpclient = HttpClients.createDefault();
-			String endPoint = urlGeneraOrdinario;
-			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
-log.info("endPoint::: " + endPoint);
-
-
-			httppost.setHeader("Accept", "application/json");
-			httppost.setHeader("Content-type", "application/json");
-			String json = "{\r\n" + "\"runUsuario\": \"" + run  + "\",\r\n "  ;
-			
-			json =json +  "\"numeroSolicitud\" :" + numeroSolicitud +  "\r\n"  ;
-
-			json =json +   "     }";
-			log.info("json::: " + json);
-			StringEntity stringEntity = new StringEntity(json);
-			httppost.setEntity(stringEntity);
-			HttpResponse response = httpclient.execute(httppost );
-			if (response.getStatusLine().getStatusCode() != 200) {
-				throw new RuntimeException(
-						" Failed : HTTP getOrdinario: " + response.getStatusLine().getStatusCode());
-			}
-			String output, result = "";
-			BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "utf-8"));
-			while ((output = br.readLine()) != null) {
-				result = result + output;
-
-			}
-
-			Object obj = new JSONParser().parse(result);
-			JSONObject jo = (JSONObject) obj; 
-
-			if (jo.get("ordinario")!=null) {
-				ordinario=(String)jo.get("ordinario");
-				}
-			if (jo.get("parrafoUno")!=null) {
-				parrafoUno=(String)jo.get("parrafoUno");
-				}
-			if (jo.get("parrafoDos")!=null) {
-				parrafoDos=(String)jo.get("parrafoDos");
-				}
-			RespuestaOrdinario respuestaOrdinario=new RespuestaOrdinario();
-			respuestaOrdinario.setOrdinario(ordinario);
-
-			respuestaOrdinario.setParrafoUno(parrafoUno);
-			respuestaOrdinario.setParrafoDos(parrafoDos);
-		//	respuestaOrdinario.setParrafoUno("Con motivo de la presentación de su Denuncia ingresada en uno de nuestros canales de contacto, donde señala que ha detectado malas prácticas de parte de un prestador, informo a usted lo siguiente:");
-		//	respuestaOrdinario.setParrafoDos("En caso de disconformidad con el contenido de esta respuesta, usted podrá solicitar a la Superintendencia de Salud su revisión, debiendo acompañar copia de esta carta y de los antecedentes remitidos por esta institución.");
-			//
-			log.info("parrafoUno::: " + parrafoUno);
-			return respuestaOrdinario;
+	  public void sendCorreo(Solicitud solicitud,String content) throws ClientProtocolException, IOException, ParseException {
+			if (solicitud.getGenero() == 1) { 
+				sendEmailWidthFile(solicitud.getIdCaso(),
+						"<br><h3> Estimado : " + solicitud.getNombreSolicitante()
+								+ " </h3> <br/> </p><br><p>Le informamos que el caso #" + solicitud.getIdCaso()
+								+ "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>",
+						"Archivo firmado digitalmente", // fallo envio de correo
+						solicitud.getEmail(), content);
+			} else if (solicitud.getGenero() == 2) {
+				sendEmailWidthFile(solicitud.getIdCaso(),
+						"<br><h3> Estimada : " + solicitud.getNombreSolicitante()
+								+ " </h3> <br/> </p><br><p>Le informamos que el caso #" + solicitud.getIdCaso()
+								+ "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>",
+						"Archivo firmado digitalmente", // fallo envio de correo
+						solicitud.getEmail(), content);
+			} else {
+				sendEmailWidthFile(solicitud.getIdCaso(),
+						"<br><h3> " + solicitud.getNombreSolicitante()
+								+ "</h3> <br/> </p><br><p>Le informamos que el caso #" + solicitud.getIdCaso()
+								+ "   ha sido cerrado con la siguiente respuesta en el adjunto del correo. </p>",
+						"Archivo firmado digitalmente", // fallo envio de correo
+						solicitud.getEmail(), content);
 		}
+	  }
 	  
+	  
+	  
+	  public void sendCorreo2(Solicitud solicitud,String content) throws ClientProtocolException, IOException, ParseException {	  
+		
+		Hijos[] inputJson1 = solicitud.getHijos();
+		String hijos = "";
+		for (int i = 0; i < inputJson1.length; i++) {
+			Long s = inputJson1[i].getCasoHijo();
 
+			if (i == 0) {
+				hijos = s.toString();
+
+			} else {
+				hijos = hijos + "," + s.toString();
+			}
+		}
+
+		if (solicitud.getGenero() == 1) {
+
+			sendEmailWidthFile(solicitud.getIdCaso(),"<br><h3> Estimado :" + solicitud.getNombreSolicitante()
+					+ "</h3> <br/> </p><br><p>Le informamos  que los casos #" + solicitud.getIdCaso() + ","
+					+ hijos + " han sido cerrados con la siguiente respuesta en el adjunto del correo. </p>",
+					"Archivo firmado digitalmente", // fallo envio de correo
+					solicitud.getEmail(), content);
+		} else if (solicitud.getGenero() == 2) {
+			sendEmailWidthFile(solicitud.getIdCaso(),"<br><h3> Estimada :" + solicitud.getNombreSolicitante()
+					+ "</h3> <br/> </p><br><p>Le informamos  que los casos #" + solicitud.getIdCaso() + ","
+					+ hijos + " han sido cerrados con la siguiente respuesta en el adjunto del correo. </p>",
+					"Archivo firmado digitalmente", // fallo envio de correo
+					solicitud.getEmail(), content);
+		} else {
+			sendEmailWidthFile(solicitud.getIdCaso(),"<br><h3> " + solicitud.getNombreSolicitante()
+					+ "</h3> <br/> </p><br><p>Le informamos  que los casos #" + solicitud.getIdCaso() + ","
+					+ hijos + " han sido cerrados con la siguiente respuesta en el adjunto del correo. </p>",
+					"Archivo firmado digitalmente", // fallo envio de correo
+					solicitud.getEmail(), content);
+		}
+	  }
 }

@@ -156,7 +156,7 @@ public class HeadFootPdf extends PdfPageEventHelper {
 
             // add current page count
             footer.getDefaultCell().setHorizontalAlignment(Element.ALIGN_RIGHT);
-            Phrase phrase= new Phrase(String.format(" %d / 2             " , (writer.getPageNumber())),f0);
+            Phrase phrase= new Phrase(String.format(" %d              " , (writer.getPageNumber())),f0);
       		PdfPCell imagenCell = new PdfPCell();
       	  Paragraph paragraphLorem4 = new Paragraph(); 
       	paragraphLorem4.add(phrase);
@@ -188,7 +188,7 @@ public class HeadFootPdf extends PdfPageEventHelper {
                 2, 2, 0);
 
     }
-}
+} 
 
 
 
