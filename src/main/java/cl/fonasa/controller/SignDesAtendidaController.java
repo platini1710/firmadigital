@@ -58,8 +58,7 @@ public class SignDesAtendidaController {
     String appName;
 	@Autowired
 	private FTP  ftp;
-    @Value("${ruta.server.pdf}")
-	private String ruta;
+ 
     @Value("${ruta.server.url}")
 	private String url;  
 	private String fileFirmadoDigital="_firmado.pdf";
@@ -132,7 +131,7 @@ public class SignDesAtendidaController {
 				// ordinario =respuestaOrdinario.getOrdinario();// fallo obtencion ordinario
 
 			} else {
-
+				log.info("obtiene ordinario");
 				ordinario = solicitud.getOrdinario();// fallo obtencion ordinario
 			}
 			// String parrafoUno =respuestaOrdinario.getParrafoUno();
@@ -144,9 +143,10 @@ public class SignDesAtendidaController {
 
 			fis = new FileInputStream(clave + fileFirmadoDigital);
 			codigo = "4";
-			ftp.upload(solicitud.getIdCaso(), fis, ruta, solicitud.getPath(), clave + fileFirmadoDigital);// fallo
+			log.info("previo a subir el archivo a servidor FTP" );
+			ftp.upload(solicitud.getIdCaso(), fis, "", solicitud.getPath(), clave + fileFirmadoDigital);// fallo
 																											// subida
-																											// FTP
+			log.info("ya subio al servidor FTP" );																						// FTP
 				
 			// archivo
 
@@ -240,7 +240,7 @@ public class SignDesAtendidaController {
     	Object[] o = null;
 
 
-
+		log.info("manda a firmar documento pdf ");
     	int[] numPage = {2};
 
 
@@ -266,7 +266,7 @@ public class SignDesAtendidaController {
 		}
 	 
 
-
+			log.info("postEndpoint " +firmaDigital);
 		String postEndpoint = firmaDigital;
 		String resultToken = signFileService.getJWTToken(payloads);
 
@@ -333,6 +333,7 @@ public class SignDesAtendidaController {
 
 		httpRequest.setEntity(stringEntity);
 		httpRequest.setHeader("Content-type", "application/json");
+		log.info("previo a firmar documento a url  " +postEndpoint);
 		HttpResponse response = httpclient.execute(httpRequest); 
 		if (response.getStatusLine().getStatusCode() != 200) { 
 			throw new RuntimeException(
@@ -351,7 +352,7 @@ public class SignDesAtendidaController {
 		int i = 0;
 		Map o1 = (Map) o[i];
 
-		
+		log.info("ya se firmo exitosamente  el documento" );
 		
 
 	    String content = (String) o1.get("content");
@@ -385,9 +386,10 @@ public class SignDesAtendidaController {
 			"    \"destinatarios\": [\r\n" + 
 			"        \""  +  correo +  "\"\r\n" + 
 			"    ],\r\n" + 
-		    "    \"destinatariosConCopia\":[ \r\n\"" +   correoCC + "\"\r\n" + 
+		    "    \"destinatariosConCopia\":[" + 
 			"    ],\r\n" + 
-			"    \"destinatariosConCopiaOculta\": [],\r\n" + 
+			"    \"destinatariosConCopiaOculta\":[ \"" +   correoCC +  "\"\r\n" + 
+			"    ],\r\n" + 
 			"    \"mensaje\": \"" + msg + "\",\r\n" + 
 			"    \"adjuntos\": [\r\n\"solicitudCiudadana.pdf?" + content			 + "\"     ]\r\n" + 
 			"}";
@@ -551,7 +553,7 @@ public class SignDesAtendidaController {
 	    }*/
 	  
 	  public void getTokenKey(String run, Solicitud solicitud) throws Exception {
-
+			log.info("obtiene token");
 
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			String endPoint = urlDatosFirma;

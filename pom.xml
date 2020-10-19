@@ -33,11 +33,6 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 
-		<dependency>
-			<groupId>cl.fonasa</groupId>
-			<artifactId>FTP</artifactId>
-			<version>1.1.0.RELEASE</version>
-		</dependency>
 
 
 		<dependency>

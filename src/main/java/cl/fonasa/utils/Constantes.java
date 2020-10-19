@@ -5,7 +5,9 @@ public class Constantes {
     public static final String AUTHORITIES = "authorities";
     public static final String BEARER = "Bearer ";
     public static final String ID_COMPONENTE = "Proxy-Sec-Externo";
-    public static final String SECRET_KEY ="cfb68f6be6764c87aa29d1449d9c15c8";
+	  //  public static final String SECRET_KEY ="cfb68f6be6764c87aa29d1449d9c15c8";//qa
+	  
+public static final String SECRET_KEY ="e54c5738e8eb4973b7628cc9eb3cb37f";// produccion
     public static final int MS_EXPIRACION = 28800_000; // 24 HR
     public static final String HEADER = "Authorization";
     public static final String API_TOKEN = "/security/token";
