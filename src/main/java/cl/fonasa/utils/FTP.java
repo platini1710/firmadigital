@@ -260,7 +260,7 @@ public class FTP
 
       System.out.println("path   ::" + path + "/" + fileName);
 
-        try {
+        try { 
             this.channelSftp.stat(path);
         }
         catch (SftpException se) {
