@@ -16,6 +16,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpATTRS;
 import com.jcraft.jsch.SftpException;
 
 @Component
@@ -35,10 +36,7 @@ public class FTP
     private ChannelSftp channelSftp;
     private static final Log log;
     static  InputStream isFile;
-    static   String filename="180eeaaa833ww0ss1.pdf";
-   static long idCaso=100L;
-   static String ruta="";
-   static String path="/testPrueba";
+
     
     static {
         log = LogFactory.getLog((Class)FTP.class);
@@ -95,22 +93,31 @@ public class FTP
     }
     
     public static void main(String[] args) throws FileNotFoundException {
-        FTP f = new FTP("foprdotdgen.fonasa.local", 7522, "fonresuelve", "Fonasa123.,");
-   
- 
+        FTP f = new FTP("192.168.1.158", 22, "aespinoza", "platini1710");
+        ChannelSftp c = f.getChannelSftp();
+        // c.cd("/fonresuelve");
+        // println c.pwd();
+        // println c.lpwd();
+        // println c.getHome();
+        String testPath = "/fonresuelve/11/1";
+        SftpATTRS attrs;
         try {
-            isFile = new FileInputStream("C:/Users/Agusto/Documents/20200129-IntegracionApiFirmav2.pdf");
-            System.out.println(isFile);
-          
-           f.upload(idCaso, isFile,  ruta,  path,  filename);
-          // f.upload( isFile,  path,  "",  "fileName");
-            f.listFiles("/testPrueba");
-        
-        } catch (Exception e) {
-            log.warn("error SftpException" + e.getMessage());
-            e.printStackTrace();
+          attrs = c.stat(testPath);
+          // println "Directorio existe!";
+
+        } catch (SftpException se) {
+          // println se.id
+          if (se.id == ChannelSftp.SSH_FX_NO_SUCH_FILE) {
+            try {
+              c.mkdir(testPath);
+            } catch (SftpException e) {
+              e.printStackTrace();
+            }
+            // println("Directorio creado");
+            // println c.pwd();
+            // Crear archivo
+          }
         }
-        System.out.println("1 fin");
     }
     
     public ChannelSftp getChannelSftp() {

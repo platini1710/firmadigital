@@ -104,8 +104,8 @@ public class SignDesAtendidaController {
 
 		try {
 			codigo = "7";
-			getTokenKey(solicitud.getRunUsuarioEjecuta(), solicitud);// fallo obtencion token
-
+			getTokenKey(solicitud.getRunUsuarioEjecuta(), solicitud);// fallo obtencion token obtiene datos del firmante
+//obtiene respuetas 
 			String respuesta = solicitud.getRespuesta();
 
 			Calendar date = Calendar.getInstance();
@@ -234,7 +234,15 @@ public class SignDesAtendidaController {
 
 	}
 
-
+/*
+ * genera PDF
+ * 
+ * firma archivo pdf
+ * 
+ * 
+ * 
+ * 
+ */
 	     
 	public String signFilePdf(String ordinario,Solicitud solicitud, Payload payloads, String clave,String respuesta,String parrafoUno,String parrafoDos) throws ParseException, IOException, DocumentException, java.text.ParseException, NoSuchAlgorithmException {
     	Object[] o = null;
@@ -258,11 +266,12 @@ public class SignDesAtendidaController {
 			if (solicitud.getTipo().trim().toUpperCase().indexOf("FELICITACI")>=0) {  
 	
 			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),  // si no es reclamo
-					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),parrafoUno,parrafoDos,numPage);
+					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),
+					parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante());
 		} else 		 {                                         // si es reclamo
 	
 			fileName = generadorFilePdf.generaFileReclamposPdf(solicitud,ordinario,
-				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage);
+				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante());
 		}
 	 
 
@@ -292,17 +301,17 @@ public class SignDesAtendidaController {
 		json = json + "<Visible active=\\\"true\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">";
 		int page =numPage[0]-1;
 		if ((solicitud.getTipo().trim().toUpperCase().indexOf("FELICITACI")>=0) ) {  
-			json = json + "<llx>210</llx> ";
+			json = json + "<llx>250</llx> ";
 			json = json + "<lly>215</lly> ";
-			json = json + "<urx>350</urx> ";		
-			json = json + "<ury>85</ury> ";
+			json = json + "<urx>340</urx> ";		
+			json = json + "<ury>165</ury> ";
 			json = json + "<page>" + page +"</page>";
 
 		} else {
-			json = json + "<llx>210</llx> ";
+			json = json + "<llx>250</llx> ";
 			json = json + "<lly>215</lly> ";
-			json = json + "<urx>350</urx> ";
-			json = json + "<ury>85</ury> ";
+			json = json + "<urx>340</urx> ";
+			json = json + "<ury>165</ury> ";
 			json = json + "<page>" + page +"</page>";
 
 		}
@@ -551,7 +560,18 @@ public class SignDesAtendidaController {
 			    return modelAndView;
 	    
 	    }*/
-	  
+	  /**
+	   *  obtiene datos del firmante
+	   * 
+	   * 
+	   * 
+	   * 
+	   * 
+	   * 
+	   * @param run
+	   * @param solicitud
+	   * @throws Exception
+	   */
 	  public void getTokenKey(String run, Solicitud solicitud) throws Exception {
 			log.info("obtiene token");
 
@@ -590,7 +610,11 @@ public class SignDesAtendidaController {
 			solicitud.setEntity(institucion);
 			solicitud.setDe( (String)jo.get("nombreFirmante"));
 			solicitud.setImagenFirma((String)jo.get("imagenFirma"));
-
+			solicitud.setCargo((String)jo.get("cargo"));
+			solicitud.setInstitucion((String)jo.get("institucion"));
+			solicitud.setDepartamentoFirmante((String)jo.get("departamentoFirmante"));
+			solicitud.setSubDeptoFirmante((String)jo.get("subDeptoFirmante"));
+			solicitud.setDzFirmante((String)jo.get("dzFirmante"));
 	    }
 	  
 	  

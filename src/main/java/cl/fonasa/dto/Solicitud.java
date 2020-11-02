@@ -27,13 +27,15 @@ public class Solicitud implements Serializable {
 	private String   concepto;
 	private String   detalle;
 	private String   imagenFirma;
+	private String   cargo;
 	private int   numeroPaginas;
 	private int   genero=2;
 	private String   ordinario;
+	private String   institucion;
 	private Hijos[]   hijos;
-	
-	
-	
+	private String   dzFirmante;
+	private String  departamentoFirmante;
+	private String  	subDeptoFirmante;
 	public long getIdCaso() {
 		return idCaso;
 	}
@@ -179,6 +181,46 @@ public class Solicitud implements Serializable {
 
 	public void setHijos(Hijos[] hijos) {
 		this.hijos = hijos;
+	}
+
+	public String getCargo() {
+		return cargo;
+	}
+
+	public void setCargo(String cargo) {
+		this.cargo = cargo;
+	}
+
+	public String getInstitucion() {
+		return institucion;
+	}
+
+	public void setInstitucion(String institucion) {
+		this.institucion = institucion;
+	}
+
+	public String getDzFirmante() {
+		return dzFirmante;
+	}
+
+	public void setDzFirmante(String dzFirmante) {
+		this.dzFirmante = dzFirmante;
+	}
+
+	public String getDepartamentoFirmante() {
+		return departamentoFirmante;
+	}
+
+	public void setDepartamentoFirmante(String departamentoFirmante) {
+		this.departamentoFirmante = departamentoFirmante;
+	}
+
+	public String getSubDeptoFirmante() {
+		return subDeptoFirmante;
+	}
+
+	public void setSubDeptoFirmante(String subDeptoFirmante) {
+		this.subDeptoFirmante = subDeptoFirmante;
 	}
 
 

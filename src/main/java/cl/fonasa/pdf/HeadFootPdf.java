@@ -67,7 +67,7 @@ public class HeadFootPdf extends PdfPageEventHelper {
         try {
      
             table.setWidths(new float[]{1, 4, 1});
-            table.setTotalWidth(407);
+            table.setTotalWidth(499);
 
             table.setLockedWidth(true);
             // add image
@@ -123,7 +123,7 @@ public class HeadFootPdf extends PdfPageEventHelper {
     
             text.setBorder(Rectangle.NO_BORDER);
             table.addCell(text);                      
-            table.writeSelectedRows(0, 2, 94, 810, writer.getDirectContent());
+            table.writeSelectedRows(0, 2, 54, 970, writer.getDirectContent());
         } catch (DocumentException de) {
             log.error(de.getMessage(), de);
             throw new ExceptionConverter(de);

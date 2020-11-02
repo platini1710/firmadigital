@@ -36,11 +36,16 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
 	private static final Logger log = LoggerFactory.getLogger(GeneradorFilePdf.class);
     private PdfTemplate t;
     private Image total;
-    
+    private  String   departamentoFirmante;
+    private  String   subDeptoFirmante;
+    private  String   dzFirmante;
+	 public static final String FONT= "/Font/arial.ttf";
 
 
-    public HeadFootOtrosPdf() {
-
+    public HeadFootOtrosPdf(String departamentoFirmante,String subDeptoFirmante,String dzFirmante) {
+    	this.departamentoFirmante=departamentoFirmante;
+    	this.subDeptoFirmante=subDeptoFirmante;
+    	this.dzFirmante=dzFirmante;
     }
     public void onOpenDocument(PdfWriter writer, Document document) {
 
@@ -61,11 +66,13 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
 
     private void addHeader(PdfWriter writer) {
         PdfPTable table = new PdfPTable(3);
+        String division;
         try {
-            Font f0 =FontFactory.getFont(FONTBold, BaseFont.WINANSI, BaseFont.EMBEDDED, 8); 
-            f0.setFamily("Calibri");
-            f0.setStyle(Font.BOLD);
-            f0.setSize(8);
+        	BaseFont bf = BaseFont.createFont(FONT,  BaseFont.CP1257, BaseFont.EMBEDDED);  
+
+     
+        	 Font bfbold =  FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
+        
             table.setWidths(new float[]{1, 4, 1});
             table.setTotalWidth(495);
 
@@ -82,7 +89,7 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
             logoLeftCell.setFixedHeight(68f);
             logoLeftCell.setBorder(Rectangle.NO_BORDER);
             table.addCell(logoLeftCell);
-            // add text
+            // add tex
             PdfPCell text = new PdfPCell();
        
 
@@ -119,10 +126,43 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
             table.addCell(logoLeftCell);
             // write content
 
-            headParaTit = new Paragraph(12);
+            headParaTit = new Paragraph(8);
             headParaTit.setAlignment(Element.ALIGN_LEFT);
-            Chunk chunk0= new Chunk("FONASA NIVEL CENTRAL\r\nDIVISIÓN SERVICIO AL USUARIO\r\nDPTO. GESTIÓN CIUDADANA\r\nSUBDPTO GESTIÓN DE SOLICITUDES CIUDADANAS " ,f0 ) ;  
-            headParaTit.add(chunk0);
+         
+            Paragraph para = new Paragraph (); 
+            para.setFont(bfbold);
+            para.add("FONDO NACIONAL DE SALUD");
+     
+            headParaTit.add(para);
+
+
+            para = new Paragraph (); 
+            para.setFont(bfbold);
+            if ("DZN".equals(dzFirmante.toUpperCase())) {
+            	division="DIRECCIÓN ZONAL NORTE";
+            }else if ("DZCN".equals(dzFirmante.toUpperCase())) {
+            	division="DIRECCIÓN ZONAL CENTRO NORTE" ; 
+            }else if ("DZCS".equals(dzFirmante.toUpperCase())) {
+            	division="DIRECCIÓN ZONAL CENTRO SUR" ; 
+            }
+            else if ("DZS".equals(dzFirmante.toUpperCase())) {
+            	division="DIRECCIÓN ZONAL SUR" ; 
+            } else {
+            	division="DIVISIÓN SERVICIO AL USUARIO" ; 
+            }
+            
+
+            para.add(division);
+            headParaTit.add(para);
+            para = new Paragraph ();  
+            para.setFont(bfbold);
+            para.add(departamentoFirmante.toUpperCase());
+            headParaTit.add(para);
+            para = new Paragraph ();  
+            para.setFont(bfbold);
+            para.add(subDeptoFirmante.toUpperCase());
+            headParaTit.add(para);
+            
             text.setColspan(3);
             text.setVerticalAlignment(Element.ALIGN_TOP);
             text.addElement(headParaTit);
@@ -144,7 +184,7 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
             
             
             
-            table.writeSelectedRows(0, 2, 54, 810, writer.getDirectContent());
+            table.writeSelectedRows(0, 2, 54, 970, writer.getDirectContent());
         } catch (DocumentException de) {
             log.error(de.getMessage(), de);
             throw new ExceptionConverter(de);
