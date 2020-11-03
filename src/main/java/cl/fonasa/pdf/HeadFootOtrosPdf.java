@@ -138,26 +138,39 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
 
             para = new Paragraph (); 
             para.setFont(bfbold);
-            if ("DZN".equals(dzFirmante.toUpperCase())) {
-            	division="DIRECCIÓN ZONAL NORTE";
-            }else if ("DZCN".equals(dzFirmante.toUpperCase())) {
-            	division="DIRECCIÓN ZONAL CENTRO NORTE" ; 
-            }else if ("DZCS".equals(dzFirmante.toUpperCase())) {
-            	division="DIRECCIÓN ZONAL CENTRO SUR" ; 
+            division="DIVISIÓN SERVICIO AL USUARIO" ; 
+            if (dzFirmante!=null) {
+	            if ("DZN".equals(dzFirmante.toUpperCase())) {
+	            	division="DIRECCIÓN ZONAL NORTE";
+	            }else if ("DZCN".equals(dzFirmante.toUpperCase())) {
+	            	division="DIRECCIÓN ZONAL CENTRO NORTE" ; 
+	            }else if ("DZCS".equals(dzFirmante.toUpperCase())) {
+	            	division="DIRECCIÓN ZONAL CENTRO SUR" ; 
+	            }
+	            else if ("DZS".equals(dzFirmante.toUpperCase())) {
+	            	division="DIRECCIÓN ZONAL SUR" ; 
+	            } else {
+	            	division="DIVISIÓN SERVICIO AL USUARIO" ; 
+	            }
             }
-            else if ("DZS".equals(dzFirmante.toUpperCase())) {
-            	division="DIRECCIÓN ZONAL SUR" ; 
-            } else {
-            	division="DIVISIÓN SERVICIO AL USUARIO" ; 
-            }
-            
 
             para.add(division);
             headParaTit.add(para);
             para = new Paragraph ();  
             para.setFont(bfbold);
+            if (departamentoFirmante==null) {
+            		departamentoFirmante=" ";
+            }
+            if (subDeptoFirmante==null) {
+            	if ("NC".equals(dzFirmante.toUpperCase())) {
+            		subDeptoFirmante="SUBDEPTO. GESTIÓN SOLICITUDES CIUDADANAS";
+            	} 
+            	else
+            		subDeptoFirmante=" ";
+        }
             para.add(departamentoFirmante.toUpperCase());
             headParaTit.add(para);
+log.info("departamentoFirmante 	::" + departamentoFirmante);;
             para = new Paragraph ();  
             para.setFont(bfbold);
             para.add(subDeptoFirmante.toUpperCase());

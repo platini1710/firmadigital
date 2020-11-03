@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
@@ -40,6 +41,7 @@ import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
 
@@ -52,7 +54,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
 
 
-public class Test {
+public class Test extends PdfPageEventHelper{
     private  SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 	private static final Logger log = LoggerFactory.getLogger(Test.class);
     public static final String FONT= "/Font/arial.ttf";
@@ -69,8 +71,9 @@ public class Test {
 		String run = "15410549-2";
 		int genero = 1;
 		BaseFont bf = BaseFont.createFont(FONT, BaseFont.CP1257, BaseFont.EMBEDDED);
+		Test test=new Test();
+	
 
-		log.info("de :: " + de + ".pdf");
 		Font fontNormal = new Font(Font.getFamily("Arial"), 12, Font.NORMAL);
 //Font f2= new Font();
 		fontNormal.setFamily("Arial");
@@ -91,7 +94,7 @@ public class Test {
 		Paragraph paragraphFirma = new Paragraph(13f);
 		Chunk chunkFirma;
 		Font bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
-		chunkFirma = new Chunk("Saluda atentamente.,                                                                                          \udddd".toUpperCase(),bfbold);
+		chunkFirma = new Chunk("                                     ".toUpperCase(),bfbold);
 		paragraphFirma.add(chunkFirma);
 		paragraphFirma.add(Chunk.NEWLINE);
 		paragraphFirma.add(Chunk.NEWLINE);
@@ -113,7 +116,7 @@ public class Test {
 				"AUGUSTO ESPINOZA NEIRA\r\nJEFE(A) DEPARTAMENTO GESTIÓN CIUDADANA\r\nFONDO NACIONAL DE SALUD", new Font(bf, 12));
         bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
 		paragraphFirma.add(chunkFirma);
-		log.info("File :: " + clave + ".pdf");
+
 		;
 		Document document ;
 		FileOutputStream FILE = new FileOutputStream(clave + ".pdf");
@@ -125,8 +128,11 @@ public class Test {
 				"\r\n" + 
 				"Fuente: Emol.com - https://www.emol.com/noticias/Autos/2020/10/29/1002177/Auto-volador-certificacion-Europa.html AAAAAAAAAAAA<br/> sdassaddsa" + 
 				"<html>";
-
-			 document = new Document(PageSize.LEGAL, 60, 60, 180, 126);
+		float marginLeft=60f;
+		float marginRight=60f;
+		float marginTop=180f;
+		float marginBottom=116f;
+			 document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
 
 		PdfWriter writer = PdfWriter.getInstance(document, FILE);
 		cl.fonasa.pdf.HeadFootOtrosPdf event = new cl.fonasa.pdf.HeadFootOtrosPdf("saaddas","dsfdsfsd","DZN");
@@ -138,16 +144,9 @@ public class Test {
 		Paragraph paragraphead2 = new Paragraph();
 		paragraphead.setAlignment(Paragraph.ALIGN_RIGHT);
 
-		// ******************************Head
-		// ******************************************************
-
-		// document.add(paragraphead);
 		paragraphead.setAlignment(Element.ALIGN_LEFT);
 		PdfPTable tableHeadRight = new PdfPTable(new float[] { 130F, 190F});
-//	tableHeadRight.setLockedWidth(true);
-	//	tableHeadRight.setWidthPercentage(100f);
 
-		// headParaTit.add(para);
 
 		PdfPCell HeadCellRight1 = new PdfPCell();
 		HeadCellRight1.setBorder(Rectangle.NO_BORDER);
@@ -245,16 +244,23 @@ public class Test {
 
 		respuesta = respuesta.replaceAll("<br>", "<br/>");
 
-		respuesta="Ahora el futurista fffffffffffffffffffffffffffffffffffffffffffffffff    e se pudiera producir un nuevo fracaso para el Gobierno, en caso de que se apruebe el proyecto de ley que permitirá un segundo retiro del 10% de los fondos de las AFP, acordando que serás más bien un traspié para el \"futuro de las pensiones\r\n" + 
-				"\r\n" + 
-				"Fuente: Emol.com - https://www.emol.com/noticias/Nacional/2020/10/29/1002197/Bellolio-por-10.htmlvehículo debe cumplir  vehículo debe cumplir  vehículo debe cumplir  vehículo debe cumplir igual trámite ante las autoridades aeronáuticas de Europa para lograr la certificación que le permita volar de forma legal. Desde 2015, el diseño del PAL-V Liberty ha pasado por la certificación de aviación con la Agencia Europea de Seguridad Aérea (EASA), y se espera su finalización en 2022. Si bien el trámite es complejo, explica el sitio Jalopnik, los encargados del proyecto se benefician de la experiencia de certificación acumulada en el programa de pruebas de vuelo anterior y que fue realizado con el PAL-V Uno. Según se explicó, para ser certificado como una aeronave, el PAL-V Liberty debe ser sometido a más de 1200 informes de revisión, los que finalizan con 150 horas de pruebas de vuelo.\r\n" + 
-				"\r\n" + 
-				"Fuente: Emol.com - https://www.emol.com/noticias/Autos/2020/10/29/1002177/Auto-volador-certificacion-Europa.htmlAhora ccccc el futurista vehículo debe cumplir igual trámite ante las autoridades aeronáuticas de Europa para lograr la certificación que le permita volar de forma legal. Desde 2015, el diseño del PAL-V Liberty ha pasado por la certificación de aviación con la Agencia Europea de Seguridad Aérea (EASA), y se espera su finalización en 2022. Si bien el trámite es complejo, explica el sitio Jalopnik, los encargados del proyecto se benefician de la experiencia de certificación acumulada en el programa de pruebas de vuelo anterior y que fue realizado con el PAL-V Uno. Según se explicó, para ser certificado como una aeronave, el PAL-V Liberty debe ser sometido a más de 1200 informes de revisión, los que finalizan con 150 horas de pruebas de vuelo.\r\n" + 
-				"\r\n" + 
-				"Fuente: Emdos del proyecto se benefician de asadads sasda rrrrrr la experiencia de dddd certificación acumulada XXXX en el  se benefician de la experiencia de certificación acumulada zzzz\r\n" + 
-				"\r\n" + 
-				"Fuent" + 
-				"";
+		respuesta="<table> <tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+
+	
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+				 "<tr> <td> asdsaddas</td></tr> <tr> <td> dsdfsdfdsf</td></tr>  " +
+								
+		 "</table>  " ;
+				
 	//	log.info("respuesta :::" + respuesta);
 		respuesta = "<html>	<style>\r\n" + "			h1 {\r\n" + "			font-size: 40px; " + "			}\r\n"
 				+ "			\r\n " + "			p {\r\n" + "  font-family: \"Arial\" "
@@ -262,46 +268,35 @@ public class Test {
 
 				"			}\r\n "
 				+ "	table, th, td {border:1px solid black;\r\n font-family: \"Arial\";font-size: 12pt; width:100%; border-collapse: collapse;}		</style> +<body><p style=\"text-align: justify;\">" + respuesta + "</p></body></html>";
-		log.info("respuesta xxxxxxxxxxxxxxxx:::" + respuesta.length());
-		log.info("respuesta xxxxxxxxxxxxxxxx:::" + respuesta);
+		
+
+
 		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
-		if (respuesta.length()>2560 && writer.getPageNumber()==1)
-		document.newPage();
-	
-		System.out.println( writer.getPageNumber());
-		// ******************************Firma
-		// ******************************************************
 
-		// document.add(paragraphFirma);
+		if (	writer.getPageNumber()==test.cantidaPage1(respuesta, marginLeft, marginRight, marginTop, marginBottom) && test.cantidaPage1(respuesta, marginLeft, marginRight, marginTop, marginBottom) ==(test.cantidaPage2(respuesta, marginLeft, marginRight, marginTop)-1) ) {
+			log.info("entro  entro :: " + clave + ".pdf");
+			document.newPage();
+		}
 
-		// ******************************Firma footer
-		// ******************************************************
-
-		PdfPTable tableImgFirma = new PdfPTable(1);
-		tableImgFirma.setTotalWidth(50f);
-
-		tableImgFirma.setWidthPercentage(100f);
-		PdfPCell image2LeftCell = new PdfPCell();
-		image2LeftCell.setBorder(Rectangle.NO_BORDER);
-		image2LeftCell.setFixedHeight(128f);
-
-		image2LeftCell.setBorderColor(BaseColor.BLUE);
-
-		// String imagePathFirma = "/imagen/firma.jpg";
-		// Image imgFirma =
-		// Image.getInstance(GeneradorFilePdf.class.getResource(imagePathFirma));
-//	imgFirma.scalePercent(30f);
-//	imgFirma.setAlignment(Element.ALIGN_CENTER);
-//	image2LeftCell.setImage(imgFirma);
-		// image2LeftCell = new PdfPCell();
 
 
 		PdfContentByte cb = writer.getDirectContent();
 		ColumnText ct = new ColumnText(cb);
 		Phrase myText = new Phrase(paragraphFirma);
+		
 		ct.setSimpleColumn(myText, 30, -750,  580, 250,  15, Element.ALIGN_CENTER);
 		ct.go();
+		
+		 cb = writer.getDirectContent();
+		 ct = new ColumnText(cb);
+			chunkFirma = new Chunk("        Saluda atentamente.,".toUpperCase(),bfbold);
+		 myText = new Phrase(chunkFirma);
+		
+		ct.setSimpleColumn(myText, 30, -750,  580, 250,  15, Element.ALIGN_LEFT);
+		ct.go();
+		
+		
 		// ******************************newPage
 		// ******************************************************
 		document.newPage();
@@ -573,4 +568,331 @@ public class Test {
 			}
 			return respuesta;
 		}
+	
+	public int cantidaPage1(String respuesta,float marginLeft,float  marginRight,float  marginTop, float marginBottom ) throws DocumentException, IOException {
+
+		Date fecha = new Date();
+		String clave = "yyy";
+		String ordinario = "ORD-251";
+		String idCaso = "100293";
+		String tipo = "Felicitaciones".toUpperCase();
+		String nombreSolicitante = "ASTRID VALERIA YÁÑEZ BASAURE";
+		String de = "LUISAHNA VELANDIA";
+		String run = "15410549-2";
+		int genero = 1;
+		BaseFont bf = BaseFont.createFont(FONT, BaseFont.CP1257, BaseFont.EMBEDDED);
+int numeroPagina=0;
+
+		Font fontNormal = new Font(Font.getFamily("Arial"), 12, Font.NORMAL);
+//Font f2= new Font();
+		fontNormal.setFamily("Arial");
+		fontNormal.setStyle(Font.NORMAL);
+		fontNormal.setSize(8);
+		Font fontNormalUnderline = new Font();
+		fontNormalUnderline.setFamily("Arial");
+		fontNormalUnderline.setStyle(Font.UNDERLINE);
+		fontNormalUnderline.setSize(12);
+		Font paragraNegrita = new Font();
+		paragraNegrita.setFamily("Arial");
+		paragraNegrita.setStyle(Font.NORMAL);
+		paragraNegrita.setSize(12);
+		Font paragraFontNormal = new Font();
+		paragraFontNormal.setFamily("Arial");
+		paragraFontNormal.setStyle(Font.NORMAL);
+		paragraFontNormal.setSize(12);
+		Paragraph paragraphFirma = new Paragraph(13f);
+		Chunk chunkFirma;
+		Font bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
+		chunkFirma = new Chunk("Saluda atentamente.,                                                                                          \udddd".toUpperCase(),bfbold);
+		paragraphFirma.add(chunkFirma);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+
+		 chunkFirma =  new Chunk("SR(A)." + de, new Font(bf, 12));
+		paragraphFirma.add(chunkFirma);
+		paragraphFirma.setAlignment(Element.ALIGN_CENTER);
+
+
+		
+		chunkFirma = new Chunk(
+				"AUGUSTO ESPINOZA NEIRA\r\nJEFE(A) DEPARTAMENTO GESTIÓN CIUDADANA\r\nFONDO NACIONAL DE SALUD", new Font(bf, 12));
+        bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
+		paragraphFirma.add(chunkFirma);
+
+		Document document ;
+		FileOutputStream FILE = new FileOutputStream(clave + ".pdf");
+
+
+			 document = new Document(PageSize.LEGAL, marginLeft,marginRight,marginTop,marginBottom);
+
+		PdfWriter writer = PdfWriter.getInstance(document, FILE);
+		cl.fonasa.pdf.HeadFootOtrosPdf event = new cl.fonasa.pdf.HeadFootOtrosPdf("saaddas","dsfdsfsd","DZN");
+		writer.setPageEvent(event);
+		document.open();
+
+
+	
+
+		respuesta="Ahora el futurista  no, en caso de que se apruebe el proyecto de ley que permitirá un segundo retiro del 10% de los fondos de las AFP, acordando que serás más bien un traspié para el \"futuro de las pensiones\r\n" + 
+				"\r\n" + 
+				"Fuente: Emol.com - https://www.emol.com/noticias/Nacional/2020/10/29/1002197/Bellolio-por-10.htmlvehículo debe cumplir  vehículo debe cumplir  vehículo debe cumplir  vehículo debe cumplir igual trámite ante las autoridades aeronáuticas de Europa para lograr la certificación que le permita volar de forma legal. Desde 2015, el diseño del PAL-V Liberty ha pasado por la certificación de aviación con la Agencia Europea de Seguridad Aérea (EASA), y se espera su finalización en 2022. Si bien el trámite es complejo, explica el sitio Jalopnik, los encargados del proyecto se benefician de la experiencia de certificación acumulada en el programa de pruebas de vuelo anterior y que fue realizado con el PAL-V Uno. Según se explicó, para ser certificado como una aeronave, el PAL-V Liberty debe ser sometido a más de 1200 informes de revisión, los que finalizan con 150 horas de pruebas de vuelo.\r\n" + 
+				"\r\n" + 
+				"Fuente: mlAhora ccccc el futurista vehículo debe cumplir igual trámite ante las autoridades aeronáuticas de Europa para lograr la certificación que le permita volar de forma legal. Desde 2015, el diseño del PAL-V Liberty ha pasado por la certificación de aviación con la Agencia Europea de Seguridad Aérea (EASA), y se espera su finalización en 2022. Si bien el trámite es complejo, explica el sitio Jalopnik, los encargados del proyecto se benefician de la experiencia de certificación acumulada en el programa de pruebas de vuelo anterior y que fue realizado con el PAL-V Uno. Según se explicó, para ser certificado como una aeronave, el PAL-V Liberty debe ser sometido a más de 1200 informes de revisión, los que finalizan con 150 horas de pruebas de vuelo.\r\n" + 
+				"\r\n" + 
+				"Fuente: Emdos del proyecto Indicó que el hombre \"se identificó como teniente coronel del Ejército en retiro\", mientras que las víctimas son dos jóvenes. No hubo disparos ni personas lesionadas a raíz del incident\r\n" + 
+				"\r\n" + 
+				"Fuente: Emol.com - https://www.emol.com/noticias/Nacional/2020/11/02/1002496/Militar-retiro-amenazo-vecinos-arma.htmlse benefician de asadads sasda rrrrrr la experiencia de dddd certificación acumulada XXXX en el  se benefician de la experiencia de certificación acumulada zzzz\r\n" + 
+				"\r\n" + 
+				"Fuent Ahora el futurista   Indicó que el hombre \"se identificó como teniente coronel del Ejército en retiro\", mientras que las víctimas son dos jóvenes. No hubo disparos ni personas lesionadas a raíz del incident\r\n" + 
+				"\r\n" + 
+				"Fuente: Emol.com - https://www.emol.com/noticias/Nacional/2020/11/02/1002496/Militar-retiro-amenazo-vecinos-arma.html Ahora el futurista fffffffffffffffffffffffffffffffffffffffffffffffff   Ahora el futurista fffffffffffffffffffffffffffffffffffffffffffffffff   " + 
+				"";
+	//	log.info("respuesta :::" + respuesta);
+		respuesta = "<html>	<style>\r\n" + "			h1 {\r\n" + "			font-size: 40px; " + "			}\r\n"
+				+ "			\r\n " + "			p {\r\n" + "  font-family: \"Arial\" "
+				+ "			   font-size:12px;\r\n" +
+
+				"			}\r\n "
+				+ "	table, th, td {border:1px solid black;\r\n font-family: \"Arial\";font-size: 12pt; width:100%; border-collapse: collapse;}		</style> +<body><p style=\"text-align: justify;\">" + respuesta + "</p></body></html>";
+		
+
+
+		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
+		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
+		numeroPagina=writer.getPageNumber();
+
+		
+
+		document.close();
+
+		FILE.flush();
+
+		FILE.close();
+		document.close();
+		FILE.flush();
+		FILE.close();
+		return numeroPagina;
+	}
+	
+	
+	public int cantidaPage2(String respuesta ,float  marginLeft,float marginRight,float marginTop) throws DocumentException, IOException {
+
+		Date fecha = new Date();
+		String clave = "zzz";
+		String ordinario = "ORD-251";
+		String idCaso = "100293";
+		String tipo = "Felicitaciones".toUpperCase();
+		String nombreSolicitante = "ASTRID VALERIA YÁÑEZ BASAURE";
+		String de = "LUISAHNA VELANDIA";
+		String run = "15410549-2";
+		int genero = 1;
+		BaseFont bf = BaseFont.createFont(FONT, BaseFont.CP1257, BaseFont.EMBEDDED);
+int numeroPagina=0;
+
+		Font fontNormal = new Font(Font.getFamily("Arial"), 12, Font.NORMAL);
+//Font f2= new Font();
+		fontNormal.setFamily("Arial");
+		fontNormal.setStyle(Font.NORMAL);
+		fontNormal.setSize(8);
+		Font fontNormalUnderline = new Font();
+		fontNormalUnderline.setFamily("Arial");
+		fontNormalUnderline.setStyle(Font.UNDERLINE);
+		fontNormalUnderline.setSize(12);
+		Font paragraNegrita = new Font();
+		paragraNegrita.setFamily("Arial");
+		paragraNegrita.setStyle(Font.NORMAL);
+		paragraNegrita.setSize(12);
+		Font paragraFontNormal = new Font();
+		paragraFontNormal.setFamily("Arial");
+		paragraFontNormal.setStyle(Font.NORMAL);
+		paragraFontNormal.setSize(12);
+		Paragraph paragraphFirma = new Paragraph(13f);
+
+		Chunk chunkFirma;
+		Font bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
+		chunkFirma = new Chunk("Saluda atentamente.,                                                                                          \udddd".toUpperCase(),bfbold);
+		paragraphFirma.add(chunkFirma);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+		paragraphFirma.add(Chunk.NEWLINE);
+
+		 chunkFirma =  new Chunk("SR(A)." + de, new Font(bf, 12));
+		paragraphFirma.add(chunkFirma);
+		paragraphFirma.setAlignment(Element.ALIGN_CENTER);
+;
+
+		
+		chunkFirma = new Chunk(
+				"AUGUSTO ESPINOZA NEIRA\r\nJEFE(A) DEPARTAMENTO GESTIÓN CIUDADANA\r\nFONDO NACIONAL DE SALUD", new Font(bf, 12));
+        bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
+		paragraphFirma.add(chunkFirma);
+
+		
+		Document document ;
+		FileOutputStream FILE = new FileOutputStream(clave + ".pdf");
+		Rectangle two = new Rectangle(200,200);
+
+
+			 document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, 56);
+
+		PdfWriter writer = PdfWriter.getInstance(document, FILE);
+		cl.fonasa.pdf.HeadFootOtrosPdf event = new cl.fonasa.pdf.HeadFootOtrosPdf("saaddas","dsfdsfsd","DZN");
+		writer.setPageEvent(event);
+		document.open();
+
+		Paragraph paragraphBody = new Paragraph(13f);
+		Paragraph paragraphead = new Paragraph(25f);
+		Paragraph paragraphead2 = new Paragraph();
+		paragraphead.setAlignment(Paragraph.ALIGN_RIGHT);
+
+		// ******************************Head
+		// ******************************************************
+
+		// document.add(paragraphead);
+		paragraphead.setAlignment(Element.ALIGN_LEFT);
+		PdfPTable tableHeadRight = new PdfPTable(new float[] { 130F, 190F});
+//	tableHeadRight.setLockedWidth(true);
+	//	tableHeadRight.setWidthPercentage(100f);
+
+		// headParaTit.add(para);
+
+		PdfPCell HeadCellRight1 = new PdfPCell();
+		HeadCellRight1.setBorder(Rectangle.NO_BORDER);
+
+		HeadCellRight1.setFixedHeight(80f);
+		tableHeadRight.addCell(HeadCellRight1);
+
+		HeadCellRight1 = new PdfPCell();
+		HeadCellRight1.setPaddingTop(0f);
+		HeadCellRight1.setHorizontalAlignment(Element.ALIGN_LEFT);
+		HeadCellRight1.setBorder(Rectangle.NO_BORDER);
+		Paragraph para = new Paragraph();
+		para.setFont(bfbold);
+		para.add("ORD. N° ");
+		para.setFont(new Font(bf, 12));
+
+		para.add(ordinario );
+		HeadCellRight1.addElement(para);
+		para = new Paragraph();
+		para.setFont(bfbold);
+		para.add("ANT.: FOLIO N° ");
+		para.setAlignment(Element.ALIGN_LEFT);
+		para.setFont(new Font(bf, 12));
+		para.add(idCaso );
+		HeadCellRight1.addElement(para);
+		
+		para = new Paragraph();
+		para.setFont(bfbold);
+		para.add("MAT.: RESPUESTA A  ");
+		para.setAlignment(Element.ALIGN_LEFT);
+		para.setFont(new Font(bf, 12));
+		para.add(tipo );
+		HeadCellRight1.addElement(para);
+		
+		para = new Paragraph();
+		para.setFont(bfbold);
+		para.add("SANTIAGO ");
+		para.setAlignment(Element.ALIGN_LEFT);
+		para.setFont(new Font(bf, 12));
+		para.add( new SimpleDateFormat("dd/MM/yyyy").format(fecha));
+		HeadCellRight1.addElement(para);
+		
+		HeadCellRight1.setHorizontalAlignment(Element.ALIGN_LEFT);
+		HeadCellRight1.setVerticalAlignment(Element.ALIGN_TOP);
+
+		HeadCellRight1.setFixedHeight(80f);
+		tableHeadRight.addCell(HeadCellRight1);
+
+		document.add(tableHeadRight);
+
+		Chunk chunkDE = new Chunk(
+				"DE : " + de.trim()
+						+ "\r\n        JEFE(A) DEPARTAMENTO GESTIÓN CIUDADANA\r\n        FONDO NACIONAL DE SALUD\r\n",
+				new Font(bf, 12));
+		if (genero == 1) {
+			chunkDE.append("\r\nA: Sr. " + nombreSolicitante.trim() + "\r\n\r\n");
+		} else if (genero == 2) {
+			chunkDE.append("\r\nA: Sra. " + nombreSolicitante.trim() + "\r\n\r\n");
+		} else {
+			chunkDE.append("\r\nA: " + nombreSolicitante.trim() + "\r\n\r\n");
+		}
+		paragraphead2.add(chunkDE);
+
+		document.add(paragraphead2);
+
+	
+
+
+	//	log.info("respuesta :::" + respuesta);
+		respuesta = "<html>	<style>\r\n" + "			h1 {\r\n" + "			font-size: 40px; " + "			}\r\n"
+				+ "			\r\n " + "			p {\r\n" + "  font-family: \"Arial\" "
+				+ "			   font-size:12px;\r\n" +
+
+				"			}\r\n "
+				+ "	table, th, td {border:1px solid black;\r\n font-family: \"Arial\";font-size: 12pt; width:100%; border-collapse: collapse;}		</style> +<body><p style=\"text-align: justify;\">" + respuesta + "</p></body></html>";
+		
+
+		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
+		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
+	
+
+
+		// ******************************Firma
+		// ******************************************************
+
+		// document.add(paragraphFirma);
+
+		// ******************************Firma footer
+		// ******************************************************
+
+		PdfPTable tableImgFirma = new PdfPTable(1);
+		tableImgFirma.setTotalWidth(50f);
+
+		tableImgFirma.setWidthPercentage(100f);
+		PdfPCell image2LeftCell = new PdfPCell();
+		image2LeftCell.setBorder(Rectangle.NO_BORDER);
+		image2LeftCell.setFixedHeight(128f);
+
+		image2LeftCell.setBorderColor(BaseColor.BLUE);
+
+
+
+
+		PdfContentByte cb = writer.getDirectContent();
+		ColumnText ct = new ColumnText(cb);
+		Phrase myText = new Phrase(paragraphFirma);
+		ct.setSimpleColumn(myText, 0, -750,  580, 250,  15, Element.ALIGN_CENTER);
+		ct.go();
+		// ******************************newPage
+		// ******************************************************
+
+
+		document.close();
+
+		FILE.flush();
+
+		FILE.close();
+		document.close();
+		FILE.flush();
+		FILE.close();
+		return numeroPagina;
+	}
+	 public void onEndPage(PdfWriter writer, Document document) {
+	       System.out.println("qwewqewq");
+	        //this.addWatermark(writer);
+
+}
 }

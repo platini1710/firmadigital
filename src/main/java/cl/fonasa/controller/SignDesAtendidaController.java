@@ -267,11 +267,11 @@ public class SignDesAtendidaController {
 	
 			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),  // si no es reclamo
 					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),
-					parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante());
+					parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales());
 		} else 		 {                                         // si es reclamo
 	
 			fileName = generadorFilePdf.generaFileReclamposPdf(solicitud,ordinario,
-				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante());
+				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales());
 		}
 	 
 
@@ -476,90 +476,7 @@ public class SignDesAtendidaController {
 	
 	/*
 	
-	  @RequestMapping(value ="/firmarArchivos", method = RequestMethod.POST)
-	    public ModelAndView  subirArchivos(Model model,@RequestParam("uploadingFiles") MultipartFile[] uploadingFiles,
-	    		@RequestParam("run")  String run,		@RequestParam("expiration")  String expiration,
-	    		@RequestParam("purpose")  String purpose,		@RequestParam("entity")  String entity
-	    		) throws IOException, NoSuchAlgorithmException, ParseException, org.json.simple.parser.ParseException, java.text.ParseException {
-	    	HttpHeaders headers = new HttpHeaders();
-	        Utilidades util = new Utilidades();
-	    	Object[] o = null;
-	        String clave ="";
-	    	headers.setContentType(MediaType.APPLICATION_JSON);
-	    	// set `accept` header
-	    	headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-			String postEndpoint = firmaDigital;
 
-			Payload payloads=new Payload( run,  entity,  purpose,   expiration);
-			SignFileService signFileService = new SignFileService();
-
-			RestTemplate restTemplate = new RestTemplate();
-			String resultToken =signFileService.getJWTToken(payloads);
-	    	String json= "{\r\n" + "\"api_token_key\": \"sandbox\",\r\n" +
-	    			"\"token\":\"" + resultToken  + "\",\r\n" + 
-	    			"\"files\":["  ;
-
-	    	
-			for (MultipartFile uploadedFile : uploadingFiles) {
-
-				File file = new File(uploadedFile.getOriginalFilename());
-				String fileBase64=signFileService.encodeFileToBase64Binary(file);
-				json= json +"{\r\n" + 
-	  	    			"\"content-type\": \"application/pdf\","  + " \r\n" +
-	  	    			 "\"content\": \"" + fileBase64   + "\" \r\n"  ;
-		    	json= json +",	\r\n \"description\": \"str\","  + " \r\n" +
-		    			 "\"checksum\":\"" + signFileService.verifyChecksum(file)  + "\" \r\n" +
-		    			"}\r\n";
-		    	
-		    	
-		    	
-			}
-			json= json  + "\r\n" + 
-					"] \r\n" +
-					"}";
-
-			CloseableHttpClient httpclient = HttpClients.createDefault();
-			HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(postEndpoint);
-			httpRequest.setHeader("Accept", "application/json");
-			httpRequest.setHeader("Content-type", "application/json");
-			StringEntity stringEntity = new StringEntity(json);
-			httpRequest.setEntity(stringEntity);
-			HttpResponse response = httpclient.execute(httpRequest);
-			if (response.getStatusLine().getStatusCode() != 200) {
-				throw new RuntimeException("Failed : HTTP firma digital error code : " + response.getStatusLine().getStatusCode());
-			}
-			String output, output2 = "";
-			BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "utf-8"  ));
-			while ((output = br.readLine()) != null) {
-				output2 = output2 + output;
-			}
-			Object obj = new JSONParser().parse(output2);
-			JSONObject jo = (JSONObject) obj;     
-			JSONArray ja = (JSONArray) jo.get("files");    
-			o = ja.toArray();       
-			for (int i = 0; i < o.length ; i++) {      
-				Map o1 = (Map) o[i];   
-				
-			     clave = util.retornaAleatorios();
-				String content = (String) o1.get("content");    
-				BASE64Decoder decoder = new BASE64Decoder();
-				byte[] decodedBytes = decoder.decodeBuffer(content);
-
-				File file = new File(clave + ".pdf");;
-				FileOutputStream fop = new FileOutputStream(file);
-
-				fop.write(decodedBytes);
-				fop.flush();
-				fop.close();
-
-				
-			}	
-			   ModelAndView modelAndView = new ModelAndView();
-		    modelAndView.addObject("appName", appName);
-		    modelAndView.setViewName("home");
-			    return modelAndView;
-	    
-	    }*/
 	  /**
 	   *  obtiene datos del firmante
 	   * 
@@ -580,7 +497,9 @@ public class SignDesAtendidaController {
 			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
 			httppost.setHeader("Accept", "application/json");
 			httppost.setHeader("Content-type", "application/json");
-			String json = "{\r\n" + "\"run\": \"" + run  + "\"\r\n"  +"}";
+			String json = "{\r\n" + "\"run\": \"" + run  + "\", \r\n"
+					+ "\"idCaso\": " + solicitud.getIdCaso()  + "\r\n" 
+					+"}";
 			log.info(" getTokenKey json ::" + json);
 			StringEntity stringEntity = new StringEntity(json);
 			httppost.setEntity(stringEntity);
@@ -615,6 +534,10 @@ public class SignDesAtendidaController {
 			solicitud.setDepartamentoFirmante((String)jo.get("departamentoFirmante"));
 			solicitud.setSubDeptoFirmante((String)jo.get("subDeptoFirmante"));
 			solicitud.setDzFirmante((String)jo.get("dzFirmante"));
+			solicitud.setDireccionSolicitante((String)jo.get("direccionSoliciante"));
+			
+			//solicitud.setDireccionSolicitante(	"\r\nPURISIMA N°240, DEPTO. 301/ RECOLETA/ REGION METROPOLITANA " +"\r\nSUBDEPTO. GESTIÓN DE SOLICITUDES CIUDADANAS " + "\r\nSUBDEPTO. OFICINA DE PARTES ");
+			solicitud.setIniciales((String)jo.get("iniciales"));
 	    }
 	  
 	  

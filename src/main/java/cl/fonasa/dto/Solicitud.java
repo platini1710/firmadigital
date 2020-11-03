@@ -36,6 +36,8 @@ public class Solicitud implements Serializable {
 	private String   dzFirmante;
 	private String  departamentoFirmante;
 	private String  	subDeptoFirmante;
+	private String  	iniciales;
+	private String  	direccionSolicitante;
 	public long getIdCaso() {
 		return idCaso;
 	}
@@ -221,6 +223,22 @@ public class Solicitud implements Serializable {
 
 	public void setSubDeptoFirmante(String subDeptoFirmante) {
 		this.subDeptoFirmante = subDeptoFirmante;
+	}
+
+	public String getIniciales() {
+		return iniciales;
+	}
+
+	public void setIniciales(String iniciales) {
+		this.iniciales = iniciales;
+	}
+
+	public String getDireccionSolicitante() {
+		return direccionSolicitante;
+	}
+
+	public void setDireccionSolicitante(String direccionSolicitante) {
+		this.direccionSolicitante = direccionSolicitante;
 	}
 
 

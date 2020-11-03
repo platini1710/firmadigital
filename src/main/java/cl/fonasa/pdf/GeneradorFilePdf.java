@@ -39,8 +39,11 @@ public class GeneradorFilePdf {
 	private static final Logger log = LoggerFactory.getLogger(SignDesAtendidaController.class);
 
 	 public static final String FONT= "/Font/arial.ttf";
+
 	public String generaFileReclamposPdf(Solicitud solicitud, String ordinario, String respuesta, String clave,
-			String wsdl, String parrafoUno, String parrafoDos, int[] numPage,String cargo,String institucion,String dzFirmante,String subDeptoFirmante ,String departamentoFirmante) throws IOException, DocumentException {
+			String wsdl, String parrafoUno, String parrafoDos, int[] numPage, String cargo, String institucion,
+			String dzFirmante, String subDeptoFirmante, String departamentoFirmante,String direccionSolicitante,String iniciales)
+			throws IOException, DocumentException {
 		String nombreSolicitante = solicitud.getNombreSolicitante();
 		String nombreTipificacion = solicitud.getNombreTipificacion();
 		int ord = solicitud.getOrd();
@@ -53,32 +56,31 @@ public class GeneradorFilePdf {
 		int genero = solicitud.getGenero();
 		log.info("de :: " + de + ".pdf");
 		Date fecha = new Date();
-		BaseFont fontNormal = BaseFont.createFont(FONT,  BaseFont.CP1257, BaseFont.EMBEDDED);  
-		Font fontBold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
-
+		BaseFont fontNormal = BaseFont.createFont(FONT, BaseFont.CP1257, BaseFont.EMBEDDED);
+		Font fontBold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD,
+				BaseColor.BLACK);
 
 		Font paragraFontNormal = FontFactory.getFont(FONT, BaseFont.CP1252, BaseFont.EMBEDDED, 10);
 		paragraFontNormal.setFamily("Arial");
 		paragraFontNormal.setStyle(Font.NORMAL);
 		paragraFontNormal.setSize(10);
 		Paragraph paragraphFirma = new Paragraph(13f);
-		Chunk chunkFirma = new Chunk(
-				"SR(A)." + de.toUpperCase() , fontBold);
+		Chunk chunkFirma = new Chunk("SR(A)." + de.toUpperCase(), fontBold);
 		paragraphFirma.setAlignment(Element.ALIGN_CENTER);
 		paragraphFirma.add(chunkFirma);
-		chunkFirma = new Chunk( "\r\n" + cargo.toUpperCase(),fontBold );
+		chunkFirma = new Chunk("\r\n" + cargo.toUpperCase(), fontBold);
 		paragraphFirma.add(chunkFirma);
-		chunkFirma = new Chunk("\r\n" +  institucion.toUpperCase(),fontBold );
+		chunkFirma = new Chunk("\r\n" + institucion.toUpperCase(), fontBold);
 		paragraphFirma.add(chunkFirma);
-		
+
 		log.debug("File :: " + clave + ".pdf");
 		;
 		FileOutputStream FILE = new FileOutputStream(clave + ".pdf");
-		int marginLeft =60;
-		int marginRight =60;
-		int marginTop =130;
-		int marginBottom =196;
-		Document document = new Document(PageSize.LEGAL,  marginLeft, marginRight, marginTop, marginBottom);
+		int marginLeft = 60;
+		int marginRight = 60;
+		int marginTop = 130;
+		int marginBottom = 116;
+		Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
 
 		PdfWriter writer = PdfWriter.getInstance(document, FILE);
 		cl.fonasa.pdf.HeadFootPdf event = new cl.fonasa.pdf.HeadFootPdf();
@@ -92,10 +94,10 @@ public class GeneradorFilePdf {
 
 		// ******************************Head
 		// ******************************************************
-		Chunk chunkOrd = new Chunk("ORD. N°   " + ordinario + "  "
-				+ new SimpleDateFormat("dd.MM.yyyy").format(fecha) + " \r\n" + "ANT.: FOLIO N° " + idCaso
-				+ "               \r\n" + "MAT.: RESPUESTA A " + tipo.toUpperCase() + " \r\n\r\n" + "", fontBold);
-		PdfPTable tableHeadRight = new PdfPTable(new float[] { 110F, 100F});
+		Chunk chunkOrd = new Chunk("ORD. N°   " + ordinario + "  " + new SimpleDateFormat("dd.MM.yyyy").format(fecha)
+				+ " \r\n" + "ANT.: FOLIO N° " + idCaso + "               \r\n" + "MAT.: RESPUESTA A "
+				+ tipo.toUpperCase() + " \r\n\r\n" + "", fontBold);
+		PdfPTable tableHeadRight = new PdfPTable(new float[] { 130F, 190F });
 		PdfPCell HeadCellRight1 = new PdfPCell();
 		HeadCellRight1.setBorder(Rectangle.NO_BORDER);
 
@@ -111,39 +113,37 @@ public class GeneradorFilePdf {
 		para.add("ORD. N° ");
 		para.setFont(new Font(fontNormal, 12));
 
-		para.add(ordinario + "  " + new SimpleDateFormat("dd.MM.yyyy").format(fecha) );
+		para.add(ordinario + "  " + new SimpleDateFormat("dd.MM.yyyy").format(fecha));
 		HeadCellRight1.addElement(para);
 		para = new Paragraph();
 		para.setFont(fontBold);
 		para.add("ANT.: FOLIO N° ");
 		para.setAlignment(Element.ALIGN_LEFT);
 		para.setFont(new Font(fontNormal, 12));
-		para.add(String.valueOf(idCaso) );
+		para.add(String.valueOf(idCaso));
 		HeadCellRight1.addElement(para);
-		
+
 		para = new Paragraph();
 		para.setFont(fontBold);
-		para.add("MAT.: RESPUESTA A  ");
+		para.add("MAT.: ");
+		para.setFont(new Font(fontNormal, 12));
+		para.add("RESPUESTA A  ");
 		para.setAlignment(Element.ALIGN_LEFT);
 		para.setFont(new Font(fontNormal, 12));
-		para.add(tipo.toUpperCase() );
+		para.add(tipo.toUpperCase());
+
 		HeadCellRight1.addElement(para);
-		
-	
-		
+
 		HeadCellRight1.setHorizontalAlignment(Element.ALIGN_LEFT);
 		HeadCellRight1.setVerticalAlignment(Element.ALIGN_TOP);
 
 		HeadCellRight1.setFixedHeight(80f);
 		tableHeadRight.addCell(HeadCellRight1);
 
-
 		document.add(tableHeadRight);
 
-		Chunk chunkDE = new Chunk(
-				"DE : " + de
-				+ "\r\n        " +cargo.toUpperCase()  +"\r\n        " +institucion.toUpperCase() + "\r\n",
-				fontBold);
+		Chunk chunkDE = new Chunk("DE : " + de + "\r\n        " + cargo.toUpperCase() + "\r\n        "
+				+ institucion.toUpperCase() + "\r\n", fontBold);
 		if (genero == 1) {
 			chunkDE.append("\r\nA: SR. " + nombreSolicitante.trim() + "\r\n\r\n");
 		} else if (genero == 2) {
@@ -165,11 +165,11 @@ public class GeneradorFilePdf {
 				"			}\r\n "
 				+ "	table, th, td {border:1px solid black;\r\n font-family: \"Arial\";font-size: 12pt; width:100%; border-collapse: collapse;}	"
 				+ "	</style> <body><p style=\"text-align: justify;\">" + respuesta + "</p></body></html>";
-		respuesta= respuesta.replaceAll("\\\\n", "\n");
-		respuesta=respuesta.replaceAll("\\\\","");
-		
+		respuesta = respuesta.replaceAll("\\\\n", "\n");
+		respuesta = respuesta.replaceAll("\\\\", "");
+
 		respuesta = eliminaAllTag(respuesta, "<div", "</div>");
-		respuesta=eliminaAllTag(respuesta,"<col","</col>");
+		respuesta = eliminaAllTag(respuesta, "<col", "</col>");
 		respuesta = eliminaAllTag(respuesta, "<colgroup", "</colgroup>");
 		respuesta = eliminatagOpenClose(respuesta, "<p", "</p>");// elimina exceso de tags
 
@@ -181,10 +181,18 @@ public class GeneradorFilePdf {
 		}
 
 		respuesta = respuesta.replaceAll("<br>", "<br/>");
-		respuesta=respuesta.replaceAll("<p>", "<p align=\"justify\">"); 
+		respuesta = respuesta.replaceAll("<p>", "<p align=\"justify\">");
 
 		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
+		cantidaPage2(respuesta, marginLeft, marginRight, marginTop,marginBottom);
+		int cantipaginas2 =cantidaPage2(respuesta, marginLeft, marginRight, marginTop, marginBottom) ;
+		if (	writer.getPageNumber()<cantipaginas2) {
+
+			document.newPage();
+		}
+
+
 
 		// ******************************Firma
 		// ******************************************************
@@ -194,69 +202,43 @@ public class GeneradorFilePdf {
 		// ******************************Firma footer
 		// ******************************************************
 
-		PdfPTable tableImgFirma = new PdfPTable(1);
-		tableImgFirma.setTotalWidth(50f);
-
-		tableImgFirma.setWidthPercentage(100f);
-		PdfPCell image2LeftCell = new PdfPCell();
-		image2LeftCell.setBorder(Rectangle.BOX);
-		image2LeftCell.setFixedHeight(128f);
-
-		image2LeftCell.setBorderColor(BaseColor.BLUE);
-
-		// String imagePathFirma = "/imagen/firma.jpg";
-		// Image imgFirma =
-		// Image.getInstance(GeneradorFilePdf.class.getResource(imagePathFirma));
-		// imgFirma.scalePercent(30f);
-		// imgFirma.setAlignment(Element.ALIGN_CENTER);
-		// image2LeftCell.setImage(imgFirma);
-		// image2LeftCell = new PdfPCell();
-		image2LeftCell.setVerticalAlignment(Element.ALIGN_BOTTOM);
-		image2LeftCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-		image2LeftCell.setBorder(Rectangle.NO_BORDER);
-		tableImgFirma.addCell(image2LeftCell);
-
-		PdfPCell firma = new PdfPCell();
-		firma.setHorizontalAlignment(Element.ALIGN_CENTER);
-		firma.setBorder(Rectangle.NO_BORDER);
-		firma.addElement(paragraphFirma);
-		tableImgFirma.addCell(firma);
 		// document.add(tableImgFirma);
 
 		// ******************************newPage
 		// ******************************************************
 		PdfContentByte cb = writer.getDirectContent();
-		
-		
-		ColumnText ct = new ColumnText(cb);		
+
+		ColumnText ct = new ColumnText(cb);
 		Phrase myText = new Phrase(paragraphFirma);
 		ct.setSimpleColumn(myText, 30, -750, 580, 117, 15, Element.ALIGN_CENTER);
 		ct.go();
+		cb = writer.getDirectContent();
+		ct = new ColumnText(cb);
+		chunkFirma = new Chunk("        Saluda atentamente.,".toUpperCase(), fontBold);
+		myText = new Phrase(chunkFirma);
+
+		ct.setSimpleColumn(myText, 30, -750, 580, 250, 15, Element.ALIGN_LEFT);
+		ct.go();
 		document.newPage();
 
-		Paragraph paragraphLorem5 = new Paragraph(13f);
-		Chunk chunk5 = new Chunk("DISTRIBUCIÓN:", new Font(fontNormal, 12));
-		paragraphLorem5.add(chunk5);
-		document.add(paragraphLorem5);
-
-		chunk5 = new Chunk(
-				"PANAMA 1037 VILLA M.L. BOMBAL, SANTIAGO\r\nREGION METROPOLITANA\r\nServicio de Salud Metropolitano Occidente\r\nDivisión Gestión Territorial\r\nSubdepartamento GES\r\nOficina de Partes\r\n"
-						+ "\r\n\r\n\r\n\r\n",
-						new Font(fontNormal, 12));
-
-		paragraphLorem5 = new Paragraph(13f);
-		paragraphLorem5.add(chunk5);
-	//	document.add(paragraphLorem5);
 
 
-		Chunk chunk6 = new Chunk(
-				"Si usted requiere mayor información de sus garantías o del AUGE en general, puede visitar nuestra página web www.fonasa.cl , en el banner \"Servicios en Línea\" opción \"Seguimiento de Garantías AUGE\" y \"Sistema de Monitoreo de Garantías\", o bien descargando la aplicación  para celulares \"GES Minsal\"."
-						+ "\r\n\r\n",new Font(fontNormal, 12)
-				);
-		Paragraph paragraphLorem6 = new Paragraph(13f);
-		paragraphLorem6.setAlignment(Paragraph.ALIGN_JUSTIFIED);
-		paragraphLorem6.add(chunk6);
-		document.add(paragraphLorem6);
+		Chunk chunkFoot = new Chunk(iniciales +"  ", new Font(fontNormal, 12));
+		Paragraph paragraphFoot = new Paragraph(13f);
+		PdfPTable tableFooter = new PdfPTable(1);
+		tableFooter.setWidthPercentage(100);
+		PdfPCell cellFoot = new PdfPCell();
+		paragraphFoot.setAlignment(Paragraph.ALIGN_LEFT);
+		paragraphFoot.add(chunkFoot);
+		chunkFoot = new Chunk("\r\nDISTRIBUCIÓN: \r\n", new Font(fontNormal, 12));
+		paragraphFoot.add(chunkFoot);
+		chunkFoot = new Chunk(direccionSolicitante, new Font(fontNormal, 12));
+		paragraphFoot.add(chunkFoot);
+		
+		
+		
+		
+		document.add(paragraphFoot);
 
 		String imagePath2 = "/imagen/imagen.jpg";
 		Image imagenFirma = Image.getInstance(GeneradorFilePdf.class.getResource(imagePath2));
@@ -281,7 +263,8 @@ public class GeneradorFilePdf {
 		table3.setWidthPercentage(100f);
 		PdfPCell cellText = new PdfPCell();
 
-		Paragraph p = new Paragraph("Fecha Emisión :" + new SimpleDateFormat("dd/MM/yyyy").format(fecha), new Font(fontNormal, 12));
+		Paragraph p = new Paragraph("Fecha Emisión :" + new SimpleDateFormat("dd/MM/yyyy").format(fecha),
+				new Font(fontNormal, 12));
 		cellText.setVerticalAlignment(Element.ALIGN_CENTER);
 		cellText.setBorder(Rectangle.TOP);
 		cellText.addElement(p);
@@ -307,8 +290,9 @@ public class GeneradorFilePdf {
 		document.add(table3);
 
 		paragraphFirma = new Paragraph(13f);
-	
-		chunkFirma = new Chunk("\r\n\r\nEste documento incorpora firma electrónica avanzada\r\n" + "", new Font(fontNormal, 12));
+
+		chunkFirma = new Chunk("\r\n\r\nEste documento incorpora firma electrónica avanzada\r\n" + "",
+				new Font(fontNormal, 12));
 		paragraphFirma.setAlignment(Element.ALIGN_CENTER);
 		paragraphFirma.add(chunkFirma);
 		document.add(paragraphFirma);
@@ -327,7 +311,7 @@ public class GeneradorFilePdf {
 	public String generaFileFelicitacioPdf(String ordinario, String nombreSolicitante, String nombreTipificacion,
 			String problemaSalud, long idCaso, String respuesta, String clave, int ord, String tipo, String de,
 			String wsdl, String run, int genero, String parrafoUno, String parrafoDos, int[] numPage,String cargo,String institucion,
-			String dzFirmante,String subDeptoFirmante ,String departamentoFirmante)
+			String dzFirmante,String subDeptoFirmante ,String departamentoFirmante,String direccionSolicitante,String iniciales)
 			throws IOException, DocumentException {
 		String ciudad;
 		Date fecha = new Date();
@@ -337,7 +321,7 @@ public class GeneradorFilePdf {
 		int marginLeft =60;
 		int marginRight =60;
 		int marginTop =180;
-		int marginBottom =196;
+		int marginBottom =116;
 		Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
 
 		PdfWriter writer = PdfWriter.getInstance(document, FILE);
@@ -396,27 +380,37 @@ public class GeneradorFilePdf {
 		HeadCellRight1.addElement(para);
 		
 		para = new Paragraph();
+
 		para.setFont(bfbold);
-		para.add("MAT.: RESPUESTA A  ");
+		para.add("MAT.: ");
 		para.setAlignment(Element.ALIGN_LEFT);
 		para.setFont(new Font(bf, 12));
+		para.add("RESPUESTA A ");
+		para.setFont(new Font(bf, 12));
 		para.add(tipo.toUpperCase() );
-		HeadCellRight1.addElement(para);
+		para.setAlignment(Element.ALIGN_LEFT);
+	
 		
+	
+		HeadCellRight1.addElement(para);
+		log.info(" dzFirmante ::" +dzFirmante);
 		para = new Paragraph();
 		para.setFont(bfbold);
-        if ("DZN".equals(dzFirmante.toUpperCase())) {
-        	ciudad="ANTOFAGASTA";
-        }else if ("DZCN".equals(dzFirmante.toUpperCase())) {
-        	ciudad="VALPARAISO" ; 
-        }else if ("DZCS".equals(dzFirmante.toUpperCase())) {
-        	ciudad="CONCEPCIÓN" ; 
-        }
-        else if ("DZS".equals(dzFirmante.toUpperCase())) {
-        	ciudad="TEMUCO" ; 
-        } else {
-        	ciudad="SANTIAGO" ; 
-        }
+		ciudad="SANTIAGO, " ;
+		if (dzFirmante!=null) {
+	        if ("DZN".equals(dzFirmante.toUpperCase())) {
+	        	ciudad="ANTOFAGASTA, ";
+	        }else if ("DZCN".equals(dzFirmante.toUpperCase())) {
+	        	ciudad="VALPARAISO, " ; 
+	        }else if ("DZCS".equals(dzFirmante.toUpperCase())) {
+	        	ciudad="CONCEPCIÓN, " ; 
+	        }
+	        else if ("DZS".equals(dzFirmante.toUpperCase())) {
+	        	ciudad="TEMUCO, " ; 
+	        } else {
+	        	ciudad="SANTIAGO, " ; 
+	        }
+		}
 		para.add(ciudad);
 		para.setAlignment(Element.ALIGN_LEFT);
 		para.setFont(new Font(bf, 12));
@@ -455,7 +449,8 @@ public class GeneradorFilePdf {
 		Paragraph saludoAntesDeFirma= new Paragraph(13f);
 		Chunk chunkFirma ;
 		//// paragraphBody.add(chunk2);Saluda atentamente.,
-		chunkFirma = new Chunk("Saluda atentamente.,                                                                                          \udddd".toUpperCase(),bfbold);
+		chunkFirma = new Chunk("      ".toUpperCase(),bfbold);
+
 		paragraphFirma.setAlignment(Element.ALIGN_LEFT);
 		paragraphFirma.add(chunkFirma);
 		paragraphFirma.add(Chunk.NEWLINE);
@@ -509,6 +504,11 @@ log.debug("respuesta::" + respuesta);
 		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
 
+		int cantipaginas2 =cantidaPage2(respuesta, marginLeft, marginRight, marginTop, marginBottom) ;
+		if (	writer.getPageNumber()<cantipaginas2) {
+
+			document.newPage();
+		}
 		PdfPTable table = new PdfPTable(1);
 		table.setTotalWidth(50f);
 		PdfPCell image2LeftCell = new PdfPCell();
@@ -541,24 +541,30 @@ log.debug("respuesta::" + respuesta);
 		Phrase myText = new Phrase(paragraphFirma);
 		ct.setSimpleColumn(myText, 30, -750, 580, 300, 15, Element.ALIGN_CENTER);
 		ct.go();
+		 cb = writer.getDirectContent();
+		 ct = new ColumnText(cb);
+			chunkFirma = new Chunk("        Saluda atentamente.,".toUpperCase(),bfbold);
+		 myText = new Phrase(chunkFirma);
+		
+		ct.setSimpleColumn(myText, 30, -750,  580, 250,  15, Element.ALIGN_LEFT);
+		ct.go();
 		document.setMargins(marginLeft, marginRight, marginTop, marginBottom);
 		document.newPage();
-		Chunk chunkFoot = new Chunk("AYM / pvm   ", new Font(bf, 12));
+		Chunk chunkFoot = new Chunk(iniciales +"  ", new Font(bf, 12));
 		Paragraph paragraphFoot = new Paragraph(13f);
 		PdfPTable tableFooter = new PdfPTable(1);
 		tableFooter.setWidthPercentage(100);
 		PdfPCell cellFoot = new PdfPCell();
 		paragraphFoot.setAlignment(Paragraph.ALIGN_LEFT);
 		paragraphFoot.add(chunkFoot);
-		chunkFoot = new Chunk("\r\nDISTRIBUCIÓN: ", new Font(bf, 12));
+		chunkFoot = new Chunk("\r\nDISTRIBUCIÓN: \r\n", new Font(bf, 12));
 		paragraphFoot.add(chunkFoot);
-		chunkFoot = new Chunk("\r\nPURISIMA N°240, DEPTO. 301/ RECOLETA/ REGION METROPOLITANA "
-				+ "\r\nSUBDEPTO. GESTIÓN DE SOLICITUDES CIUDADANAS " + "\r\nSUBDEPTO. OFICINA DE PARTES ", new Font(bf, 12));
+		chunkFoot = new Chunk(direccionSolicitante, new Font(bf, 12));
 		paragraphFoot.add(chunkFoot);
 		paragraphFoot.setAlignment(Element.ALIGN_LEFT);
 		cellFoot.setHorizontalAlignment(Element.ALIGN_CENTER);
 		cellFoot.setVerticalAlignment(Element.ALIGN_LEFT);
-		//cellFoot.addElement(paragraphFoot);
+		cellFoot.addElement(paragraphFoot);
 		cellFoot.setBorder(Rectangle.NO_BORDER);
 		tableFooter.addCell(cellFoot);
 		SignFileService codigoCertificadoUtil = new SignFileService();
@@ -674,6 +680,280 @@ log.debug("respuesta::" + respuesta);
 			respuesta = eliminatagCerrado(tagCerrado, respuesta, count1, count2);
 		}
 		return respuesta;
+	}
+	
+	
+	
+	
+	
+	
+	
+	public int cantidaPage1(String respuesta,float marginLeft,float marginRight,float marginTop,float marginBottom)
+			throws IOException, DocumentException {
+		int numeroPagina=0;
+		FileOutputStream FILE = new FileOutputStream("yyy" + ".pdf");
+		// log.info("File :: " + clave + ".pdf");;
+
+		Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
+
+		PdfWriter writer = PdfWriter.getInstance(document, FILE);
+
+
+		document.open();
+
+
+		Paragraph paragraphBody = new Paragraph(13f);
+		Paragraph paragraphead = new Paragraph(13f);
+		Paragraph paragrapHeadLeft = new Paragraph(13f);
+		paragraphead.setAlignment(Paragraph.ALIGN_RIGHT);
+		Font bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
+		BaseFont bf = BaseFont.createFont(FONT, BaseFont.CP1257, BaseFont.EMBEDDED);
+		/*
+		 * --------------------------------------------Head-----------------------------
+		 * ------------------
+		 */
+
+
+		paragraphead.setAlignment(Paragraph.ALIGN_RIGHT);
+
+		// ******************************Head
+		// ******************************************************
+
+		// document.add(paragraphead);
+		paragraphead.setAlignment(Element.ALIGN_LEFT);
+		PdfPTable tableHeadRight = new PdfPTable(new float[] { 130F, 190F});
+//	tableHeadRight.setLockedWidth(true);
+	//	tableHeadRight.setWidthPercentage(100f);
+
+		// headParaTit.add(para);
+
+		PdfPCell HeadCellRight1 = new PdfPCell();
+		HeadCellRight1.setBorder(Rectangle.NO_BORDER);
+
+		HeadCellRight1.setFixedHeight(80f);
+		tableHeadRight.addCell(HeadCellRight1);
+
+		HeadCellRight1 = new PdfPCell();
+		HeadCellRight1.setPaddingTop(0f);
+		HeadCellRight1.setHorizontalAlignment(Element.ALIGN_LEFT);
+		HeadCellRight1.setBorder(Rectangle.NO_BORDER);
+		Paragraph para = new Paragraph();
+		para.setFont(bfbold);
+		para.add("ORD. N° ");
+		para.setFont(new Font(bf, 12));
+
+		para.add("120" );
+		HeadCellRight1.addElement(para);
+		para = new Paragraph();
+		para.setFont(bfbold);
+		para.add("ANT.: FOLIO N° ");
+		para.setAlignment(Element.ALIGN_LEFT);
+		para.setFont(new Font(bf, 12));
+		para.add(String.valueOf(123L));
+		HeadCellRight1.addElement(para);
+		
+		para = new Paragraph();
+
+		para.setFont(bfbold);
+		para.add("MAT.: ");
+		para.setAlignment(Element.ALIGN_LEFT);
+		para.setFont(new Font(bf, 12));
+		para.add("RESPUESTA A ");
+		para.setFont(new Font(bf, 12));
+		para.add("tipo".toUpperCase() );
+		para.setAlignment(Element.ALIGN_LEFT);
+	
+		
+	
+		HeadCellRight1.addElement(para);
+
+		para = new Paragraph();
+		para.setFont(bfbold);
+		String ciudad="SANTIAGO, " ;
+
+		para.add(ciudad);
+		para.setAlignment(Element.ALIGN_LEFT);
+		para.setFont(new Font(bf, 12));
+		para.add("12-122020");
+		HeadCellRight1.addElement(para);
+		
+		HeadCellRight1.setHorizontalAlignment(Element.ALIGN_LEFT);
+		HeadCellRight1.setVerticalAlignment(Element.ALIGN_TOP);
+
+		HeadCellRight1.setFixedHeight(80f);
+		tableHeadRight.addCell(HeadCellRight1);
+
+		
+
+		Chunk chunkHeadleft= new Chunk(
+				"DE : " + "de".toUpperCase()
+						+ "\r\n        " +"cargo".toUpperCase()  +"\r\n        " +"institucion".toUpperCase() + "\r\n",
+						bfbold);
+
+			chunkHeadleft.append("\r\nA: SR. " + "XXXXX" + "\r\n\r\n");
+
+
+
+
+			paragrapHeadLeft.add(chunkHeadleft);
+			document.add(paragrapHeadLeft);
+
+
+
+
+
+
+
+
+
+
+		// document.add(tableBody);
+
+
+		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
+		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
+
+		numeroPagina=writer.getPageNumber();
+		document.close();
+		FILE.flush();
+		FILE.close();
+		return numeroPagina;
+	
+	}
+	public int cantidaPage2(String respuesta,float marginLeft,float marginRight,float marginTop,float marginBottom)
+			throws IOException, DocumentException {
+
+		int numeroPagina=0;
+		FileOutputStream FILE = new FileOutputStream("zzz" + ".pdf");
+		// log.info("File :: " + clave + ".pdf");;
+
+			marginBottom=marginBottom+ 80f;
+		
+		Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
+
+		PdfWriter writer = PdfWriter.getInstance(document, FILE);
+
+
+		document.open();
+
+
+
+		
+		Paragraph paragraphBody = new Paragraph(13f);
+		Paragraph paragraphead = new Paragraph(13f);
+		Paragraph paragrapHeadLeft = new Paragraph(13f);
+		paragraphead.setAlignment(Paragraph.ALIGN_RIGHT);
+		Font bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
+		BaseFont bf = BaseFont.createFont(FONT, BaseFont.CP1257, BaseFont.EMBEDDED);
+		/*
+		 * --------------------------------------------Head-----------------------------
+		 * ------------------
+		 */
+
+
+		paragraphead.setAlignment(Paragraph.ALIGN_RIGHT);
+
+		// ******************************Head
+		// ******************************************************
+
+		// document.add(paragraphead);
+		paragraphead.setAlignment(Element.ALIGN_LEFT);
+		PdfPTable tableHeadRight = new PdfPTable(new float[] { 130F, 190F});
+//	tableHeadRight.setLockedWidth(true);
+	//	tableHeadRight.setWidthPercentage(100f);
+
+		// headParaTit.add(para);
+
+		PdfPCell HeadCellRight1 = new PdfPCell();
+		HeadCellRight1.setBorder(Rectangle.NO_BORDER);
+
+		HeadCellRight1.setFixedHeight(80f);
+		tableHeadRight.addCell(HeadCellRight1);
+
+		HeadCellRight1 = new PdfPCell();
+		HeadCellRight1.setPaddingTop(0f);
+		HeadCellRight1.setHorizontalAlignment(Element.ALIGN_LEFT);
+		HeadCellRight1.setBorder(Rectangle.NO_BORDER);
+		Paragraph para = new Paragraph();
+		para.setFont(bfbold);
+		para.add("ORD. N° ");
+		para.setFont(new Font(bf, 12));
+
+		para.add("120" );
+		HeadCellRight1.addElement(para);
+		para = new Paragraph();
+		para.setFont(bfbold);
+		para.add("ANT.: FOLIO N° ");
+		para.setAlignment(Element.ALIGN_LEFT);
+		para.setFont(new Font(bf, 12));
+		para.add(String.valueOf(123L));
+		HeadCellRight1.addElement(para);
+		
+		para = new Paragraph();
+
+		para.setFont(bfbold);
+		para.add("MAT.: ");
+		para.setAlignment(Element.ALIGN_LEFT);
+		para.setFont(new Font(bf, 12));
+		para.add("RESPUESTA A ");
+		para.setFont(new Font(bf, 12));
+		para.add("tipo".toUpperCase() );
+		para.setAlignment(Element.ALIGN_LEFT);
+	
+		
+	
+		HeadCellRight1.addElement(para);
+
+		para = new Paragraph();
+		para.setFont(bfbold);
+		String ciudad="SANTIAGO, " ;
+
+		para.add(ciudad);
+		para.setAlignment(Element.ALIGN_LEFT);
+		para.setFont(new Font(bf, 12));
+		para.add("12-122020");
+		HeadCellRight1.addElement(para);
+		
+		HeadCellRight1.setHorizontalAlignment(Element.ALIGN_LEFT);
+		HeadCellRight1.setVerticalAlignment(Element.ALIGN_TOP);
+
+		HeadCellRight1.setFixedHeight(80f);
+		tableHeadRight.addCell(HeadCellRight1);
+
+		document.add(tableHeadRight);
+		
+		
+		
+
+		Chunk chunkHeadleft= new Chunk(
+				"DE : " + "de".toUpperCase()
+						+ "\r\n        " +"cargo".toUpperCase()  +"\r\n        " +"institucion".toUpperCase() + "\r\n",
+						bfbold);
+
+			chunkHeadleft.append("\r\nA: SR. " + "XXXXX" + "\r\n\r\n");
+
+
+
+
+			paragrapHeadLeft.add(chunkHeadleft);
+			document.add(paragrapHeadLeft);
+
+
+
+
+
+
+		// document.add(tableBody);
+
+
+		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
+		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
+
+		numeroPagina=writer.getPageNumber();
+		document.close();
+		FILE.flush();
+		FILE.close();
+		return numeroPagina;
 	}
 
 }
