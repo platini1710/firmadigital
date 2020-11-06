@@ -85,10 +85,19 @@ public class SignDesAtendidaController {
     @Value("${ws.genera.codigo.certificadoWSDL}")	
     	    private String certificadoWSDL;   
 
+    
+    @Value("${keySecret}")
+	    private String keySecret;   
+
 	@RequestMapping(value = "fea", method = RequestMethod.POST, consumes = "application/json; charset=utf-8", produces = "application/json; charset=utf-8")
 	public DocumentSign firmaDocumentoDesatendida(@Context HttpServletRequest request,
 			@RequestBody(required = true) Solicitud solicitud) throws IOException {
-
+		try {
+		String ordinario= obtenerOrdinario(solicitud.getRunUsuarioEjecuta(),solicitud.getIdCaso());
+		solicitud.setOrdinario(ordinario);
+		}catch(Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		String message = "archivo firmado exitosamente ";
 
 		String codigo = "1";
@@ -120,7 +129,7 @@ public class SignDesAtendidaController {
 			 */
 			codigo = "1";
 			Payload payloads = new Payload(solicitud.getRunUsuarioEjecuta(), solicitud.getEntity(),
-					solicitud.getPurpose(), dateTime);
+					solicitud.getPurpose(), dateTime,keySecret);
 			String ordinario = "000";
 
 			codigo = "2";
@@ -246,7 +255,7 @@ public class SignDesAtendidaController {
 	     
 	public String signFilePdf(String ordinario,Solicitud solicitud, Payload payloads, String clave,String respuesta,String parrafoUno,String parrafoDos) throws ParseException, IOException, DocumentException, java.text.ParseException, NoSuchAlgorithmException {
     	Object[] o = null;
-
+		log.info("signFilePdf de de ::" + solicitud.getDe());
 
 		log.info("manda a firmar documento pdf ");
     	int[] numPage = {2};
@@ -265,13 +274,13 @@ public class SignDesAtendidaController {
 		solicitud.setNumeroPaginas(2 );
 			if (solicitud.getTipo().trim().toUpperCase().indexOf("FELICITACI")>=0) {  
 	
-			fileName = generadorFilePdf.generaFileFelicitacioPdf(ordinario,solicitud.getNombreSolicitante(), solicitud.getNombreTipificacion(),  // si no es reclamo
+			fileName = generadorFilePdf.generaFileFelicitacioPdf(solicitud.getNombreSolicitante(),solicitud.getOrdinario(), solicitud.getNombreTipificacion(),  // si no es reclamo
 					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),
 					parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales());
 		} else 		 {                                         // si es reclamo
 	
-			fileName = generadorFilePdf.generaFileReclamposPdf(solicitud,ordinario,
-				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales());
+			fileName = generadorFilePdf.generaFileReclamposPdf(solicitud,solicitud.getOrdinario(), 
+				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales(),solicitud.getIdCaso());
 		}
 	 
 
@@ -336,7 +345,7 @@ public class SignDesAtendidaController {
 
 		httpRequest.setHeader("otp", solicitud.getOtp());
 
-
+		
 		StringEntity stringEntity = new StringEntity(json);
 		stringEntity.setContentType("application/json");
 
@@ -346,7 +355,7 @@ public class SignDesAtendidaController {
 		HttpResponse response = httpclient.execute(httpRequest); 
 		if (response.getStatusLine().getStatusCode() != 200) { 
 			throw new RuntimeException(
-					" Failed : HTTP firma digital causaas posible otp erroneo token erroneo : " + response.getStatusLine().getStatusCode());
+					" Failed : HTTP firma digital causaas posible otp erroneo : " + response.getStatusLine().getStatusCode());
 		}
 		String output, output2 = "";
 		BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "utf-8"));
@@ -494,6 +503,7 @@ public class SignDesAtendidaController {
 
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			String endPoint = urlDatosFirma;
+			log.info("endPoint::" + endPoint);
 			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
 			httppost.setHeader("Accept", "application/json");
 			httppost.setHeader("Content-type", "application/json");
@@ -523,7 +533,7 @@ public class SignDesAtendidaController {
 			if (apiToken==null) {
 				throw new Exception(" Failed : No existe usuario con firma regisdtrada en database ");
 			}
-			log.info("apiToken::" + apiToken);
+			log.info("de de sigDes::" + (String)jo.get("nombreFirmante"));
 			String institucion=(String)jo.get("institucion");
 			solicitud.setApiToken(apiToken);
 			solicitud.setEntity(institucion);
@@ -533,7 +543,13 @@ public class SignDesAtendidaController {
 			solicitud.setInstitucion((String)jo.get("institucion"));
 			solicitud.setDepartamentoFirmante((String)jo.get("departamentoFirmante"));
 			solicitud.setSubDeptoFirmante((String)jo.get("subDeptoFirmante"));
+			if ((String)jo.get("dzFirmante")==null) {
+				solicitud.setDzFirmante("NC");
+			} else
 			solicitud.setDzFirmante((String)jo.get("dzFirmante"));
+			if ((String)jo.get("direccionSoliciante")==null) {
+				solicitud.setDireccionSolicitante(" ");
+			} else
 			solicitud.setDireccionSolicitante((String)jo.get("direccionSoliciante"));
 			
 			//solicitud.setDireccionSolicitante(	"\r\nPURISIMA N°240, DEPTO. 301/ RECOLETA/ REGION METROPOLITANA " +"\r\nSUBDEPTO. GESTIÓN DE SOLICITUDES CIUDADANAS " + "\r\nSUBDEPTO. OFICINA DE PARTES ");
@@ -648,4 +664,58 @@ public class SignDesAtendidaController {
 					solicitud.getEmail(), content);
 		}
 	  }
+	  
+	  
+	    public String obtenerOrdinario(String runUsuario,long numeroSolicitud) throws Exception {
+
+			String ord="";
+			String postEndpoint =urlGeneraOrdinario;
+
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+
+			HttpPost httpRequest = new HttpPost(postEndpoint);
+
+			httpRequest.setHeader("Accept", "application/json");
+			httpRequest.setHeader("Content-type", "application/json");
+
+			String inputJson = "{\r\n"
+					+ "  \"runUsuario\" : \"" +  runUsuario + "\",\r\n"
+					+ "  \"numeroSolicitud\" :" + numeroSolicitud + "\r\n"
+					+ "}";
+
+			StringEntity stringEntity =   new StringEntity(inputJson,"UTF-8");
+			httpRequest.setEntity(stringEntity);
+
+
+
+			HttpResponse response = httpclient.execute(httpRequest);
+
+			BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent()), "utf-8"));
+
+			// Throw runtime exception if status code isn't 200
+			if (response.getStatusLine().getStatusCode() != 200) {
+				throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			}
+
+			String output, output2 = "";
+
+			while ((output = br.readLine()) != null) {
+				output2 = output2 + output;
+
+			}
+			org.json.JSONObject resultRest = new org.json.JSONObject(output2);
+
+		
+
+			if (!resultRest.isNull("ordinario")) {
+				ord = resultRest.getString("ordinario");
+				log.info("ordinario ordinario ordinario ordinario " + ord);
+			}
+			else {
+				ord=" " ;//calcOrdinario( zona);
+				log.info("ordinario   " + ord);
+			}
+			return ord;
+		}
+
 }

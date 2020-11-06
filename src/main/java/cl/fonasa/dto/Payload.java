@@ -10,12 +10,14 @@ private String run;
 private String entity;
 private String purpose;
 private String expiration;
+private String keySecret;
 
-public Payload (String run, String entity, String purpose,  String expiration) {
+public Payload (String run, String entity, String purpose,  String expiration,String keySecret) {
 	this.run=run;
 	this.entity=entity;	
 	this.purpose=purpose;		
-	this.expiration=expiration;		
+	this.expiration=expiration;	
+	this.keySecret=keySecret;
 }
 public String getRun() {
 	
@@ -41,6 +43,12 @@ public String getExpiration() {
 }
 public void setExpiration(String expiration) {
 	this.expiration = expiration;
+}
+public String getKeySecret() {
+	return keySecret;
+}
+public void setKeySecret(String keySecret) {
+	this.keySecret = keySecret;
 }
 
 

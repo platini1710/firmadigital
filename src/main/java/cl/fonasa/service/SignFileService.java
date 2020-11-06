@@ -114,12 +114,13 @@ public class SignFileService {
 				.claim("expiration", payloads.getExpiration())
 				.claim("purpose",payloads.getPurpose())
 
-				.signWith(SignatureAlgorithm.HS256,  TextCodec.BASE64.encode(Constantes.SECRET_KEY));
+				.signWith(SignatureAlgorithm.HS256,  TextCodec.BASE64.encode(payloads.getKeySecret()));
 	
 		log.warn("Entity ::" + payloads.getEntity()); 
 		log.warn("Run ::" + run);
 		log.warn("Expiration ::" + payloads.getExpiration());
 		log.warn("Purpose ::" + payloads.getPurpose());
+    	System.out.println("prop\u00f3sito  general ");
 		return builder.compact();
 
 	}
