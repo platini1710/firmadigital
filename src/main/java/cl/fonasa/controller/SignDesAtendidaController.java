@@ -231,7 +231,7 @@ public class SignDesAtendidaController {
 		} else if ("6".equals(codigo)) {
 			message = "Fallo el envio de correo , se firmó el archivo y se  cerró en base de datos";
 		} else if ("7".equals(codigo)) {
-			message = "Fallo la obtencion del token, usuario no cuenta con firma digital registrada";
+			message = "Fallo la obtencion del token, usuario no cuenta con firma digital registrada xxxx";
 		} 
 
 
@@ -336,7 +336,7 @@ public class SignDesAtendidaController {
 				
 		json = json +  "\r\n}\r\n";	
 		json = json + "\r\n" + "] \r\n" + "}";
-
+		log.info("json  " +json);
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(postEndpoint);
 		httpRequest.setHeader("Accept", "application/json");
