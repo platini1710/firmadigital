@@ -141,7 +141,7 @@ public class SignFileService {
 				.claim("expiration", payloads.getExpiration())
 				.claim("purpose",payloads.getPurpose())
 
-				.signWith(SignatureAlgorithm.HS256,  TextCodec.BASE64.encode(Constantes.SECRET_KEY));
+				.signWith(SignatureAlgorithm.HS256,  TextCodec.BASE64.encode(payloads.getKeySecret()));
 	
 
 		return builder.compact();
