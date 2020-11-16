@@ -50,7 +50,7 @@ public class GeneradorFilePdf {
 		public String generaFileReclamposPdf(Solicitud solicitud, String ordinario,String respuesta, String clave,
 				String wsdl, String parrafoUno, String parrafoDos, int[] numPage, String cargo, String institucion,
 				String dzFirmante, String subDeptoFirmante, String departamentoFirmante, String direccionSolicitante,
-				String iniciales, long numeroSolicitud) throws IOException, DocumentException {
+				String iniciales, long numeroSolicitud,String ciudad) throws IOException, DocumentException {
 			String nombreSolicitante = solicitud.getNombreSolicitante();
 			String nombreTipificacion = solicitud.getNombreTipificacion();
 			int ord = solicitud.getOrd();
@@ -85,10 +85,10 @@ public class GeneradorFilePdf {
 			log.debug("File :: " + clave + ".pdf");
 			;
 			FileOutputStream FILE = new FileOutputStream(clave + ".pdf");
-			int marginLeft = 60;
-			int marginRight = 60;
-			int marginTop = 130;
-			int marginBottom = 116;
+			int marginLeft =60;
+			int marginRight =60;
+			int marginTop =120;
+			int marginBottom =250;
 			Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
 
 			PdfWriter writer = PdfWriter.getInstance(document, FILE);
@@ -195,10 +195,10 @@ public class GeneradorFilePdf {
 			XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
 			cantidaPage2(respuesta, marginLeft, marginRight, marginTop, marginBottom);
 			int cantipaginas2 = cantidaPage2(respuesta, marginLeft, marginRight, marginTop, marginBottom);
-			if (writer.getPageNumber() < cantipaginas2) {
+	/*		if (writer.getPageNumber() < cantipaginas2) {
 
 				document.newPage();
-			}
+			}*/
 
 			// ******************************Firma
 			// ******************************************************
@@ -312,9 +312,9 @@ public class GeneradorFilePdf {
 	public String generaFileFelicitacioPdf( String nombreSolicitante,  String ordinario,String nombreTipificacion,
 			String problemaSalud, long idCaso, String respuesta, String clave, int ord, String tipo, String de,
 			String wsdl, String run, int genero, String parrafoUno, String parrafoDos, int[] numPage,String cargo,String institucion,
-			String dzFirmante,String subDeptoFirmante ,String departamentoFirmante,String direccionSolicitante,String iniciales)
+			String dzFirmante,String subDeptoFirmante ,String departamentoFirmante,String direccionSolicitante,String iniciales,String ciudad)
 			throws IOException, DocumentException {
-		String ciudad;
+
 		Date fecha = new Date();
 
 		FileOutputStream FILE = new FileOutputStream(clave + ".pdf");
@@ -322,8 +322,8 @@ public class GeneradorFilePdf {
 		// log.info("File :: " + clave + ".pdf");;
 		int marginLeft =60;
 		int marginRight =60;
-		int marginTop =180;
-		int marginBottom =116;
+		int marginTop =120;
+		int marginBottom =250;
 		Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
 
 		PdfWriter writer = PdfWriter.getInstance(document, FILE);
@@ -355,6 +355,84 @@ public class GeneradorFilePdf {
 	//	tableHeadRight.setWidthPercentage(100f);
 
 		// headParaTit.add(para);
+		
+		
+
+
+		//-----------------------------------------------------------------------------------**************************************
+		 PdfPTable tableLeft = new PdfPTable(3);
+        PdfPCell text = new PdfPCell();
+	      Paragraph headParaTit = new Paragraph();
+
+        headParaTit = new Paragraph(8);
+        headParaTit.setAlignment(Element.ALIGN_LEFT);
+     
+        Paragraph paraLeft = new Paragraph (); 
+        paraLeft.setFont(bfbold);
+        paraLeft.add("FONDO NACIONAL DE SALUD");
+ 
+        headParaTit.add(paraLeft);
+
+
+        paraLeft = new Paragraph (); 
+        paraLeft.setFont(bfbold);
+/*        division="DIVISIÓN SERVICIO AL USUARIO" ; 
+        if (dzFirmante!=null) {
+            if ("DZN".equals(dzFirmante.toUpperCase())) {
+            	division="DIRECCIÓN ZONAL NORTE";
+            }else if ("DZCN".equals(dzFirmante.toUpperCase())) {
+            	division="DIRECCIÓN ZONAL CENTRO NORTE" ; 
+            }else if ("DZCS".equals(dzFirmante.toUpperCase())) {
+            	division="DIRECCIÓN ZONAL CENTRO SUR" ; 
+            }
+            else if ("DZS".equals(dzFirmante.toUpperCase())) {
+            	division="DIRECCIÓN ZONAL SUR" ; 
+            } else {
+            	division="DIVISIÓN SERVICIO AL USUARIO" ; 
+            }
+        }
+*/
+        paraLeft.add(dzFirmante);
+        headParaTit.add(paraLeft);
+        paraLeft = new Paragraph ();  
+        paraLeft.setFont(bfbold);
+        if (departamentoFirmante==null) {
+        		departamentoFirmante=" ";
+        }
+
+        paraLeft.add(departamentoFirmante.toUpperCase());
+        headParaTit.add(paraLeft);
+		log.info("departamentoFirmante 	::" + departamentoFirmante);;
+		paraLeft = new Paragraph ();  
+		paraLeft.setFont(bfbold);
+		log.info(" subDeptoFirmante ::::::::::::::::::::::::::::::::::::::::: " + subDeptoFirmante);;
+		if ((subDeptoFirmante!=null) && (!"".equals(subDeptoFirmante.trim()))) {
+		paraLeft.add(subDeptoFirmante.toUpperCase());
+		}
+        headParaTit.add(paraLeft);
+        
+        text.setColspan(3);
+        text.setVerticalAlignment(Element.ALIGN_TOP);
+        text.addElement(headParaTit);
+        text.setPaddingTop(0);
+        text.setBorder(Rectangle.NO_BORDER);
+
+        text.setBorder(Rectangle.NO_BORDER);
+        tableLeft.addCell(text);    
+        tableLeft.setWidthPercentage(100);
+        PdfPCell text2 = new PdfPCell();
+        
+        text2.setBorder(Rectangle.NO_BORDER);
+  
+
+        text2.setColspan(3);
+        tableLeft.addCell(text2); 
+        
+		document.add(tableLeft);
+		
+		//------------------------------------------------------**********************************************************
+		
+		
 
 		PdfPCell HeadCellRight1 = new PdfPCell();
 		HeadCellRight1.setBorder(Rectangle.NO_BORDER);
@@ -398,22 +476,8 @@ public class GeneradorFilePdf {
 		log.info(" dzFirmante ::" +dzFirmante);
 		para = new Paragraph();
 		para.setFont(bfbold);
-		ciudad="SANTIAGO, " ;
-		if (dzFirmante!=null) {
-	        if ("DZN".equals(dzFirmante.toUpperCase())) {
-	        	ciudad="ANTOFAGASTA, ";
-	        }else if ("DZCN".equals(dzFirmante.toUpperCase())) {
-	        	ciudad="VALPARAISO, " ; 
-	        }else if ("DZCS".equals(dzFirmante.toUpperCase())) {
-	        	ciudad="CONCEPCIÓN, " ; 
-	        }
-	        else if ("DZS".equals(dzFirmante.toUpperCase())) {
-	        	ciudad="TEMUCO, " ; 
-	        } else {
-	        	ciudad="SANTIAGO, " ; 
-	        }
-		}
-		para.add(ciudad);
+	
+		para.add(ciudad  + " ");
 		para.setAlignment(Element.ALIGN_LEFT);
 		para.setFont(new Font(bf, 12));
 		para.add( new SimpleDateFormat("dd-MM-yyyy").format(fecha));
@@ -431,10 +495,10 @@ public class GeneradorFilePdf {
 		
 		
 		
-		
-
+		System.out.println("cargo   " +cargo);
+		System.out.println("institucion  " +institucion);
 		Chunk chunkHeadleft= new Chunk(
-				"DE : " + de
+				"DE : " + de.toUpperCase()
 						+ "\r\n        " +cargo.toUpperCase()  +"\r\n        " +institucion.toUpperCase() + "\r\n",
 						bfbold);
 		if (genero == 1) {
@@ -506,10 +570,7 @@ log.debug("respuesta::" + respuesta);
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
 
 		int cantipaginas2 =cantidaPage2(respuesta, marginLeft, marginRight, marginTop, marginBottom) ;
-		if (	writer.getPageNumber()<cantipaginas2) {
-
-			document.newPage();
-		}
+	
 		PdfPTable table = new PdfPTable(1);
 		table.setTotalWidth(50f);
 		PdfPCell image2LeftCell = new PdfPCell();

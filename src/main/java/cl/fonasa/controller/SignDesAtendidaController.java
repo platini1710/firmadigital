@@ -231,7 +231,7 @@ public class SignDesAtendidaController {
 		} else if ("6".equals(codigo)) {
 			message = "Fallo el envio de correo , se firmó el archivo y se  cerró en base de datos";
 		} else if ("7".equals(codigo)) {
-			message = "Fallo la obtencion del token, usuario no cuenta con firma digital registrada xxxx";
+			message = "Fallo la obtencion del token, usuario no cuenta con firma digital registrada ";
 		} 
 
 
@@ -276,11 +276,11 @@ public class SignDesAtendidaController {
 	
 			fileName = generadorFilePdf.generaFileFelicitacioPdf(solicitud.getNombreSolicitante(),solicitud.getOrdinario(), solicitud.getNombreTipificacion(),  // si no es reclamo
 					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),
-					parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales());
+					parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales(),solicitud.getCiudad());
 		} else 		 {                                         // si es reclamo
 	
 			fileName = generadorFilePdf.generaFileReclamposPdf(solicitud,solicitud.getOrdinario(), 
-				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales(),solicitud.getIdCaso());
+				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales(),solicitud.getIdCaso(),solicitud.getCiudad());
 		}
 	 
 
@@ -311,16 +311,16 @@ public class SignDesAtendidaController {
 		int page =numPage[0]-1;
 		if ((solicitud.getTipo().trim().toUpperCase().indexOf("FELICITACI")>=0) ) {  
 			json = json + "<llx>250</llx> ";
-			json = json + "<lly>215</lly> ";
-			json = json + "<urx>340</urx> ";		
-			json = json + "<ury>165</ury> ";
+			json = json + "<lly>255</lly> ";
+			json = json + "<urx>390</urx> ";		
+			json = json + "<ury>90</ury> ";
 			json = json + "<page>" + page +"</page>";
 
 		} else {
 			json = json + "<llx>250</llx> ";
-			json = json + "<lly>215</lly> ";
-			json = json + "<urx>340</urx> ";
-			json = json + "<ury>165</ury> ";
+			json = json + "<lly>255</lly> ";
+			json = json + "<urx>390</urx> ";		
+			json = json + "<ury>90</ury> ";
 			json = json + "<page>" + page +"</page>";
 
 		}
@@ -336,7 +336,7 @@ public class SignDesAtendidaController {
 				
 		json = json +  "\r\n}\r\n";	
 		json = json + "\r\n" + "] \r\n" + "}";
-		log.info("json  " +json);
+		log.debug("json  " +json);
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(postEndpoint);
 		httpRequest.setHeader("Accept", "application/json");
@@ -351,7 +351,7 @@ public class SignDesAtendidaController {
 
 		httpRequest.setEntity(stringEntity);
 		httpRequest.setHeader("Content-type", "application/json");
-		log.info("previo a firmar documento a url  " +postEndpoint);
+		log.debug("previo a firmar documento a url  " +postEndpoint);
 		HttpResponse response = httpclient.execute(httpRequest); 
 		if (response.getStatusLine().getStatusCode() != 200) { 
 			throw new RuntimeException(
@@ -397,7 +397,7 @@ public class SignDesAtendidaController {
 		}catch(Exception e) {
 			log.error(e.getMessage(),e );
 		}
-	log.info(" correoCC::" + correoCC);;
+	log.debug(" correoCC::" + correoCC);;
 	String json = "{\r\n" + 
 			"    \"asunto\": \"" + asunto + "\",\r\n" + 
 			"    \"remitente\": \"NotificacionFonasa@fonasa.cl\",\r\n" + 
@@ -531,7 +531,7 @@ public class SignDesAtendidaController {
 			JSONObject jo = (JSONObject) obj; 
 			String apiToken=(String)jo.get("apiToken");
 			if (apiToken==null) {
-				throw new Exception(" Failed : No existe usuario con firma regisdtrada en database ");
+				throw new Exception(" Failed : apiToken nulllo");
 			}
 			log.info("de de sigDes::" + (String)jo.get("nombreFirmante"));
 			String institucion=(String)jo.get("institucion");
@@ -542,16 +542,24 @@ public class SignDesAtendidaController {
 			solicitud.setCargo((String)jo.get("cargo"));
 			solicitud.setInstitucion((String)jo.get("institucion"));
 			solicitud.setDepartamentoFirmante((String)jo.get("departamentoFirmante"));
-			solicitud.setSubDeptoFirmante((String)jo.get("subDeptoFirmante"));
+			if (jo.get("subDeptoFirmante")==null) {
+				solicitud.setSubDeptoFirmante(" ");
+			} else {
+				solicitud.setSubDeptoFirmante((String)jo.get("subDeptoFirmante"));
+			}
+			log.info(" subDeptoFirmante ::::::::::::::::::::::::::::::::::::::::: " + (String)jo.get("subDeptoFirmante"));;
 			if ((String)jo.get("dzFirmante")==null) {
-				solicitud.setDzFirmante("NC");
+				solicitud.setDzFirmante(" ");
 			} else
 			solicitud.setDzFirmante((String)jo.get("dzFirmante"));
 			if ((String)jo.get("direccionSoliciante")==null) {
 				solicitud.setDireccionSolicitante(" ");
 			} else
 			solicitud.setDireccionSolicitante((String)jo.get("direccionSoliciante"));
-			
+			if ((String)jo.get("ciudad")==null) {
+				solicitud.setCiudad(" ");
+			} else
+			solicitud.setCiudad((String)jo.get("ciudad"));
 			//solicitud.setDireccionSolicitante(	"\r\nPURISIMA N°240, DEPTO. 301/ RECOLETA/ REGION METROPOLITANA " +"\r\nSUBDEPTO. GESTIÓN DE SOLICITUDES CIUDADANAS " + "\r\nSUBDEPTO. OFICINA DE PARTES ");
 			solicitud.setIniciales((String)jo.get("iniciales"));
 	    }

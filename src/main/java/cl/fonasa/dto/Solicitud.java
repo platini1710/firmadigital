@@ -18,6 +18,7 @@ public class Solicitud implements Serializable {
 	private String   problemaDeSalud;
 	private String   email;
 	private String   respuesta;
+
 	private String   otp;
 	private int   ord;
 	private String   tipo;
@@ -38,6 +39,7 @@ public class Solicitud implements Serializable {
 	private String  	subDeptoFirmante;
 	private String  	iniciales;
 	private String  	direccionSolicitante;
+	private String  	ciudad;
 	public long getIdCaso() {
 		return idCaso;
 	}
@@ -242,6 +244,13 @@ public class Solicitud implements Serializable {
 	}
 
 
+	public String getCiudad() {
+		return ciudad;
+	}
+
+	public void setCiudad(String ciudad) {
+		this.ciudad = ciudad;
+	}
 
 	
 	

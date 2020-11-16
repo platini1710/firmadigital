@@ -120,7 +120,7 @@ public class SignFileService {
 		log.warn("Run ::" + run);
 		log.warn("Expiration ::" + payloads.getExpiration());
 		log.warn("Purpose ::" + payloads.getPurpose());
-    	System.out.println("prop\u00f3sito  general ");
+		log.warn("keySecret ::" + payloads.getKeySecret());
 		return builder.compact();
 
 	}
