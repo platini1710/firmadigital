@@ -39,13 +39,17 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
     private  String   departamentoFirmante;
     private  String   subDeptoFirmante;
     private  String   dzFirmante;
+    private  int page=120;
+    private  Paragraph paragraphFirma;
 	 public static final String FONT= "/Font/arial.ttf";
 
 
-    public HeadFootOtrosPdf(String departamentoFirmante,String subDeptoFirmante,String dzFirmante) {
+    public HeadFootOtrosPdf(String departamentoFirmante,String subDeptoFirmante,String dzFirmante,int cant, Paragraph paragraphFirma) {
     	this.departamentoFirmante=departamentoFirmante;
     	this.subDeptoFirmante=subDeptoFirmante;
     	this.dzFirmante=dzFirmante;
+    	this.page=cant;
+    	this.paragraphFirma=paragraphFirma;
     }
     public void onOpenDocument(PdfWriter writer, Document document) {
 
@@ -60,8 +64,37 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
 
     @Override
     public void onEndPage(PdfWriter writer, Document document) {
-        addHeader(writer);
-        addFooter(writer);
+		Font bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
+
+	    addHeader(writer);
+	    addFooter(writer);
+	    if (this.page==writer.getPageNumber()) {
+        	PdfContentByte cb = writer.getDirectContent();
+    		ColumnText ct = new ColumnText(cb);
+    		Phrase myText = new Phrase(paragraphFirma);
+    		ct.setSimpleColumn(myText, 30, -750, 580, 300, 15, Element.ALIGN_CENTER);
+    		try {
+				ct.go();
+			} catch (DocumentException e) {
+				// TODO Auto-generated catch block
+				log.error(e.getMessage(),e);
+			}
+    		 cb = writer.getDirectContent();
+    		 ct = new ColumnText(cb);
+    		 Chunk	chunkFirma = new Chunk("        Saluda atentamente.,".toUpperCase(),bfbold);
+    		 myText = new Phrase(chunkFirma);
+    		
+    		ct.setSimpleColumn(myText, 30, -750,  580, 250,  15, Element.ALIGN_LEFT);
+    		try {
+				ct.go();
+			} catch (DocumentException e) {
+				// TODO Auto-generated catch block
+				log.error(e.getMessage(),e);
+			}
+        }
+        
+
+
     }
 
     private void addHeader(PdfWriter writer) {

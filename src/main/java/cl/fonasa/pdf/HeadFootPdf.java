@@ -23,6 +23,7 @@ import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.ColumnText;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfName;
@@ -41,9 +42,13 @@ public class HeadFootPdf extends PdfPageEventHelper {
     private String nombre;
     private String run;
     private String periodoDesde, periodoHasta;
-
-    public HeadFootPdf() {
-
+    private  int page=120;
+    private  Paragraph paragraphFirma;
+	 public static final String FONT= "/Font/arial.ttf";
+    
+    public HeadFootPdf(int cant, Paragraph paragraphFirma) {
+    	this.page=cant;
+    	this.paragraphFirma=paragraphFirma;
     }
     public void onOpenDocument(PdfWriter writer, Document document) {
 
@@ -58,8 +63,34 @@ public class HeadFootPdf extends PdfPageEventHelper {
 
     @Override
     public void onEndPage(PdfWriter writer, Document document) {
+		Font bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
         addHeader(writer);
         addFooter(writer);
+
+	    if (this.page==writer.getPageNumber()) {
+			PdfContentByte cb = writer.getDirectContent();
+			ColumnText ct = new ColumnText(cb);
+			Phrase myText = new Phrase(paragraphFirma);
+			ct.setSimpleColumn(myText, 30, -750, 580, 117, 15, Element.ALIGN_CENTER);
+			try {
+				ct.go();
+			} catch (DocumentException e) {
+				// TODO Auto-generated catch block
+				log.error(e.getMessage(),e);
+			}
+			 cb = writer.getDirectContent();
+			 ct = new ColumnText(cb);
+			 Chunk	chunkFirma = new Chunk("        Saluda atentamente.,".toUpperCase(),bfbold);
+			 myText = new Phrase(chunkFirma);
+			
+			ct.setSimpleColumn(myText, 30, -750,  580, 250,  15, Element.ALIGN_LEFT);
+			try {
+				ct.go();
+			} catch (DocumentException e) {
+				// TODO Auto-generated catch block
+				log.error(e.getMessage(),e);
+			}
+	    }
     }
 
     private void addHeader(PdfWriter writer) {
