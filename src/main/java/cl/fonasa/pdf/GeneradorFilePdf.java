@@ -1,14 +1,19 @@
 package cl.fonasa.pdf;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,9 +78,9 @@ public class GeneradorFilePdf {
 		paragraphFirma.add(chunkFirma);
 		chunkFirma = new Chunk("\r\n" + institucion.toUpperCase(), fontBold);
 		paragraphFirma.add(chunkFirma);
-
-		log.debug("File :: " + clave + ".pdf");
-		;
+		if (log.isDebugEnabled()) {
+		log.debug("File :: [" + clave + "].pdf");
+		}
 		FileOutputStream FILE = new FileOutputStream(clave + ".pdf");
 		int marginLeft = 60;
 		int marginRight = 60;
@@ -106,6 +111,8 @@ public class GeneradorFilePdf {
 
 		respuesta = respuesta.replaceAll("<br>", "<br/>");
 		respuesta = respuesta.replaceAll("<p>", "<p align=\"justify\">");
+		int intArray[]=new int[1];;
+		respuesta=convertImagen(respuesta,clave,intArray);
 		Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
 
 		PdfWriter writer = PdfWriter.getInstance(document, FILE);
@@ -261,13 +268,29 @@ public class GeneradorFilePdf {
 		paragraphFirma.add(chunkFirma);
 		document.add(paragraphFirma);
 		solicitud.setNumeroPaginas(writer.getPageNumber());
-		log.debug("paso numeroPaginas::" + writer.getPageNumber());
+		if (log.isDebugEnabled()) {
+			log.debug("paso numeroPaginas::[" + writer.getPageNumber() + "]");
+		}
 		document.close();
 
 		FILE.flush();
-		log.debug("getPageNumber: " + writer.getPageNumber());
+		if (log.isDebugEnabled()) {
+			log.debug("getPageNumber: [" + writer.getPageNumber()+ "]");
+		}
 		numPage[0] = writer.getPageNumber();
 		FILE.close();
+		if (intArray[0]>0) {
+			try {
+				int cont=0;
+				while (cont<(intArray[0])) {
+					File file = new File(clave+ cont +".png");
+					file.delete();
+					cont=cont + 1;
+				}
+			}catch(Exception e) {
+				log.error(e.getMessage(),e);
+			}
+		}
 		return clave + ".pdf";
 
 	}
@@ -306,6 +329,9 @@ public class GeneradorFilePdf {
 		}
 		respuesta = respuesta.replaceAll("<br>", "<br/>");
 		respuesta = respuesta.replaceAll("<p>", "<p align=\"justify\">");
+		int intArray[]=new int[1];;
+		respuesta=convertImagen(respuesta,clave,intArray);
+
 		Chunk chunkFirma;
 		//// paragraphBody.add(chunk2);Saluda atentamente.,
 		chunkFirma = new Chunk("      ".toUpperCase(), bfbold);
@@ -400,13 +426,14 @@ public class GeneradorFilePdf {
 			paraLeft.add(departamentoFirmante.toUpperCase());
 			headParaTit.add(paraLeft);
 		}
-
-		log.debug("departamentoFirmante 	::" + departamentoFirmante);
-		;
+		if (log.isDebugEnabled()) {
+			log.debug("departamentoFirmante 	::[" + departamentoFirmante + "]");
+		}
 		paraLeft = new Paragraph();
 		paraLeft.setFont(bfbold);
-		log.debug(" subDeptoFirmante ::::::::::::::::::::::::::::::::::::::::: " + subDeptoFirmante);
-		;
+		if (log.isDebugEnabled()) {
+			log.debug(" subDeptoFirmante ::::::::::::::::::::::::::::::::::::::::: [" + subDeptoFirmante + "]");
+		}
 		if ((subDeptoFirmante != null) && (!"".equals(subDeptoFirmante.trim()))) {
 			paraLeft.add(subDeptoFirmante.toUpperCase());
 			headParaTit.add(paraLeft);
@@ -501,8 +528,9 @@ public class GeneradorFilePdf {
 		document.add(paragrapHeadLeft);
 
 		// document.add(tableBody);
-
-		log.debug("respuesta::" + respuesta);
+		if (log.isDebugEnabled()) {
+			log.debug("respuesta::" + respuesta);
+		}
 		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
 
@@ -543,11 +571,26 @@ public class GeneradorFilePdf {
 		cellFoot.setBorder(Rectangle.NO_BORDER);
 		tableFooter.addCell(cellFoot);
 		document.add(tableFooter);
-		log.debug("getPageNumber: " + writer.getPageNumber());
+
+		if (log.isDebugEnabled()) {
+			log.debug("getPageNumber: [" + writer.getPageNumber() +"]");
+		}
 		numPage[0] = writer.getPageNumber();
 		document.close();
 		FILE.flush();
 		FILE.close();
+		if (intArray[0]>0) {
+			int cont=0;
+			try {
+				while (cont<(intArray[0])) {
+					File file = new File(clave+ cont +".png");
+					file.delete();
+					cont=cont + 1;
+				}
+			}catch(Exception e) {
+				log.error(e.getMessage(),e);
+			}
+		}
 		return clave + ".pdf";
 	}
 
@@ -679,7 +722,7 @@ public class GeneradorFilePdf {
 
 		headParaTit = new Paragraph(8);
 		headParaTit.setAlignment(Element.ALIGN_LEFT);
-
+ 
 		Paragraph paraLeft = new Paragraph();
 		paraLeft.setFont(bfbold);
 		paraLeft.add("FONDO NACIONAL DE SALUD");
@@ -810,7 +853,9 @@ public class GeneradorFilePdf {
 		Path directory = Paths.get(nameFile);
 
 		try {
-			log.debug("directory ::" + directory.toString());
+			if (log.isDebugEnabled()) {
+				log.debug("directory ::" + directory.toString() +"]");
+			}
 			Files.delete(directory);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -867,7 +912,9 @@ public class GeneradorFilePdf {
 		long idCaso = solicitud.getIdCaso();
 
 		int genero = solicitud.getGenero();
-		log.debug("de :: " + de + ".pdf");
+		if (log.isDebugEnabled()) {
+			log.debug("de :: [" + de + "].pdf");
+		}
 		String nameFile = clave + "111.pdf";
 		Date fecha = new Date();
 		BaseFont fontNormal = BaseFont.createFont(FONT, BaseFont.CP1257, BaseFont.EMBEDDED);
@@ -886,9 +933,9 @@ public class GeneradorFilePdf {
 		paragraphFirma.add(chunkFirma);
 		chunkFirma = new Chunk("\r\n" + institucion.toUpperCase(), fontBold);
 		paragraphFirma.add(chunkFirma);
-
-		log.debug("File :: " + nameFile);
-		;
+		if (log.isDebugEnabled()) {
+			log.debug("File :: [" + nameFile +"]");
+		}
 		FileOutputStream FILE = new FileOutputStream(nameFile);
 
 		Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
@@ -978,7 +1025,9 @@ public class GeneradorFilePdf {
 		Path directory = Paths.get(nameFile);
 
 		try {
-			log.debug("directory ::" + directory.toString());
+			if (log.isDebugEnabled()) {
+				log.debug("directory ::[" + directory.toString() + "]");
+			}
 			Files.delete(directory);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -1007,5 +1056,61 @@ public class GeneradorFilePdf {
 		}
 		return ord;
 	}
+	
+public String convertImagen(String respuesta,String nombreImg ,int[] arr)	{
+	int i=0;
+	int indiceInicio =0;
+	int indiceFin=0;
+	int indice = respuesta.indexOf("<img");
+	int indice1 = 0;
+	String path = "dd";
+	while (indice>=0 ) {
+		indiceInicio = respuesta.indexOf("<img",indice1);
+		indiceFin = respuesta.indexOf(">", indiceInicio) + 1;
+	
+		String srcImg = respuesta.substring(indiceInicio, indiceFin);
+	
+		String src = respuesta.substring(indiceInicio, respuesta.indexOf(">", indiceInicio) + 1);
+	
+		indice1 = src.indexOf("\"");
+	
+		src = src.substring(indice1 + 1, src.indexOf("\"", indice1 + 1));
+		String[] strings = src.split(",");
+		String extension;
+	
+		switch (strings[0]) {// check image's extension
+			case "data:image/jpeg;base64":
+			extension = ".jpeg";
+			break;
+			case "data:image/png;base64":
+			extension = ".png";
+			break;
+			default:// should write cases for more images types
+			extension = ".jpg";
+			break;
+		}
+		// convert base64 string to binary data
+		byte[] data = DatatypeConverter.parseBase64Binary(strings[1]);
+		path = nombreImg + i +extension;
+		File file = new File(path);
+		try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
+			outputStream.write(data);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	
+		String s= "<img src=\"" + path + "\"/>";
+		respuesta = respuesta.replace(respuesta.substring(indiceInicio, indiceFin),s);
+		indice = respuesta.indexOf("<img", indiceInicio +s.length() );
+		if (log.isDebugEnabled()) {
+			log.debug("respuesta  indice [" +indice + "]");
+			log.debug("respuesta  indice [" + respuesta+ "]");
+		}
+		i=i +1;
+		indice1=indice;
+	}
+	arr[0]=i;
+	return respuesta;
 
+}
 }

@@ -115,12 +115,13 @@ public class SignFileService {
 				.claim("purpose",payloads.getPurpose())
 
 				.signWith(SignatureAlgorithm.HS256,  TextCodec.BASE64.encode(payloads.getKeySecret()));
-	
-		log.warn("Entity ::" + payloads.getEntity()); 
-		log.warn("Run ::" + run);
-		log.warn("Expiration ::" + payloads.getExpiration());
-		log.warn("Purpose ::" + payloads.getPurpose());
-		log.warn("keySecret ::" + payloads.getKeySecret());
+		if (log.isDebugEnabled()) {
+			log.debug("Entity ::" + payloads.getEntity() + "]"); 
+			log.debug("Run ::" + run + "]");
+			log.debug("Expiration ::" + payloads.getExpiration() + "]");
+			log.debug("Purpose ::" + payloads.getPurpose() + "]");
+			log.debug("keySecret ::" + payloads.getKeySecret() + "]");
+		}
 		return builder.compact();
 
 	}
@@ -167,7 +168,9 @@ public class SignFileService {
 			header.setFechaHora(DatatypeFactory.newInstance().newXMLGregorianCalendar(gfechaActual));
 
 			GestionCertificadoRequest request = new GestionCertificadoRequest();
-			log.info("fechaActual  ::" + fechaActual.getTime());
+			if (log.isDebugEnabled()) {
+			log.debug("fechaActual  ::" + fechaActual.getTime());
+			}
 			GestionCertificadoRequest.BodyResquest bd = new GestionCertificadoRequest.BodyResquest();
 			bd.setRunCertificado(rut);
 			bd.setTipoCertificado(codigo);

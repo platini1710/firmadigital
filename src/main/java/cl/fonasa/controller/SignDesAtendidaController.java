@@ -140,7 +140,9 @@ public class SignDesAtendidaController {
 				// ordinario =respuestaOrdinario.getOrdinario();// fallo obtencion ordinario
 
 			} else {
-				log.debug("obtiene ordinario");
+				if (log.isDebugEnabled()) {
+					log.debug("obtiene ordinario");
+				}
 				ordinario = solicitud.getOrdinario();// fallo obtencion ordinario
 			}
 			// String parrafoUno =respuestaOrdinario.getParrafoUno();
@@ -152,10 +154,13 @@ public class SignDesAtendidaController {
 
 			fis = new FileInputStream(clave + fileFirmadoDigital);
 			codigo = "4";
-			log.debug("previo a subir el archivo a servidor FTP" );
+			if (log.isDebugEnabled()) {
+				log.debug("previo a subir el archivo a servidor FTP" );
+			}
 			ftp.upload(solicitud.getIdCaso(), fis, "", solicitud.getPath(), clave + fileFirmadoDigital);// fallo
-																											// subida
-			log.debug("ya subio al servidor FTP" );																						// FTP
+			if (log.isDebugEnabled()) {																								// subida
+				log.debug("ya subio al servidor FTP" );		
+			}// FTP
 				
 			// archivo
 
@@ -256,9 +261,9 @@ public class SignDesAtendidaController {
 	public String signFilePdf(String ordinario,Solicitud solicitud, Payload payloads, String clave,String respuesta,String parrafoUno,String parrafoDos) throws ParseException, IOException, DocumentException, java.text.ParseException, NoSuchAlgorithmException {
     	Object[] o = null;
 		if (log.isDebugEnabled()) {
-		log.debug("signFilePdf de de ::" + solicitud.getDe());
-
-		log.debug("manda a firmar documento pdf ");
+			log.debug("signFilePdf de de ::" + solicitud.getDe());
+	
+			log.debug("manda a firmar documento pdf ");
 		}
     	int[] numPage = {2};
 
@@ -295,45 +300,46 @@ public class SignDesAtendidaController {
 		File file = new File(fileName);
 
 		String fileBase64 = signFileService.encodeFileToBase64Binary(file);
+	     StringBuilder json 
+         = new StringBuilder(); 
+	     json.append( "{\r\n" + "\"api_token_key\": \"" +solicitud.getApiToken() + "\",\r\n" + "\"token\":\"" + resultToken + "\",\r\n"
+				+ "\"files\":[");
+	     json.append(  "{\r\n" + "\"content-type\": \"application/pdf\"," + " \r\n" + "\"content\": \"" + fileBase64
+				+ "\" \r\n");
+	     json.append( ",	\r\n \"description\": \"str\"," + " \r\n" + "\"checksum\":\""
+				+ signFileService.verifyChecksum(file) + "\", \r\n");
 
-		String json = "{\r\n" + "\"api_token_key\": \"" +solicitud.getApiToken() + "\",\r\n" + "\"token\":\"" + resultToken + "\",\r\n"
-				+ "\"files\":[";
-		json = json + "{\r\n" + "\"content-type\": \"application/pdf\"," + " \r\n" + "\"content\": \"" + fileBase64
-				+ "\" \r\n";
-		json = json + ",	\r\n \"description\": \"str\"," + " \r\n" + "\"checksum\":\""
-				+ signFileService.verifyChecksum(file) + "\", \r\n";
 
 
-
-		json = json +"\"layout\":";
+	     json.append("\"layout\":");
 		
-		json = json + "\"<AgileSignerConfig>";
-		json = json + "<Application id=\\\"THIS-CONFIG\\\">";
-		json = json + "<pdfPassword/> " ;
-		json = json + "<Signature>";
-		json = json + "<Visible active=\\\"true\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">";
+	     json.append( "\"<AgileSignerConfig>");
+	     json.append( "<Application id=\\\"THIS-CONFIG\\\">");
+	     json.append( "<pdfPassword/> " );
+	     json.append( "<Signature>");
+	     json.append( "<Visible active=\\\"true\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">");
 		int page =numPage[0]-1;
   
-		json = json + "<llx>250</llx> ";
-		json = json + "<lly>275</lly> ";
-		json = json + "<urx>390</urx> ";		
-		json = json + "<ury>110</ury> ";
-		json = json + "<page>" + page +"</page>";
+		 json.append( "<llx>250</llx> ");
+		 json.append( "<lly>275</lly> ");
+		 json.append( "<urx>390</urx> ");		
+		 json.append( "<ury>110</ury> ");
+		 json.append("<page>" + page +"</page>");
 
 
 		
-		json = json + "<image>BASE64</image>";
-		json = json + "<BASE64VALUE>" + solicitud.getImagenFirma() + "</BASE64VALUE>";
-		json = json + "</Visible>";
-		json = json + "</Signature>";
-		json = json + "</Application>";
-		json = json + "</AgileSignerConfig>\"";
+		 json.append( "<image>BASE64</image>");
+		 json.append( "<BASE64VALUE>" + solicitud.getImagenFirma() + "</BASE64VALUE>");
+		 json.append( "</Visible>");
+		 json.append( "</Signature>");
+		 json.append( "</Application>");
+		 json.append( "</AgileSignerConfig>\"");
 		
 				
-		json = json +  "\r\n}\r\n";	
-		json = json + "\r\n" + "] \r\n" + "}";
+		 json.append(  "\r\n}\r\n");
+		 json.append("\r\n" + "] \r\n" + "}");
 		if (log.isDebugEnabled()) {
-		log.debug("json  " +json);
+		log.debug("json  [" +json + "]");
 		}
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 		HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(postEndpoint);
@@ -344,13 +350,13 @@ public class SignDesAtendidaController {
 		httpRequest.setHeader("otp", solicitud.getOtp());
 
 		
-		StringEntity stringEntity = new StringEntity(json);
+		StringEntity stringEntity = new StringEntity(json.toString());
 		stringEntity.setContentType("application/json");
 
 		httpRequest.setEntity(stringEntity);
 		httpRequest.setHeader("Content-type", "application/json");
 		if (log.isDebugEnabled()) {
-			log.debug("previo a firmar documento a url  " +postEndpoint);
+			log.debug("previo a firmar documento a url [ " +postEndpoint + "]");
 		}
 		HttpResponse response = httpclient.execute(httpRequest); 
 		if (response.getStatusLine().getStatusCode() != 200) { 
@@ -369,9 +375,9 @@ public class SignDesAtendidaController {
 		o = ja.toArray();
 		int i = 0;
 		Map o1 = (Map) o[i];
-
-		log.debug("ya se firmo exitosamente  el documento" );
-		
+		if (log.isDebugEnabled()) {
+			log.debug("ya se firmo exitosamente  el documento" );
+		}
 
 	     content = (String) o1.get("content");
 		BASE64Decoder decoder = new BASE64Decoder();
@@ -414,19 +420,21 @@ public class SignDesAtendidaController {
 		if (log.isDebugEnabled()) {
 			log.debug(" correoCC::" + correoCC);;
 		}
-		String json = "{\r\n" + 
-			"    \"asunto\": \"".concat(asunto.concat("\",\r\n")) ;  
-			json=	json + "    \"remitente\": \"NotificacionFonasa@fonasa.cl\",\r\n" + 
-			"    \"destinatarios\": [\r\n" + 
-			"        \""  +  correo +  "\"\r\n" + 
-			"    ],\r\n" + 
-		    "    \"destinatariosConCopia\":[" + 
-			"    ],\r\n" + 
-			"    \"destinatariosConCopiaOculta\":[ \"" +   correoCC +  "\"\r\n" + 
-			"    ],\r\n" + 
-			"    \"mensaje\": \"" + msg + "\",\r\n" + 
-			"    \"adjuntos\": [\r\n\"solicitudCiudadana.pdf?" + content			 + "\"     ]\r\n" + 
-			"}";
+	     StringBuilder json 
+         = new StringBuilder(); 
+	     json.append( "{\r\n" + 
+			"    \"asunto\": \"".concat(asunto.concat("\",\r\n"))) ;  
+	     json.append(  "    \"remitente\": \"NotificacionFonasa@fonasa.cl\",\r\n" ) ;  
+	     json.append( 	"    \"destinatarios\": [\r\n" ) ;  
+	     json.append( 	"        \""  +  correo +  "\"\r\n" ) ;   
+	     json.append( 	"    ],\r\n" ) ;   
+	     json.append(     "    \"destinatariosConCopia\":[") ;   
+	     json.append( 	"    ],\r\n" ) ;   
+	     json.append( 	"    \"destinatariosConCopiaOculta\":[ \"" +   correoCC +  "\"\r\n" ) ;   
+		 json.append( 	"    ],\r\n" ) ;   
+		 json.append( 	"    \"mensaje\": \"" + msg + "\",\r\n" ) ;  
+		 json.append( 	"    \"adjuntos\": [\r\n\"solicitudCiudadana.pdf?" + content			 + "\"     ]\r\n" ) ;  
+		 json.append( 	"}") ;  
 
 	CloseableHttpClient httpclient = HttpClients.createDefault();
 	HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(urlCorreoAdjunto);
@@ -437,7 +445,7 @@ public class SignDesAtendidaController {
 	httpRequest.setHeader("Content-Disposition",
 			"attachment; filename=" + "document.pdf");
 
-	StringEntity stringEntity = new StringEntity(json,"UTF-8");
+	StringEntity stringEntity = new StringEntity(json.toString(),"UTF-8");
 	httpRequest.setEntity(stringEntity);
 	HttpResponse response = httpclient.execute(httpRequest);
 	if (response.getStatusLine().getStatusCode() != 200) {
@@ -447,13 +455,15 @@ public class SignDesAtendidaController {
 	}
 	public String obtenerCopiaCorreo(long numeroSolicitud) throws ClientProtocolException, IOException, ParseException {
 		String correo="";
-		String json = "\r\n" + 
-				"{\r\n" + 
-				"  \"numeroSolicitud\" : " + numeroSolicitud+ "\r\n" + 
-				"\r\n" + 
-				"\r\n" + 
-				"}\r\n" + 
-				"" ;
+		 StringBuilder json 
+         = new StringBuilder(); 
+		 json.append( "\r\n" );
+		 json.append(		"{\r\n" );
+		 json.append(		"  \"numeroSolicitud\" : " + numeroSolicitud+ "\r\n" ); 
+		 json.append("\r\n");
+		 json.append("\r\n" );
+		 json.append("}\r\n"); 
+		 json.append("" );
 
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(correoZona);
@@ -463,7 +473,7 @@ public class SignDesAtendidaController {
 		httpRequest.setHeader("Content-type", "application/json;charset=UTF-8");
 
 
-		StringEntity stringEntity = new StringEntity(json,"UTF-8");
+		StringEntity stringEntity = new StringEntity(json.toString(),"UTF-8");
 		httpRequest.setEntity(stringEntity);
 		HttpResponse response = httpclient.execute(httpRequest);
 		if (response.getStatusLine().getStatusCode() != 200) {
@@ -523,11 +533,15 @@ public class SignDesAtendidaController {
 			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
 			httppost.setHeader("Accept", "application/json");
 			httppost.setHeader("Content-type", "application/json");
-			String json = "{\r\n" + "\"run\": \"" + run  + "\", \r\n"
-					+ "\"idCaso\": " + solicitud.getIdCaso()  + "\r\n" 
-					+"}";
-			log.debug(" getTokenKey json ::" + json);
-			StringEntity stringEntity = new StringEntity(json);
+			 StringBuilder json 
+	         = new StringBuilder(); 
+			 json.append( "{\r\n" + "\"run\": \"" + run  + "\", \r\n");
+			 json.append( "\"idCaso\": " + solicitud.getIdCaso()  + "\r\n" );
+			 json.append("}");
+			if (log.isDebugEnabled()) {
+				log.debug(" getTokenKey json ::" + json);
+			}
+			StringEntity stringEntity = new StringEntity(json.toString());
 			httppost.setEntity(stringEntity);
 			HttpResponse response = httpclient.execute(httppost );
 			if (response.getStatusLine().getStatusCode() != 200) {
@@ -549,7 +563,9 @@ public class SignDesAtendidaController {
 			if (apiToken==null) {
 				throw new Exception(" Failed : apiToken nulllo");
 			}
-			log.debug("de de sigDes::" + (String)jo.get("nombreFirmante"));
+			if (log.isDebugEnabled()) {
+				log.debug("de de sigDes::" + (String)jo.get("nombreFirmante"));
+			}
 			String institucion=(String)jo.get("institucion");
 			solicitud.setApiToken(apiToken);
 			solicitud.setEntity(institucion);
@@ -563,7 +579,9 @@ public class SignDesAtendidaController {
 			} else {
 				solicitud.setSubDeptoFirmante((String)jo.get("subDeptoFirmante"));
 			}
-			log.debug(" subDeptoFirmante ::::::::::::::::::::::::::::::::::::::::: " + (String)jo.get("subDeptoFirmante"));;
+			if (log.isDebugEnabled()) {
+				log.debug(" subDeptoFirmante ::::::::::::::::::::::::::::::::::::::::: [" + (String)jo.get("subDeptoFirmante") + "]");;
+			}
 			if ((String)jo.get("dzFirmante")==null) {
 				solicitud.setDzFirmante(" ");
 			} else
@@ -591,18 +609,22 @@ public class SignDesAtendidaController {
 
 
 			httppost.setHeader("Content-type", "application/json");
-			String json = "{\r\n" + 
-					"  \"numeroSolicitud\" :" +  idCaso +  ",\r\n" + 
-					"  \"mensaje\" : \"" + alias + "\",\r\n" + 
-					"  \"documentoAdjunto\" : [ {\r\n" + 
-					"    \"nombreArchivo\" : \"" + nombreArchivo  + "\",\r\n" + 
-					"    \"descripcion\" : \"string\",\r\n" + 
-					"    \"path\" : \"" + ruta + "\",\r\n" + 
-					"    \"extension\" : \"" + extension + "\"\r\n" + 
-					"  } ]\r\n" + 
-					"}";
-			log.debug("json::: " + json);
-			StringEntity stringEntity = new StringEntity(json);
+			 StringBuilder json 
+	         = new StringBuilder(); 
+			 json.append( "{\r\n" );
+			 json.append("  \"numeroSolicitud\" :" +  idCaso +  ",\r\n" ); 
+			 json.append("  \"mensaje\" : \"" + alias + "\",\r\n" ); 
+			 json.append("  \"documentoAdjunto\" : [ {\r\n" ); 
+			 json.append("    \"nombreArchivo\" : \"" + nombreArchivo  + "\",\r\n" ); 
+			 json.append("    \"descripcion\" : \"string\",\r\n" ); 
+			 json.append("		   \"path\" : \"" + ruta + "\",\r\n" ); 
+			 json.append("    \"extension\" : \"" + extension + "\"\r\n" );
+			 json.append("  } ]\r\n" ); 
+			 json.append("}"); 
+			if (log.isDebugEnabled()) {
+				log.debug("json::: " + json);
+			}
+			StringEntity stringEntity = new StringEntity(json.toString());
 			httppost.setEntity(stringEntity);
 			HttpResponse response = httpclient.execute(httppost );
 			if (response.getStatusLine().getStatusCode() != 200) {
@@ -619,8 +641,10 @@ public class SignDesAtendidaController {
 			Object obj = new JSONParser().parse(result);
 			JSONObject jo = (JSONObject) obj; 
 			codigo=(Long)jo.get("codigo");
-			log.debug("codigo::: " + codigo);
-			log.debug("result::: " + result);
+			if (log.isDebugEnabled()) {
+				log.debug("codigo::: " + codigo);
+				log.debug("result::: " + result);
+			}
 			return codigo;
 		  
 	  }
@@ -688,7 +712,7 @@ public class SignDesAtendidaController {
 					solicitud.getEmail(), content);
 		}
 	  }
-	  
+	   
 	  
 	    public String obtenerOrdinario(String runUsuario,long numeroSolicitud) throws Exception {
 
@@ -733,11 +757,15 @@ public class SignDesAtendidaController {
 
 			if (!resultRest.isNull("ordinario")) {
 				ord = resultRest.getString("ordinario");
-				log.debug("ordinario ordinario ordinario ordinario " + ord);
+				if (log.isDebugEnabled()) {
+					log.debug("ordinario ordinario ordinario ordinario " + ord + "]");
+				}
 			}
 			else {
 				ord=" " ;//calcOrdinario( zona);
-				log.debug("ordinario   " + ord);
+				if (log.isDebugEnabled()) {
+					log.debug("ordinario   [" + ord + "]");
+				}
 			}
 			return ord;
 		}
