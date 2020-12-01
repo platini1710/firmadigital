@@ -48,7 +48,7 @@ public class GeneradorFilePdf {
 	public String generaFileReclamposPdf(Solicitud solicitud, String ordinario, String respuesta, String clave,
 			String wsdl, String parrafoUno, String parrafoDos, int[] numPage, String cargo, String institucion,
 			String dzFirmante, String subDeptoFirmante, String departamentoFirmante, String direccionSolicitante,
-			String iniciales, long numeroSolicitud, String ciudad,String firma) throws IOException, DocumentException {
+			String iniciales, long numeroSolicitud, String ciudad, String firma) throws IOException, DocumentException {
 		String nombreSolicitante = solicitud.getNombreSolicitante().toUpperCase();
 		String nombreTipificacion = solicitud.getNombreTipificacion().toUpperCase();
 		int ord = solicitud.getOrd();
@@ -79,7 +79,7 @@ public class GeneradorFilePdf {
 		chunkFirma = new Chunk("\r\n" + institucion.toUpperCase(), fontBold);
 		paragraphFirma.add(chunkFirma);
 		if (log.isDebugEnabled()) {
-		log.debug("File :: [" + clave + "].pdf");
+			log.debug("File :: [" + clave + "].pdf");
 		}
 		FileOutputStream FILE = new FileOutputStream(clave + ".pdf");
 		int marginLeft = 60;
@@ -113,8 +113,9 @@ public class GeneradorFilePdf {
 
 		respuesta = respuesta.replaceAll("<br>", "<br/>");
 		respuesta = respuesta.replaceAll("<p>", "<p align=\"justify\">");
-		int intArray[]=new int[1];;
-		respuesta=convertImagen(respuesta,clave,intArray);
+		int intArray[] = new int[1];
+		;
+		respuesta = convertImagen(respuesta, clave, intArray);
 		Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
 
 		PdfWriter writer = PdfWriter.getInstance(document, FILE);
@@ -197,11 +198,6 @@ public class GeneradorFilePdf {
 		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
 
-
-
-		
-		
-		
 		String imagePath = "firma.jpg";
 		//
 		byte[] data = DatatypeConverter.parseBase64Binary(firma);
@@ -217,7 +213,7 @@ public class GeneradorFilePdf {
 		image2.setAlignment(Element.ALIGN_CENTER);
 		imagePath = "/imagen/firma.png";
 		PdfPTable tableFirma = new PdfPTable(2);
-		float[] widths = new float[] { 1f, 2f};
+		float[] widths = new float[] { 1f, 2f };
 		tableFirma.setWidths(widths);
 
 		tableFirma.setKeepTogether(true);
@@ -225,11 +221,10 @@ public class GeneradorFilePdf {
 		tableFirma.setKeepTogether(true);
 		tableFirma.setWidthPercentage(100);
 		PdfPCell cellFirma = new PdfPCell();
-		
+
 		Font fontBoldFirma = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 9, Font.BOLD,
 				BaseColor.BLACK);
-		Chunk chunkfoot4 = new Chunk("SALUDA ATENTAMENTE,                             ",
-				fontBoldFirma);
+		Chunk chunkfoot4 = new Chunk("SALUDA ATENTAMENTE,                             ", fontBoldFirma);
 		cellFirma.setHorizontalAlignment(Element.ALIGN_LEFT);
 		cellFirma.addElement(chunkfoot4);
 		cellFirma.setPaddingBottom(1f);
@@ -237,11 +232,9 @@ public class GeneradorFilePdf {
 		cellFirma.setBorder(Rectangle.NO_BORDER);
 		cellFirma.setFixedHeight(29f);
 		tableFirma.addCell(cellFirma);
-		
-		
-		cellFirma = new PdfPCell();		
-		chunkfoot4 = new Chunk("            Por orden del Director",
-				fontBoldFirma);
+
+		cellFirma = new PdfPCell();
+		chunkfoot4 = new Chunk("            Por orden del Director", fontBoldFirma);
 		cellFirma.setHorizontalAlignment(Element.ALIGN_LEFT);
 		cellFirma.addElement(chunkfoot4);
 		cellFirma.setPaddingBottom(1f);
@@ -250,8 +243,7 @@ public class GeneradorFilePdf {
 		cellFirma.setBorder(Rectangle.NO_BORDER);
 		cellFirma.setFixedHeight(29f);
 		tableFirma.addCell(cellFirma);
-		
-		
+
 		cellFirma = new PdfPCell();
 		cellFirma.setPaddingTop(0f);
 		cellFirma.addElement(image2);
@@ -259,10 +251,8 @@ public class GeneradorFilePdf {
 		cellFirma.setBorder(Rectangle.NO_BORDER);
 		cellFirma.setColspan(2);
 
-
 		tableFirma.addCell(cellFirma);
-		
-		
+
 		cellFirma = new PdfPCell();
 		cellFirma.addElement(paragraphFirma);
 		cellFirma.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -272,16 +262,8 @@ public class GeneradorFilePdf {
 		tableFirma.setWidthPercentage(100);
 		tableFirma.addCell(cellFirma);
 
-
 		document.add(tableFirma);
-		
-		
-		
-		
-		
-		
-		
-		
+
 		document.newPage();
 
 		Chunk chunkFoot = new Chunk(iniciales + "  ", new Font(fontNormal, 12));
@@ -363,20 +345,20 @@ public class GeneradorFilePdf {
 
 		FILE.flush();
 		if (log.isDebugEnabled()) {
-			log.debug("getPageNumber: [" + writer.getPageNumber()+ "]");
+			log.debug("getPageNumber: [" + writer.getPageNumber() + "]");
 		}
 		numPage[0] = writer.getPageNumber();
 		FILE.close();
-		if (intArray[0]>0) {
+		if (intArray[0] > 0) {
 			try {
-				int cont=0;
-				while (cont<(intArray[0])) {
-					File file = new File(clave+ cont +".png");
+				int cont = 0;
+				while (cont < (intArray[0])) {
+					File file = new File(clave + cont + ".png");
 					file.delete();
-					cont=cont + 1;
+					cont = cont + 1;
 				}
-			}catch(Exception e) {
-				log.error(e.getMessage(),e);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
 			}
 		}
 		return clave + ".pdf";
@@ -387,7 +369,8 @@ public class GeneradorFilePdf {
 			String problemaSalud, long idCaso, String respuesta, String clave, int ord, String tipo, String de,
 			String wsdl, String run, int genero, String parrafoUno, String parrafoDos, int[] numPage, String cargo,
 			String institucion, String dzFirmante, String subDeptoFirmante, String departamentoFirmante,
-			String direccionSolicitante, String iniciales, String ciudad,String firma) throws IOException, DocumentException {
+			String direccionSolicitante, String iniciales, String ciudad, String firma)
+			throws IOException, DocumentException {
 
 		Paragraph paragraphBody = new Paragraph(13f);
 		Paragraph paragraphead = new Paragraph(13f);
@@ -396,20 +379,23 @@ public class GeneradorFilePdf {
 		Font bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
 		BaseFont bf = BaseFont.createFont(FONT, BaseFont.CP1257, BaseFont.EMBEDDED);
 		Paragraph paragraphFirma = new Paragraph(13f);
-		respuesta = "<html>	<style>\r\n" + "			h1 {\r\n" + "			font-size: 40px; " + "			}\r\n"
-				+ "			\r\n " + "			p {\r\n" + "  font-family: \"Arial\" "
-				+ "			   font-size:12px;\r\n" +
+	     StringBuilder respuestaB 
+         = new StringBuilder();
+	     respuestaB.append( "<html>	<style>\r\n" + "			h1 {\r\n" + "			font-size: 40px; " + "			}\r\n");
+	     respuestaB.append(  "			\r\n " + "			p {\r\n" + "  font-family: \"Arial\" " );
+	     respuestaB.append(  "			   font-size:12px;\r\n" );
 
-				"			}\r\n "
-				+ "	table {\r\n font-family: arial;\r\n"
-				+ "	  border: 1px solid #000000;\r\n"
-				+ "  border-collapse: collapse;\r\n"
-				+ "  width: 100%;\r\n"
+		respuestaB.append( 				"			}\r\n " );
+		respuestaB.append(  "	table {\r\n font-family: arial;\r\n" );
+		respuestaB.append( "	  border: 1px solid #000000;\r\n" );
+		respuestaB.append(  "  border-collapse: collapse;\r\n" );
+		respuestaB.append(  "  width: 100%;\r\n" );
 		
-				+ "} th{\r\n"
-				+ "	  padding: 8px;text-align: center;\r\n vertical-align: middle;\r\n border:1px solid #000000;\r\n font-family: \"Arial\";font-size: 8pt; width:100%; border-collapse: collapse;"
-				+ "}\r\n  td {  padding: 4px;text-align: left;\r\n vertical-align: middle;\r\n border:1px solid #000000;\r\n font-family: \"Arial\";font-size: 8pt; width:100%; border-collapse: collapse;}		</style> <body><p style=\"text-align: justify;\">"
-				+ respuesta + "</p></body></html>";
+		respuestaB.append(  "} th{\r\n" );
+		respuestaB.append( "	  padding: 8px;text-align: center;\r\n vertical-align: middle;\r\n border:1px solid #000000;\r\n font-family: \"Arial\";font-size: 8pt; width:100%; border-collapse: collapse;" );
+		respuestaB.append(  "}\r\n  td {  padding: 4px;text-align: left;\r\n vertical-align: middle;\r\n border:1px solid #000000;\r\n font-family: \"Arial\";font-size: 8pt; width:100%; border-collapse: collapse;}		</style> <body><p style=\"text-align: justify;\">" );
+		respuestaB.append( respuesta + "</p></body></html>");
+		respuesta=respuestaB.toString();
 		respuesta = respuesta.replaceAll("\\\\n", "\n");
 		respuesta = respuesta.replaceAll("\\\\", "");
 		respuesta = eliminaAllTag(respuesta, "<div", "</div>");
@@ -424,9 +410,12 @@ public class GeneradorFilePdf {
 		}
 		respuesta = respuesta.replaceAll("<br>", "<br/>");
 		respuesta = respuesta.replaceAll("<p>", "<p align=\"justify\">");
-		int intArray[]=new int[1];;
-		respuesta=convertImagen(respuesta,clave,intArray);
-
+		int intArray[] = new int[1];
+		;
+		respuesta = convertImagen(respuesta, clave, intArray);
+		if (log.isDebugEnabled()) {
+			log.debug("respuesta ::" + respuesta);
+		}
 		Chunk chunkFirma;
 		//// paragraphBody.add(chunk2);Saluda atentamente,
 		chunkFirma = new Chunk("      ".toUpperCase(), bfbold);
@@ -464,27 +453,26 @@ public class GeneradorFilePdf {
 		int marginRight = 60;
 		int marginTop = 120;
 		int marginBottom = 260;
-		int cantConFirmas = cantidaPageFelicitacionConFirma(marginLeft, marginRight, marginTop, marginBottom, nombreSolicitante,
-				ordinario, nombreTipificacion, problemaSalud, idCaso, respuesta, clave, ord, tipo, de, wsdl, run,
-				genero, parrafoUno, parrafoDos, numPage, cargo, institucion, dzFirmante, subDeptoFirmante,
-				departamentoFirmante, direccionSolicitante, iniciales, ciudad,firma);
-		int cantSinFirmas = cantidaPageFelicitacionSinFirma(marginLeft, marginRight, marginTop, marginBottom, nombreSolicitante,
-				ordinario, nombreTipificacion, problemaSalud, idCaso, respuesta, clave, ord, tipo, de, wsdl, run,
-				genero, parrafoUno, parrafoDos, numPage, cargo, institucion, dzFirmante, subDeptoFirmante,
-				departamentoFirmante, direccionSolicitante, iniciales, ciudad,firma);
-		numPage[1]=cantConFirmas;
-		numPage[2]=cantSinFirmas;
-		log.info("cantConFirmas ::" + cantConFirmas);
-		log.info("cantSinFirmas ::" + cantSinFirmas);		
+		int cantConFirmas = cantidaPageFelicitacionConFirma(marginLeft, marginRight, marginTop, marginBottom,
+				nombreSolicitante, ordinario, nombreTipificacion, problemaSalud, idCaso, respuesta, clave, ord, tipo,
+				de, wsdl, run, genero, parrafoUno, parrafoDos, numPage, cargo, institucion, dzFirmante,
+				subDeptoFirmante, departamentoFirmante, direccionSolicitante, iniciales, ciudad, firma);
+		int cantSinFirmas = cantidaPageFelicitacionSinFirma(marginLeft, marginRight, marginTop, marginBottom,
+				nombreSolicitante, ordinario, nombreTipificacion, problemaSalud, idCaso, respuesta, clave, ord, tipo,
+				de, wsdl, run, genero, parrafoUno, parrafoDos, numPage, cargo, institucion, dzFirmante,
+				subDeptoFirmante, departamentoFirmante, direccionSolicitante, iniciales, ciudad, firma);
+		numPage[1] = cantConFirmas;
+		numPage[2] = cantSinFirmas;
+		if (log.isDebugEnabled()) {
+			log.debug("cantConFirmas ::" + cantConFirmas);
+			log.debug("cantSinFirmas ::" + cantSinFirmas);
+		}
 		Document document = new Document(PageSize.LEGAL, marginLeft, marginRight, marginTop, marginBottom);
 
 		PdfWriter writer = PdfWriter.getInstance(document, FILE);
-		
-		
-		
-		
+
 		cl.fonasa.pdf.HeadFootOtrosPdf event = new cl.fonasa.pdf.HeadFootOtrosPdf(departamentoFirmante,
-				subDeptoFirmante, dzFirmante, cantConFirmas, cantSinFirmas,paragraphFirma);
+				subDeptoFirmante, dzFirmante, cantConFirmas, cantSinFirmas, paragraphFirma);
 		writer.setPageEvent(event);
 
 		document.open();
@@ -606,7 +594,9 @@ public class GeneradorFilePdf {
 		para.setAlignment(Element.ALIGN_LEFT);
 
 		HeadCellRight1.addElement(para);
-		log.info(" dzFirmante ::" + dzFirmante);
+		if (log.isDebugEnabled()) {
+			log.debug(" dzFirmante ::" + dzFirmante);
+		}
 		para = new Paragraph();
 		para.setFont(bfbold);
 
@@ -644,117 +634,96 @@ public class GeneradorFilePdf {
 		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
 
-		
-		
-		
-		
 		/*
 		 * 
-		 * start  firma
+		 * start firma
 		 * 
 		 * 
 		 */
-		
-		
-		
-	
-		if (cantConFirmas==cantSinFirmas) {
 
-			 paragraphFirma = new Paragraph(13f);
-			 chunkFirma = new Chunk("SR(A). " + de.toUpperCase(), bfbold);
+		if (cantConFirmas == cantSinFirmas) {
+
+			paragraphFirma = new Paragraph(13f);
+			chunkFirma = new Chunk("SR(A). " + de.toUpperCase(), bfbold);
 			paragraphFirma.setAlignment(Element.ALIGN_CENTER);
 			paragraphFirma.add(chunkFirma);
 			chunkFirma = new Chunk("\r\n" + cargo.toUpperCase(), bfbold);
 			paragraphFirma.add(chunkFirma);
 			chunkFirma = new Chunk("\r\n" + institucion.toUpperCase(), bfbold);
 			paragraphFirma.add(chunkFirma);
-		String imagePath = "firma.jpg";
-		//
-		byte[] data = DatatypeConverter.parseBase64Binary(firma);
+			String imagePath = "firma.jpg";
+			//
+			byte[] data = DatatypeConverter.parseBase64Binary(firma);
 
-		File fileFirma = new File(imagePath);
-		try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(fileFirma))) {
-			outputStream.write(data);
-		} catch (IOException e) {
-			e.printStackTrace();
+			File fileFirma = new File(imagePath);
+			try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(fileFirma))) {
+				outputStream.write(data);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			Image image2 = Image.getInstance(imagePath);
+			image2.scalePercent(50f);
+			image2.setAlignment(Element.ALIGN_CENTER);
+			imagePath = "/imagen/firma.png";
+			PdfPTable tableFirma = new PdfPTable(2);
+			float[] widths = new float[] { 1f, 2f };
+			tableFirma.setWidths(widths);
+
+			tableFirma.setKeepTogether(true);
+			tableFirma.setWidthPercentage(100);
+			tableFirma.setKeepTogether(true);
+			tableFirma.setWidthPercentage(100);
+			PdfPCell cellFirma = new PdfPCell();
+
+			Font fontBoldFirma = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 9, Font.BOLD,
+					BaseColor.BLACK);
+			Chunk chunkfoot4 = new Chunk("SALUDA ATENTAMENTE,                             ", fontBoldFirma);
+			cellFirma.setHorizontalAlignment(Element.ALIGN_LEFT);
+			cellFirma.addElement(chunkfoot4);
+			cellFirma.setPaddingBottom(1f);
+			cellFirma.setVerticalAlignment(Element.ALIGN_TOP);
+			cellFirma.setBorder(Rectangle.NO_BORDER);
+			cellFirma.setFixedHeight(29f);
+			tableFirma.addCell(cellFirma);
+
+			cellFirma = new PdfPCell();
+			chunkfoot4 = new Chunk("            Por orden del Director", fontBoldFirma);
+			cellFirma.setHorizontalAlignment(Element.ALIGN_LEFT);
+			cellFirma.addElement(chunkfoot4);
+			cellFirma.setPaddingBottom(1f);
+			cellFirma.setHorizontalAlignment(Element.ALIGN_CENTER);
+			cellFirma.setVerticalAlignment(Element.ALIGN_BOTTOM);
+			cellFirma.setBorder(Rectangle.NO_BORDER);
+			cellFirma.setFixedHeight(29f);
+			tableFirma.addCell(cellFirma);
+
+			cellFirma = new PdfPCell();
+			cellFirma.setPaddingTop(0f);
+			cellFirma.addElement(image2);
+			cellFirma.setHorizontalAlignment(Element.ALIGN_CENTER);
+			cellFirma.setBorder(Rectangle.NO_BORDER);
+			cellFirma.setColspan(2);
+
+			tableFirma.addCell(cellFirma);
+
+			cellFirma = new PdfPCell();
+			cellFirma.addElement(paragraphFirma);
+			cellFirma.setHorizontalAlignment(Element.ALIGN_CENTER);
+			cellFirma.setBorder(Rectangle.NO_BORDER);
+			cellFirma.setColspan(2);
+			tableFirma.setKeepTogether(true);
+			tableFirma.setWidthPercentage(100);
+			tableFirma.addCell(cellFirma);
+
+			document.add(tableFirma);
+
 		}
-		Image image2 = Image.getInstance(imagePath);
-		image2.scalePercent(50f);
-		image2.setAlignment(Element.ALIGN_CENTER);
-		imagePath = "/imagen/firma.png";
-		PdfPTable tableFirma = new PdfPTable(2);
-		float[] widths = new float[] { 1f, 2f};
-		tableFirma.setWidths(widths);
 
-		tableFirma.setKeepTogether(true);
-		tableFirma.setWidthPercentage(100);
-		tableFirma.setKeepTogether(true);
-		tableFirma.setWidthPercentage(100);
-		PdfPCell cellFirma = new PdfPCell();
-		
-		Font fontBoldFirma = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 9, Font.BOLD,
-				BaseColor.BLACK);
-		Chunk chunkfoot4 = new Chunk("SALUDA ATENTAMENTE,                             ",
-				fontBoldFirma);
-		cellFirma.setHorizontalAlignment(Element.ALIGN_LEFT);
-		cellFirma.addElement(chunkfoot4);
-		cellFirma.setPaddingBottom(1f);
-		cellFirma.setVerticalAlignment(Element.ALIGN_TOP);
-		cellFirma.setBorder(Rectangle.NO_BORDER);
-		cellFirma.setFixedHeight(29f);
-		tableFirma.addCell(cellFirma);
-		
-		
-		cellFirma = new PdfPCell();		
-		chunkfoot4 = new Chunk("            Por orden del Director",
-				fontBoldFirma);
-		cellFirma.setHorizontalAlignment(Element.ALIGN_LEFT);
-		cellFirma.addElement(chunkfoot4);
-		cellFirma.setPaddingBottom(1f);
-		cellFirma.setHorizontalAlignment(Element.ALIGN_CENTER);
-		cellFirma.setVerticalAlignment(Element.ALIGN_BOTTOM);
-		cellFirma.setBorder(Rectangle.NO_BORDER);
-		cellFirma.setFixedHeight(29f);
-		tableFirma.addCell(cellFirma);
-		
-		
-		cellFirma = new PdfPCell();
-		cellFirma.setPaddingTop(0f);
-		cellFirma.addElement(image2);
-		cellFirma.setHorizontalAlignment(Element.ALIGN_CENTER);
-		cellFirma.setBorder(Rectangle.NO_BORDER);
-		cellFirma.setColspan(2);
-
-
-		tableFirma.addCell(cellFirma);
-		
-		
-		cellFirma = new PdfPCell();
-		cellFirma.addElement(paragraphFirma);
-		cellFirma.setHorizontalAlignment(Element.ALIGN_CENTER);
-		cellFirma.setBorder(Rectangle.NO_BORDER);
-		cellFirma.setColspan(2);
-		tableFirma.setKeepTogether(true);
-		tableFirma.setWidthPercentage(100);
-		tableFirma.addCell(cellFirma);
-
-
-		document.add(tableFirma);
-		
-		}
-		
 		/*
 		 * 
-		 * fin firma 
+		 * fin firma
 		 */
-		
-		
-		
-		
-		
-		
-		
-		
+
 		document.newPage();
 		Chunk chunkFoot = new Chunk(iniciales + "  ", new Font(bf, 12));
 		Paragraph paragraphFoot = new Paragraph(13f);
@@ -794,22 +763,22 @@ public class GeneradorFilePdf {
 		document.add(tableFooter);
 
 		if (log.isDebugEnabled()) {
-			log.debug("getPageNumber: [" + writer.getPageNumber() +"]");
+			log.debug("getPageNumber: [" + writer.getPageNumber() + "]");
 		}
 		numPage[0] = writer.getPageNumber();
 		document.close();
 		FILE.flush();
 		FILE.close();
-		if (intArray[0]>0) {
-			int cont=0;
+		if (intArray[0] > 0) {
+			int cont = 0;
 			try {
-				while (cont<(intArray[0])) {
-					File file = new File(clave+ cont +".png");
+				while (cont < (intArray[0])) {
+					File file = new File(clave + cont + ".png");
 					file.delete();
-					cont=cont + 1;
+					cont = cont + 1;
 				}
-			}catch(Exception e) {
-				log.error(e.getMessage(),e);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
 			}
 		}
 		return clave + ".pdf";
@@ -913,7 +882,7 @@ public class GeneradorFilePdf {
 			String respuesta, String clave, int ord, String tipo, String de, String wsdl, String run, int genero,
 			String parrafoUno, String parrafoDos, int[] numPage, String cargo, String institucion, String dzFirmante,
 			String subDeptoFirmante, String departamentoFirmante, String direccionSolicitante, String iniciales,
-			String ciudad,String firma) throws IOException, DocumentException {
+			String ciudad, String firma) throws IOException, DocumentException {
 		int numeroPagina = 0;
 		Paragraph paragraphFirma = new Paragraph(13f);
 		Paragraph paragraphead = new Paragraph(13f);
@@ -943,7 +912,7 @@ public class GeneradorFilePdf {
 
 		headParaTit = new Paragraph(8);
 		headParaTit.setAlignment(Element.ALIGN_LEFT);
- 
+
 		Paragraph paraLeft = new Paragraph();
 		paraLeft.setFont(bfbold);
 		paraLeft.add("FONDO NACIONAL DE SALUD");
@@ -1065,9 +1034,6 @@ public class GeneradorFilePdf {
 		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
 
-
-		
-		
 		String imagePath = "firma.jpg";
 		//
 		byte[] data = DatatypeConverter.parseBase64Binary(firma);
@@ -1083,7 +1049,7 @@ public class GeneradorFilePdf {
 		image2.setAlignment(Element.ALIGN_CENTER);
 		imagePath = "/imagen/firma.png";
 		PdfPTable tableFirma = new PdfPTable(2);
-		float[] widths = new float[] { 1f, 2f};
+		float[] widths = new float[] { 1f, 2f };
 		tableFirma.setWidths(widths);
 
 		tableFirma.setKeepTogether(true);
@@ -1091,11 +1057,10 @@ public class GeneradorFilePdf {
 		tableFirma.setKeepTogether(true);
 		tableFirma.setWidthPercentage(100);
 		PdfPCell cellFirma = new PdfPCell();
-		
+
 		Font fontBoldFirma = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 9, Font.BOLD,
 				BaseColor.BLACK);
-		Chunk chunkfoot4 = new Chunk("SALUDA ATENTAMENTE,                             ",
-				fontBoldFirma);
+		Chunk chunkfoot4 = new Chunk("SALUDA ATENTAMENTE,                             ", fontBoldFirma);
 		cellFirma.setHorizontalAlignment(Element.ALIGN_LEFT);
 		cellFirma.addElement(chunkfoot4);
 		cellFirma.setPaddingBottom(1f);
@@ -1103,11 +1068,9 @@ public class GeneradorFilePdf {
 		cellFirma.setBorder(Rectangle.NO_BORDER);
 		cellFirma.setFixedHeight(29f);
 		tableFirma.addCell(cellFirma);
-		
-		
-		cellFirma = new PdfPCell();		
-		chunkfoot4 = new Chunk("            Por orden del Director",
-				fontBoldFirma);
+
+		cellFirma = new PdfPCell();
+		chunkfoot4 = new Chunk("            Por orden del Director", fontBoldFirma);
 		cellFirma.setHorizontalAlignment(Element.ALIGN_LEFT);
 		cellFirma.addElement(chunkfoot4);
 		cellFirma.setPaddingBottom(1f);
@@ -1116,8 +1079,7 @@ public class GeneradorFilePdf {
 		cellFirma.setBorder(Rectangle.NO_BORDER);
 		cellFirma.setFixedHeight(29f);
 		tableFirma.addCell(cellFirma);
-		
-		
+
 		cellFirma = new PdfPCell();
 		cellFirma.setPaddingTop(0f);
 		cellFirma.addElement(image2);
@@ -1125,10 +1087,8 @@ public class GeneradorFilePdf {
 		cellFirma.setBorder(Rectangle.NO_BORDER);
 		cellFirma.setColspan(2);
 
-
 		tableFirma.addCell(cellFirma);
-		
-		
+
 		cellFirma = new PdfPCell();
 		cellFirma.addElement(paragraphFirma);
 		cellFirma.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -1138,11 +1098,8 @@ public class GeneradorFilePdf {
 		tableFirma.setWidthPercentage(100);
 		tableFirma.addCell(cellFirma);
 
-
 		document.add(tableFirma);
-		
-		
-		
+
 		numeroPagina = writer.getCurrentPageNumber();
 
 		document.close();
@@ -1153,7 +1110,7 @@ public class GeneradorFilePdf {
 
 		try {
 			if (log.isDebugEnabled()) {
-				log.debug("directory ::" + directory.toString() +"]");
+				log.debug("directory ::" + directory.toString() + "]");
 			}
 			Files.delete(directory);
 		} catch (IOException e) {
@@ -1165,7 +1122,6 @@ public class GeneradorFilePdf {
 
 	}
 
-	
 	/********************************************************
 	 * ********************************************************cantidaPageFelicitacion****************************************************
 	 * 
@@ -1176,7 +1132,7 @@ public class GeneradorFilePdf {
 			String respuesta, String clave, int ord, String tipo, String de, String wsdl, String run, int genero,
 			String parrafoUno, String parrafoDos, int[] numPage, String cargo, String institucion, String dzFirmante,
 			String subDeptoFirmante, String departamentoFirmante, String direccionSolicitante, String iniciales,
-			String ciudad,String firma) throws IOException, DocumentException {
+			String ciudad, String firma) throws IOException, DocumentException {
 		int numeroPagina = 0;
 		Paragraph paragraphFirma = new Paragraph(13f);
 		Paragraph paragraphead = new Paragraph(13f);
@@ -1206,7 +1162,7 @@ public class GeneradorFilePdf {
 
 		headParaTit = new Paragraph(8);
 		headParaTit.setAlignment(Element.ALIGN_LEFT);
- 
+
 		Paragraph paraLeft = new Paragraph();
 		paraLeft.setFont(bfbold);
 		paraLeft.add("FONDO NACIONAL DE SALUD");
@@ -1328,9 +1284,6 @@ public class GeneradorFilePdf {
 		InputStream is = new ByteArrayInputStream(respuesta.getBytes());
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, is);
 
-
-		
-		
 		String imagePath = "firma.jpg";
 		//
 		byte[] data = DatatypeConverter.parseBase64Binary(firma);
@@ -1346,14 +1299,6 @@ public class GeneradorFilePdf {
 		image2.setAlignment(Element.ALIGN_CENTER);
 		imagePath = "/imagen/firma.png";
 
-
-		
-
-
-
-
-		
-		
 		numeroPagina = writer.getCurrentPageNumber();
 
 		document.close();
@@ -1364,7 +1309,7 @@ public class GeneradorFilePdf {
 
 		try {
 			if (log.isDebugEnabled()) {
-				log.debug("directory ::" + directory.toString() +"]");
+				log.debug("directory ::" + directory.toString() + "]");
 			}
 			Files.delete(directory);
 		} catch (IOException e) {
@@ -1375,6 +1320,7 @@ public class GeneradorFilePdf {
 		return numeroPagina;
 
 	}
+
 	/*************************************************************************************************
 	 * 
 	 * @param marginLeft
@@ -1443,7 +1389,7 @@ public class GeneradorFilePdf {
 		chunkFirma = new Chunk("\r\n" + institucion.toUpperCase(), fontBold);
 		paragraphFirma.add(chunkFirma);
 		if (log.isDebugEnabled()) {
-			log.debug("File :: [" + nameFile +"]");
+			log.debug("File :: [" + nameFile + "]");
 		}
 		FileOutputStream FILE = new FileOutputStream(nameFile);
 
@@ -1565,61 +1511,61 @@ public class GeneradorFilePdf {
 		}
 		return ord;
 	}
-	
-public String convertImagen(String respuesta,String nombreImg ,int[] arr)	{
-	int i=0;
-	int indiceInicio =0;
-	int indiceFin=0;
-	int indice = respuesta.indexOf("<img");
-	int indice1 = 0;
-	String path = "dd";
-	while (indice>=0 ) {
-		indiceInicio = respuesta.indexOf("<img",indice1);
-		indiceFin = respuesta.indexOf(">", indiceInicio) + 1;
-	
-		String srcImg = respuesta.substring(indiceInicio, indiceFin);
-	
-		String src = respuesta.substring(indiceInicio, respuesta.indexOf(">", indiceInicio) + 1);
-	
-		indice1 = src.indexOf("\"");
-	
-		src = src.substring(indice1 + 1, src.indexOf("\"", indice1 + 1));
-		String[] strings = src.split(",");
-		String extension;
-	
-		switch (strings[0]) {// check image's extension
-			case "data:image/jpeg;base64":
-			extension = ".jpeg";
-			break;
-			case "data:image/png;base64":
-			extension = ".png";
-			break;
-			default:// should write cases for more images types
-			extension = ".jpg";
-			break;
-		}
-		// convert base64 string to binary data
-		byte[] data = DatatypeConverter.parseBase64Binary(strings[1]);
-		path = nombreImg + i +extension;
-		File file = new File(path);
-		try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
-			outputStream.write(data);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	
-		String s= "<img src=\"" + path + "\"/>";
-		respuesta = respuesta.replace(respuesta.substring(indiceInicio, indiceFin),s);
-		indice = respuesta.indexOf("<img", indiceInicio +s.length() );
-		if (log.isDebugEnabled()) {
-			log.debug("respuesta  indice [" +indice + "]");
-			log.debug("respuesta  indice [" + respuesta+ "]");
-		}
-		i=i +1;
-		indice1=indice;
-	}
-	arr[0]=i;
-	return respuesta;
 
-}
+	public String convertImagen(String respuesta, String nombreImg, int[] arr) {
+		int i = 0;
+		int indiceInicio = 0;
+		int indiceFin = 0;
+		int indice = respuesta.indexOf("<img");
+		int indice1 = 0;
+		String path = "dd";
+		while (indice >= 0) {
+			indiceInicio = respuesta.indexOf("<img", indice1);
+			indiceFin = respuesta.indexOf(">", indiceInicio) + 1;
+
+			String srcImg = respuesta.substring(indiceInicio, indiceFin);
+
+			String src = respuesta.substring(indiceInicio, respuesta.indexOf(">", indiceInicio) + 1);
+
+			indice1 = src.indexOf("\"");
+
+			src = src.substring(indice1 + 1, src.indexOf("\"", indice1 + 1));
+			String[] strings = src.split(",");
+			String extension;
+
+			switch (strings[0]) {// check image's extension
+			case "data:image/jpeg;base64":
+				extension = ".jpeg";
+				break;
+			case "data:image/png;base64":
+				extension = ".png";
+				break;
+			default:// should write cases for more images types
+				extension = ".jpg";
+				break;
+			}
+			// convert base64 string to binary data
+			byte[] data = DatatypeConverter.parseBase64Binary(strings[1]);
+			path = nombreImg + i + extension;
+			File file = new File(path);
+			try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
+				outputStream.write(data);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			String s = "<img src=\"" + path + "\"/>";
+			respuesta = respuesta.replace(respuesta.substring(indiceInicio, indiceFin), s);
+			indice = respuesta.indexOf("<img", indiceInicio + s.length());
+			if (log.isDebugEnabled()) {
+				log.debug("respuesta  indice [" + indice + "]");
+				log.debug("respuesta  indice [" + respuesta + "]");
+			}
+			i = i + 1;
+			indice1 = indice;
+		}
+		arr[0] = i;
+		return respuesta;
+
+	}
 }
