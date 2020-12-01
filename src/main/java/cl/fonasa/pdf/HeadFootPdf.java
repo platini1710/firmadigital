@@ -70,7 +70,7 @@ public class HeadFootPdf extends PdfPageEventHelper {
 	    if (this.page==writer.getPageNumber()) {
 			PdfContentByte cb = writer.getDirectContent();
 			ColumnText ct = new ColumnText(cb);
-			Phrase myText = new Phrase(paragraphFirma);
+			Phrase myText = new Phrase("");//new Phrase(paragraphFirma);
 			ct.setSimpleColumn(myText, 30, -750, 580, 117, 15, Element.ALIGN_CENTER);
 			try {
 				ct.go();
@@ -80,8 +80,8 @@ public class HeadFootPdf extends PdfPageEventHelper {
 			}
 			 cb = writer.getDirectContent();
 			 ct = new ColumnText(cb);
-			 Chunk	chunkFirma = new Chunk("        Saluda atentamente.,".toUpperCase(),bfbold);
-			 myText = new Phrase(chunkFirma);
+			 Chunk	chunkFirma = new Chunk("        Saluda atentamente,".toUpperCase(),bfbold);
+			 myText = new Phrase("");//new Phrase(chunkFirma);
 			
 			ct.setSimpleColumn(myText, 30, -750,  580, 250,  15, Element.ALIGN_LEFT);
 			try {

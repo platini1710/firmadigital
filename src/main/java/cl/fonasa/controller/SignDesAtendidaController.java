@@ -265,7 +265,7 @@ public class SignDesAtendidaController {
 	
 			log.debug("manda a firmar documento pdf ");
 		}
-    	int[] numPage = {2};
+    	int[] numPage = {2,0,0};
 
     	String content = "";
     	if ("".equals(payloads.getEntity().trim()) || payloads.getEntity()==null) {
@@ -284,11 +284,11 @@ public class SignDesAtendidaController {
 	
 			fileName = generadorFilePdf.generaFileFelicitacioPdf(solicitud.getNombreSolicitante(),solicitud.getOrdinario(), solicitud.getNombreTipificacion(),  // si no es reclamo
 					solicitud.getProblemaDeSalud(), solicitud.getIdCaso(), respuesta, clave,solicitud.getOrd(),solicitud.getTipo(),solicitud.getDe(),certificadoWSDL,solicitud.getRunUsuarioEjecuta(),solicitud.getGenero(),
-					parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales(),solicitud.getCiudad());
+					parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales(),solicitud.getCiudad(),solicitud.getImagenFirma() );
 		} else 		 {                                         // si es reclamo
 	
 			fileName = generadorFilePdf.generaFileReclamposPdf(solicitud,solicitud.getOrdinario(), 
-				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales(),solicitud.getIdCaso(),solicitud.getCiudad());
+				respuesta,clave,certificadoWSDL,parrafoUno,parrafoDos,numPage,solicitud.getCargo(),solicitud.getInstitucion(),solicitud.getDzFirmante(),solicitud.getSubDeptoFirmante(),solicitud.getDepartamentoFirmante(),solicitud.getDireccionSolicitante(),solicitud.getIniciales(),solicitud.getIdCaso(),solicitud.getCiudad(),solicitud.getImagenFirma());
 		}
 	 
 		if (log.isDebugEnabled()) {
@@ -317,13 +317,19 @@ public class SignDesAtendidaController {
 	     json.append( "<Application id=\\\"THIS-CONFIG\\\">");
 	     json.append( "<pdfPassword/> " );
 	     json.append( "<Signature>");
-	     json.append( "<Visible active=\\\"true\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">");
+	     System.out.println("numPage[1] " + numPage[1]);
+	     System.out.println("numPage[2] " + numPage[2]);
+	     if (numPage[1]!=numPage[2]) {
+	    	 json.append( "<Visible active=\\\"true\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">");	    	 
+	     } else {
+	    	 json.append( "<Visible active=\\\"false\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">");
+	     }
 		int page =numPage[0]-1;
   
-		 json.append( "<llx>250</llx> ");
-		 json.append( "<lly>275</lly> ");
-		 json.append( "<urx>390</urx> ");		
-		 json.append( "<ury>110</ury> ");
+		 json.append( "<llx>240</llx> ");
+		 json.append( "<lly>245</lly> ");
+		 json.append( "<urx>380</urx> ");		
+		 json.append( "<ury>90</ury> ");
 		 json.append("<page>" + page +"</page>");
 
 
@@ -339,7 +345,7 @@ public class SignDesAtendidaController {
 		 json.append(  "\r\n}\r\n");
 		 json.append("\r\n" + "] \r\n" + "}");
 		if (log.isDebugEnabled()) {
-		log.debug("json  [" +json + "]");
+			log.debug("json  [" +json + "]");
 		}
 		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
 		HttpPost httpRequest = new org.apache.http.client.methods.HttpPost(postEndpoint);
