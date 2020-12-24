@@ -265,6 +265,8 @@ public class SignDesAtendidaController {
 	
 			log.debug("manda a firmar documento pdf ");
 		}
+		
+		//log.info("	solicitud.getSubDeptoFirmante() " + 	solicitud.getSubDeptoFirmante());
     	int[] numPage = {2,0,0};
 
     	String content = "";
@@ -296,7 +298,7 @@ public class SignDesAtendidaController {
 		}
 		String postEndpoint = firmaDigital;
 		String resultToken = signFileService.getJWTToken(payloads);
-
+     
 		File file = new File(fileName);
 
 		String fileBase64 = signFileService.encodeFileToBase64Binary(file);
@@ -317,8 +319,10 @@ public class SignDesAtendidaController {
 	     json.append( "<Application id=\\\"THIS-CONFIG\\\">");
 	     json.append( "<pdfPassword/> " );
 	     json.append( "<Signature>");
-	     System.out.println("numPage[1] " + numPage[1]);
-	     System.out.println("numPage[2] " + numPage[2]);
+		if (log.isDebugEnabled()) {
+			log.debug("numPage[1] " + numPage[1]);
+			log.debug("numPage[2] " + numPage[2]);
+		}
 	     if (numPage[1]!=numPage[2]) {
 	    	 json.append( "<Visible active=\\\"true\\\" layer2=\\\"false\\\" label=\\\"true\\\" pos=\\\"1\\\">");	    	 
 	     } else {
@@ -535,7 +539,9 @@ public class SignDesAtendidaController {
 
 			CloseableHttpClient httpclient = HttpClients.createDefault();
 			String endPoint = urlDatosFirma;
-			log.debug("endPoint::" + endPoint);
+			if (log.isDebugEnabled()) {
+				log.debug("endPoint::" + endPoint);
+			}
 			HttpPost httppost  = new org.apache.http.client.methods.HttpPost(endPoint);
 			httppost.setHeader("Accept", "application/json");
 			httppost.setHeader("Content-type", "application/json");
@@ -547,6 +553,7 @@ public class SignDesAtendidaController {
 			if (log.isDebugEnabled()) {
 				log.debug(" getTokenKey json ::" + json);
 			}
+
 			StringEntity stringEntity = new StringEntity(json.toString());
 			httppost.setEntity(stringEntity);
 			HttpResponse response = httpclient.execute(httppost );
@@ -581,9 +588,12 @@ public class SignDesAtendidaController {
 			solicitud.setInstitucion((String)jo.get("institucion"));
 			solicitud.setDepartamentoFirmante((String)jo.get("departamentoFirmante"));
 			if (jo.get("subDeptoFirmante")==null) {
+
 				solicitud.setSubDeptoFirmante(" ");
 			} else {
+
 				solicitud.setSubDeptoFirmante((String)jo.get("subDeptoFirmante"));
+				//solicitud.setSubDeptoFirmante("SUBDEPTO. GESTIÓN SOLICITUDES CIUDADANAS");
 			}
 			if (log.isDebugEnabled()) {
 				log.debug(" subDeptoFirmante ::::::::::::::::::::::::::::::::::::::::: [" + (String)jo.get("subDeptoFirmante") + "]");;
@@ -596,6 +606,8 @@ public class SignDesAtendidaController {
 				solicitud.setDireccionSolicitante(" ");
 			} else
 			solicitud.setDireccionSolicitante((String)jo.get("direccionSoliciante"));
+
+			solicitud.setDireccionSolicitante("Región del Maule, Comuna de Colbún ");
 			if ((String)jo.get("ciudad")==null) {
 				solicitud.setCiudad(" ");
 			} else

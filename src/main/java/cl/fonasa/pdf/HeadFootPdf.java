@@ -39,6 +39,8 @@ public class HeadFootPdf extends PdfPageEventHelper {
     private PdfTemplate t;
     private Image total;
     private int totalPagina;
+    private int  cantConFirmas;
+    private int  cantSinFirmas;
     private String nombre;
     private String run;
     private String periodoDesde, periodoHasta;
@@ -46,8 +48,9 @@ public class HeadFootPdf extends PdfPageEventHelper {
     private  Paragraph paragraphFirma;
 	 public static final String FONT= "/Font/arial.ttf";
     
-    public HeadFootPdf(int cant, Paragraph paragraphFirma) {
-    	this.page=cant;
+    public HeadFootPdf(int cantConFirmas, int cantSinFirmas,Paragraph paragraphFirma) {
+    	this.cantConFirmas=cantConFirmas;
+    	this.cantSinFirmas=cantSinFirmas;
     	this.paragraphFirma=paragraphFirma;
     }
     public void onOpenDocument(PdfWriter writer, Document document) {
@@ -66,25 +69,30 @@ public class HeadFootPdf extends PdfPageEventHelper {
 		Font bfbold = FontFactory.getFont(FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 12, Font.BOLD, BaseColor.BLACK);
         addHeader(writer);
         addFooter(writer);
+        if (this.cantSinFirmas==writer.getPageNumber() && (cantSinFirmas!=cantConFirmas)) {
 
-	    if (this.page==writer.getPageNumber()) {
-			PdfContentByte cb = writer.getDirectContent();
-			ColumnText ct = new ColumnText(cb);
-			Phrase myText = new Phrase("");//new Phrase(paragraphFirma);
-			ct.setSimpleColumn(myText, 30, -750, 580, 117, 15, Element.ALIGN_CENTER);
-			try {
+        	PdfContentByte cb = writer.getDirectContent();
+    		ColumnText ct = new ColumnText(cb);
+    		Phrase myText = new Phrase(paragraphFirma);
+    		ct.setSimpleColumn(myText, 30, -750, 580, 120, 15, Element.ALIGN_CENTER);
+    		Paragraph paragraphFirma = new Paragraph(13f);
+    		try {
 				ct.go();
 			} catch (DocumentException e) {
 				// TODO Auto-generated catch block
 				log.error(e.getMessage(),e);
 			}
-			 cb = writer.getDirectContent();
-			 ct = new ColumnText(cb);
-			 Chunk	chunkFirma = new Chunk("        Saluda atentamente,".toUpperCase(),bfbold);
-			 myText = new Phrase("");//new Phrase(chunkFirma);
-			
-			ct.setSimpleColumn(myText, 30, -750,  580, 250,  15, Element.ALIGN_LEFT);
-			try {
+    		 cb = writer.getDirectContent();
+    		 ct = new ColumnText(cb);
+    		 Chunk	chunkFirma = new Chunk("        Saluda atentamente,".toUpperCase(),bfbold);
+    		 myText = new Phrase(chunkFirma);
+    		 paragraphFirma.add(myText);
+    		 
+    		 chunkFirma =        new Chunk("\r\n                                                               Por orden del Director",bfbold);
+    		 myText = new Phrase(chunkFirma);
+    		 paragraphFirma.add(myText);
+    		ct.setSimpleColumn(paragraphFirma, 30, -750,  580, 250,  15, Element.ALIGN_LEFT);
+    		try {
 				ct.go();
 			} catch (DocumentException e) {
 				// TODO Auto-generated catch block

@@ -1,0 +1,98 @@
+
+<html>
+
+<head>
+<meta charset="UTF-8"/>
+    <title>firma electronica avanzada</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border:0;
+        }
+		
+		
+		
+        th {     
+        	border:0;
+            padding-left: 0px;
+            text-align: left;
+         	font-family:'Arial';
+            font-weight: bold;
+        }
+        
+        td {  
+         	vertical-align: middle;
+         	border:1px solid black; 
+         	font-family:'Arial';
+         	font-size: 12pt; 
+         	width:100%; 
+         	text-align: justify;
+         	border-collapse: collapse;        
+    	 	border:0;  
+    	 	    padding: 1px;
+        }
+    </style>
+</head>
+
+<body>
+<p style='text-align: justify;'>
+<table>
+	<tr>
+			<th style="width:40%"> </th>
+			<th align="left">ORD. $Ord</th>
+	</tr>
+	<tr>
+			<th style="width:40%"> </th>
+			<th align="left">ANT.: FOLIO N&#176; $Folio</th>
+	</tr>
+	<tr>
+			<th style="width:40%"> </th>
+			<th align="left">MAT.: RESPUESTA A $Tipo</th>
+	</tr>	
+	<tr height="50px">
+			<th colspan="2"> </th>
+
+	</tr>
+	<tr>
+			<th colspan="2">
+				<table>
+					<tr>
+						<th style="width:5%;text-align-last: left">DE:</th>
+						<th style="width:80%">$De</th>
+					</tr>
+					<tr>
+						<th style="width:20%"></th>
+						<th style="width:80%">$Jefe</th>
+					</tr>
+					
+					<tr>
+						<th style="width:20%"></th>
+						<th style="width:80%">$Commpany</th>
+					</tr>
+					
+					<tr>
+						<th style="width:10%">	</th>
+						<th style="width:80%"></th>
+					</tr>				
+					
+					<tr>
+						<th style="width:10%;text-align-last: left">A :</th>
+						<th style="width:80%">$A</th>
+					</tr>													
+				</table>		
+			</th>
+
+	</tr>	
+	<tr height="30px">
+		<td colspan="2"> </td>
+	</tr>
+	<tr>
+		<td colspan="2"> $msg</td>
+
+	</tr>
+	</table>
+	</p>
+</body>
+
+</html>

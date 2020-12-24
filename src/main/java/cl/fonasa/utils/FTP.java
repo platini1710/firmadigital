@@ -264,14 +264,16 @@ public class FTP
 
         this.connect();
         path ="/solicitudesCiudadanas/" + String.valueOf(ruta) + path;
-
-      System.out.println("path   ::" + path + "/" + fileName);
-
+		if (log.isDebugEnabled()) {
+			log.debug("path   ::" + path + "/" + fileName);
+		}
         try { 
             this.channelSftp.stat(path);
         }
         catch (SftpException se) {
+
             FTP.log.warn((Object)se.getMessage());
+
             try {
                 this.channelSftp.mkdir(path);
             }

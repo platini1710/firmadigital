@@ -70,15 +70,12 @@ public class HeadFootOtrosPdf extends PdfPageEventHelper {
 
 	    addHeader(writer);
 	    addFooter(writer);
-		log.info("this.page::" + this.page);
-		log.info("writer.getPageNumber()::" + writer.getPageNumber());
-		log.info("cantSinFirmas::" + cantSinFirmas);
-		log.info("this.page" + this.page);
+
 	    if (this.cantSinFirmas==writer.getPageNumber() && (cantSinFirmas!=page)) {
         	PdfContentByte cb = writer.getDirectContent();
     		ColumnText ct = new ColumnText(cb);
     		Phrase myText = new Phrase(paragraphFirma);
-    		ct.setSimpleColumn(myText, 30, -750, 580, 300, 15, Element.ALIGN_CENTER);
+    		ct.setSimpleColumn(myText, 30, -750, 580, 120, 15, Element.ALIGN_CENTER);
     		Paragraph paragraphFirma = new Paragraph(13f);
     		try {
 				ct.go();
