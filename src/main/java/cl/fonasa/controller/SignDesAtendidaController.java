@@ -93,6 +93,7 @@ public class SignDesAtendidaController {
 	public DocumentSign firmaDocumentoDesatendida(@Context HttpServletRequest request,
 			@RequestBody(required = true) Solicitud solicitud) throws IOException {
 		try {
+			
 		String ordinario= obtenerOrdinario(solicitud.getRunUsuarioEjecuta(),solicitud.getIdCaso());
 		solicitud.setOrdinario(ordinario);
 		}catch(Exception e) {

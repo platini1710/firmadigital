@@ -513,6 +513,7 @@ public class GeneradorFilePdf {
 		String respuesta2 = "";
 		while (indice1 > -1) {
 			respuesta2 = respuesta.substring(respuesta.indexOf(tag) + tag.length(), respuesta.length());
+
 			count2 = count2 + 1;
 			indice1 = respuesta.indexOf(tag, indice1 + 1);
 
